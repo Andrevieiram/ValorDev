@@ -1,7 +1,7 @@
-import { spacing } from '@/theme';
+import { spacing } from '../theme/spacing';
 
 /** Altura da área de ícone + rótulo na tab bar (sem safe area inferior) */
-export const TAB_BAR_INNER_HEIGHT = 48;
+export const TAB_BAR_INNER_HEIGHT = 56;
 
 /** Espaço superior interno da tab bar */
 export const TAB_BAR_PADDING_TOP = spacing.sm;

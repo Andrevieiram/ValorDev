@@ -3,9 +3,10 @@ import { Clock, Home, User } from 'lucide-react-native';
 
 import { TAB_BAR_INNER_HEIGHT } from '@/constants/layout';
 import { useTabBarMetrics } from '@/hooks';
-import { colors } from '@/theme';
+import { useTheme } from '@/theme';
 
 export default function TabLayout() {
+  const { colors } = useTheme();
   const { tabBarStyle } = useTabBarMetrics();
 
   return (
@@ -13,14 +14,14 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.mutedForeground,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle,
         tabBarItemStyle: {
           height: TAB_BAR_INNER_HEIGHT,
         },
         tabBarLabelStyle: {
+          fontFamily: 'Inter_500Medium',
           fontSize: 12,
-          fontWeight: '500',
         },
       }}
     >
