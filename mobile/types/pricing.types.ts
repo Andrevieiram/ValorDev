@@ -8,7 +8,7 @@ export type ClientLocation = "local" | "regional" | "national" | "international"
 export type BusinessImpact = "low" | "medium" | "high" | "strategic";
 export type ScopeClarity = "high" | "medium" | "low";
 export type RiskLevel = "low" | "medium" | "high";
-export type PaymentMethod = "pix" | "boleto" | "creditCard" | "international";
+export type PaymentMethod = "upfront50" | "upfront30" | "delivery" | "installments";
 export type BillingMethod = "fixed" | "hourly" | "subscription" | "milestone";
 export type InstallmentOption = "oneTime" | "two" | "three" | "fourPlus";
 export type PaymentTerm =
@@ -30,9 +30,7 @@ export interface ProfileData {
     desiredIncome: string;
     hoursPerWeek: string;
     experienceLevel: ExperienceLevel | "";
-    taxRegime: string;
     mainStack: string;
-    workload: string;
     monthlyCosts: string;
     financialReserve: string;
 }
@@ -42,12 +40,9 @@ export interface ProjectData {
     complexity: ComplexityLevel | "";
     deadline: string;
     scopeDocumented: boolean;
-    maintenance: boolean;
-    meetingsFrequency: string;
-    externalDependencies: string;
-    reuseComponents: boolean;
-    toolsUsed: string;
-    estimatedHours: string;
+    isUrgent: "yes" | "no" | "";
+    meetings: string;
+    maintenance: string;
 }
 
 export interface ClientData {
@@ -60,7 +55,6 @@ export interface ClientData {
 
 export interface AdjustmentsData {
     billingMethod: BillingMethod | "";
-    paymentMethod: PaymentMethod | "";
     installmentOption: InstallmentOption | "";
     paymentTerm: PaymentTerm | "";
     downPayment: DownPayment | "";

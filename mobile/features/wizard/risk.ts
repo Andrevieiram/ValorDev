@@ -2,10 +2,20 @@ import type { AdjustmentsData, ClientData, ProfileData, ProjectData, RiskReport 
 
 const clamp = (value: number) => Math.min(100, Math.max(0, value));
 
-const parseDeadlineWeeks = (deadline: string) => {
-    const match = deadline.match(/(\d+)\s*(semana|semanas|week|weeks)/i);
+const parseDeadlineMonths = (deadline: string) => {
+    const match = deadline.match(/(\d+)\s*(m[eê]s|mes|month|months)/i);
     if (!match) return null;
     return Number(match[1]);
+};
+
+const isShortDeadline = (deadline: string) => {
+    const normalized = deadline.toLowerCase();
+    return /\b(semana|semanas|dia|dias|week|days)\b/.test(normalized);
+};
+
+const isWeeklyMeeting = (meetings: string) => {
+    const normalized = meetings.toLowerCase();
+    return /\b(semanal|quinzenal|mensal|weekly|biweekly|monthly)\b/.test(normalized);
 };
 
 export function calculateWizardRisk(
@@ -18,118 +28,157 @@ export function calculateWizardRisk(
     const riskFactors: string[] = [];
     const positiveFactors: string[] = [];
 
-    // 1. Complexidade do Projeto
+    const deadline = project.deadline?.trim() ?? "";
+    const normalizedDeadline = deadline.toLowerCase();
+
     if (project.complexity === "high") {
-        score += 15;
-        riskFactors.push("Alta complexidade técnica");
+        score += 10;
+        riskFactors.push("Complexidade alta do projeto");
     } else if (project.complexity === "medium") {
         score += 5;
-        riskFactors.push("Complexidade média");
-    } else {
-        positiveFactors.push("Baixa complexidade do projeto");
+        riskFactors.push("Complexidade moderada");
+    } else if (project.complexity === "low") {
+        positiveFactors.push("Complexidade baixa");
     }
 
-    // 2. Escopo
     if (!project.scopeDocumented) {
-        score += 20;
-        riskFactors.push("Escopo do projeto não documentado");
+        score += 15;
+        riskFactors.push("Escopo não está documentado");
     } else {
-        positiveFactors.push("Escopo formalmente documentado");
+        positiveFactors.push("Escopo documentado");
     }
 
-    // 3. Prazo (Urgência)
-    const weeks = parseDeadlineWeeks(project.deadline || "");
-    if (weeks !== null) {
-        if (weeks < 2) {
-            score += 25;
-            riskFactors.push("Prazo extremamente crítico (menos de 2 semanas)");
-        } else if (weeks <= 4) {
-            score += 10;
-            riskFactors.push("Prazo curto (até 4 semanas)");
+    if (deadline) {
+        if (isShortDeadline(deadline)) {
+            score += 15;
+            riskFactors.push("Prazo muito curto");
         } else {
-            positiveFactors.push("Prazo confortável para entrega");
+            const months = parseDeadlineMonths(deadline);
+            if (months !== null) {
+                if (months <= 2) {
+                    score += 10;
+                    riskFactors.push("Prazo apertado");
+                } else if (months > 6) {
+                    positiveFactors.push("Prazo mais confortável");
+                } else {
+                    positiveFactors.push("Prazo razoável");
+                }
+            } else {
+                positiveFactors.push("Prazo informado");
+            }
         }
     } else {
-        // Fallback para prazos genéricos curtos
-        const lowerDeadline = (project.deadline || "").toLowerCase();
-        if (lowerDeadline.includes("urgente") || lowerDeadline.includes("correndo")) {
-            score += 20;
-            riskFactors.push("Caráter de urgência relatado");
-        } else {
-            positiveFactors.push("Cronograma padrão informado");
-        }
-    }
-
-    // 4. Reuniões
-    if (project.meetingsFrequency === "diaria") {
-        score += 8;
-        riskFactors.push("Reuniões diárias (alto overhead de comunicação)");
-    } else if (project.meetingsFrequency === "semanal" || project.meetingsFrequency === "quinzenal") {
-        positiveFactors.push("Frequência de reuniões ideal para alinhamento");
-    } else if (project.meetingsFrequency === "mensal") {
         score += 10;
-        riskFactors.push("Pouca frequência de reuniões (risco de desvios)");
+        riskFactors.push("Prazo não informado");
     }
 
-    // 5. Dependências Externas
-    if (project.externalDependencies && project.externalDependencies.trim().length > 0) {
-        score += 15;
-        riskFactors.push(`Dependências de terceiros: ${project.externalDependencies}`);
-    } else {
-        positiveFactors.push("Livre de dependências de terceiros");
+    if (isWeeklyMeeting(project.meetings || "")) {
+        positiveFactors.push("Reuniões periódicas para alinhamento");
+    } else if (project.meetings) {
+        score += 10;
+        riskFactors.push("Frequência de reuniões inconsistente");
     }
 
-    // 6. Reaproveitamento de componentes
-    if (project.reuseComponents) {
-        score -= 5;
-        positiveFactors.push("Reaproveitamento de componentes (reduz prazo/risco)");
-    }
-
-    // 7. Perfil Profissional
-    if (profile.experienceLevel === "junior") {
-        score += 15;
-        riskFactors.push("Profissional nível júnior no comando");
-    } else if (profile.experienceLevel === "senior") {
-        score -= 10;
-        positiveFactors.push("Profissional sênior de alta bagagem");
-    }
-
-    // 8. Maturidade Digital do Cliente
-    if (client.digitalExperience === "none") {
-        score += 20;
-        riskFactors.push("Cliente leigo / sem maturidade digital");
-    } else if (client.digitalExperience === "advanced") {
-        score -= 5;
-        positiveFactors.push("Cliente altamente maduro digitalmente");
-    }
-
-    // 9. Cliente Recorrente
-    if (client.recurringClient === "yes") {
-        score -= 10;
-        positiveFactors.push("Cliente parceiro e recorrente");
-    } else {
+    if (project.maintenance === "yes") {
         score += 5;
-        riskFactors.push("Cliente novo (sem histórico de parceria)");
+        riskFactors.push("Manutenção pós-entrega prevista");
+    } else {
+        positiveFactors.push("Sem manutenção recorrente definida");
     }
 
-    // 10. Contrato Formal e Financeiro
-    if (adjustments.formalContract === "no") {
-        score += 25;
-        riskFactors.push("Sem contrato formal firmado");
+    if (profile.experienceLevel === "junior") {
+        score += 10;
+        riskFactors.push("Experiência profissional iniciante");
+    } else if (profile.experienceLevel === "pleno") {
+        score += 5;
+        riskFactors.push("Experiência intermediária");
+    } else if (profile.experienceLevel === "senior") {
+        positiveFactors.push("Experiência sênior no perfil financeiro");
+    }
+
+    if (client.digitalExperience === "none") {
+        score += 10;
+        riskFactors.push("Cliente sem experiência digital");
+    } else if (client.digitalExperience === "beginner") {
+        score += 5;
+        riskFactors.push("Cliente iniciante em digital");
     } else {
-        positiveFactors.push("Contrato de prestação de serviço assegurado");
+        positiveFactors.push("Cliente com maturidade digital");
+    }
+
+    if (client.recurringClient === "no") {
+        score += 5;
+        riskFactors.push("Cliente não recorrente");
+    } else {
+        positiveFactors.push("Cliente recorrente");
+    }
+
+    if (client.location === "international") {
+        score += 5;
+        riskFactors.push("Localização internacional");
+    } else {
+        positiveFactors.push("Localização dentro do país");
+    }
+
+    if (client.businessImpact === "low") {
+        score += 10;
+        riskFactors.push("Impacto baixo no negócio");
+    } else if (client.businessImpact === "medium") {
+        score += 5;
+        riskFactors.push("Impacto comercial moderado");
+    } else if (client.businessImpact === "high" || client.businessImpact === "strategic") {
+        positiveFactors.push("Projeto com alto impacto para o negócio");
+    }
+
+    if (adjustments.billingMethod !== "fixed") {
+        score += 5;
+        riskFactors.push("Modelo de cobrança mais complexo");
+    } else {
+        positiveFactors.push("Cobrança fixa mais previsível");
+    }
+
+    if (adjustments.installmentOption === "fourPlus") {
+        score += 5;
+        riskFactors.push("Parcelamento longo");
+    } else if (adjustments.installmentOption === "three") {
+        score += 3;
+        riskFactors.push("Parcelamento moderado");
+    } else {
+        positiveFactors.push("Parcelamento enxuto");
+    }
+
+    if (adjustments.paymentTerm === "fortyFiveDays" || adjustments.paymentTerm === "sixtyDays") {
+        score += 10;
+        riskFactors.push("Prazo de pagamento extenso");
+    } else if (adjustments.paymentTerm === "thirtyDays") {
+        score += 5;
+        riskFactors.push("Prazo de pagamento padrão");
+    } else {
+        positiveFactors.push("Prazo de pagamento curto");
     }
 
     if (adjustments.downPayment === "none") {
-        score += 15;
-        riskFactors.push("Ausência de pagamento de sinal / entrada");
+        score += 10;
+        riskFactors.push("Sem entrada inicial");
+    } else if (adjustments.downPayment === "tenPercent") {
+        score += 5;
+        riskFactors.push("Entrada inicial reduzida");
     } else {
-        positiveFactors.push("Garantia de sinal / entrada na assinatura");
+        positiveFactors.push("Entrada inicial garantida");
     }
 
-    if (adjustments.paymentMethod === "international") {
-        score += 8;
-        riskFactors.push("Recebimento internacional (risco cambial/taxas)");
+    if (adjustments.recurringBilling === "yes") {
+        positiveFactors.push("Cobrança recorrente prevista");
+    } else {
+        score += 5;
+        riskFactors.push("Cobrança única sem recorrência");
+    }
+
+    if (adjustments.formalContract === "no") {
+        score += 10;
+        riskFactors.push("Ausência de contrato formal");
+    } else {
+        positiveFactors.push("Contrato formal definido");
     }
 
     const finalScore = clamp(score);
@@ -137,10 +186,10 @@ export function calculateWizardRisk(
 
     const summary =
         level === "high"
-            ? "Alto risco estrutural. É fortemente recomendado exigir contrato e cobrar sinal."
+            ? "Existem sinais claros de atenção. Ajustes e alinhamentos serão importantes."
             : level === "medium"
-              ? "Risco moderado. O projeto possui alguns desafios viáveis, mas atente-se às reuniões."
-              : "Baixo risco. Escopo, cliente e condições contratuais estão excelentes.";
+              ? "O projeto tem pontos positivos e alguns fatores de risco a considerar."
+              : "O perfil está bem estruturado, com poucos fatores críticos.";
 
     return {
         score: finalScore,

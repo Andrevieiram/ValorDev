@@ -41,8 +41,8 @@ export function WizardRiskScreen() {
                 keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 24}
             >
                 <ScrollView contentContainerStyle={{ paddingVertical: 24 }} className="px-4">
-                    <View className="gap-5">
-                        <View className="gap-2">
+                    <View className="space-y-5">
+                        <View className="space-y-2">
                             <Text className="text-2xl font-semibold text-foreground">
                                 Mapa de risco
                             </Text>
@@ -52,8 +52,8 @@ export function WizardRiskScreen() {
                             </Text>
                         </View>
 
-                        <Card variant="outlined" className="gap-4 p-4">
-                            <View className="gap-2">
+                        <Card variant="outlined" className="space-y-4 p-4">
+                            <View className="space-y-2">
                                 <Text className="text-sm font-medium text-foreground">
                                     Nível de risco
                                 </Text>
@@ -84,12 +84,12 @@ export function WizardRiskScreen() {
                             </Text>
                         </Card>
 
-                        <View className="gap-4">
+                        <View className="space-y-4">
                             <Card variant="outlined" className="p-4">
                                 <Text className="text-sm font-medium text-foreground mb-3">
                                     Fatores de atenção
                                 </Text>
-                                <View className="gap-2">
+                                <View className="space-y-2">
                                     {riskReport.riskFactors.length > 0 ? (
                                         riskReport.riskFactors.map((factor) => (
                                             <Text key={factor} className="text-sm text-destructive">
@@ -108,7 +108,7 @@ export function WizardRiskScreen() {
                                 <Text className="text-sm font-medium text-foreground mb-3">
                                     Pontos positivos
                                 </Text>
-                                <View className="gap-2">
+                                <View className="space-y-2">
                                     {riskReport.positiveFactors.length > 0 ? (
                                         riskReport.positiveFactors.map((factor) => (
                                             <Text key={factor} className="text-sm text-foreground">
@@ -124,17 +124,19 @@ export function WizardRiskScreen() {
                             </Card>
                         </View>
 
-                        <View className="gap-3 pt-1">
+                        <View className="space-y-3 pt-1">
                             <Button
-                                size="md"
+                                size="lg"
                                 label="Continuar para revisão"
                                 onPress={handleContinue}
+                                className="rounded-3xl"
                             />
                             <Button
-                                size="md"
+                                size="lg"
                                 variant="ghost"
                                 label="Voltar"
                                 onPress={goBack}
+                                className="rounded-3xl"
                             />
                         </View>
                     </View>

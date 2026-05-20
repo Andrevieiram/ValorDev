@@ -4,7 +4,6 @@ import { Sparkles } from "lucide-react-native";
 import { Button, Card } from "@/components/ui";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { useWizardNavigation } from "@/hooks";
-import { useTheme } from "@/theme";
 
 const BENEFITS = [
     "Estimativa guiada de horas e custo",
@@ -14,39 +13,26 @@ const BENEFITS = [
 
 export function WizardIntroScreen() {
     const { goToNextStep } = useWizardNavigation();
-    const { colors } = useTheme();
 
     return (
         <ScreenContainer className="justify-between pb-8">
-            <View className="gap-6">
-                {/* Header */}
-                <View className="gap-3">
-                    <Text
-                        className="text-3xl text-foreground"
-                        style={{ fontFamily: 'Inter_800ExtraBold' }}
-                    >
+            <View className="space-y-6">
+                <View className="space-y-3">
+                    <Text className="text-3xl font-semibold text-foreground">
                         Comece seu cálculo de precificação
                     </Text>
-                    <Text
-                        className="text-base leading-7 text-muted-foreground"
-                        style={{ fontFamily: 'Inter_300Light' }}
-                    >
+                    <Text className="text-base leading-7 text-muted-foreground">
                         Um fluxo mobile-first para estimar valor de projetos com clareza e rapidez.
                     </Text>
                 </View>
 
-                {/* Benefits Card */}
-                <Card variant="outlined" className="gap-4 p-5">
+                <Card className="space-y-4 p-5">
                     {BENEFITS.map((benefit) => (
                         <View key={benefit} className="flex-row items-start gap-3">
-                            {/* Ícone com cor do design system (primary azul) */}
                             <View className="mt-1 rounded-full bg-primary/10 p-2">
-                                <Sparkles size={18} color={colors.primary} />
+                                <Sparkles size={18} color="#0f766e" />
                             </View>
-                            <Text
-                                className="flex-1 text-base leading-6 text-foreground"
-                                style={{ fontFamily: 'Inter_400Regular' }}
-                            >
+                            <Text className="flex-1 text-base leading-6 text-foreground">
                                 {benefit}
                             </Text>
                         </View>
@@ -54,13 +40,7 @@ export function WizardIntroScreen() {
                 </Card>
             </View>
 
-            {/* CTA — botão glow primário com gradiente */}
-            <Button
-                size="lg"
-                variant="primary"
-                label="Começar cálculo"
-                onPress={() => goToNextStep("intro")}
-            />
+            <Button size="lg" label="Começar cálculo" onPress={() => goToNextStep("intro")} />
         </ScreenContainer>
     );
 }

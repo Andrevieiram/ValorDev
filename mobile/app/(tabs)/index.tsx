@@ -12,7 +12,7 @@ export default function HomeScreen() {
   const { userName, recentItems, startNewCalculation, goToHistory } = useHomeScreen();
 
   return (
-    <ScreenContainer>
+    <ScreenContainer withTabBar>
       <AnimatedSection delay={0}>
         <HomeHeader userName={userName} />
       </AnimatedSection>
