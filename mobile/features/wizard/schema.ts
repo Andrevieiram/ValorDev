@@ -6,25 +6,7 @@ export const EXPERIENCE_LEVEL_OPTIONS = [
     { value: "senior", label: "Sênior" },
 ] as const;
 
-export const TAX_REGIME_OPTIONS = [
-    { value: "mei", label: "MEI (+2%)" },
-    { value: "simples", label: "Simples Nacional (+5%)" },
-    { value: "lucroPresumido", label: "Lucro Presumido (+8%)" },
-    { value: "lucroReal", label: "Lucro Real (+13%)" },
-] as const;
-
-export const MAIN_STACK_OPTIONS = [
-    { value: "frontend", label: "Frontend (+20%)" },
-    { value: "mobile", label: "Mobile (+25%)" },
-    { value: "fullstack", label: "Fullstack (+30%)" },
-    { value: "devops", label: "DevOps (+40%)" },
-] as const;
-
-export const WORKLOAD_OPTIONS = [
-    { value: "normal", label: "Normal (0%)" },
-    { value: "high", label: "Alta (+15%)" },
-    { value: "overloaded", label: "Sobrecarregada (+30%)" },
-] as const;
+const EXPERIENCE_LEVEL_VALUES = ["junior", "pleno", "senior"] as const;
 
 export const WIZARD_PROFILE_SCHEMA = z.object({
     desiredIncome: z
@@ -33,12 +15,8 @@ export const WIZARD_PROFILE_SCHEMA = z.object({
         .regex(/^\d+(?:[.,]\d{1,2})?$/, "Informe um valor numérico válido"),
     hoursPerWeek: z
         .string()
-        .nonempty("Horas semanais são obrigatórias")
+        .nonempty("Horas semanais disponíveis são obrigatórias")
         .regex(/^\d+$/, "Informe um valor inteiro"),
-    experienceLevel: z.enum(["junior", "pleno", "senior"]),
-    taxRegime: z.enum(["mei", "simples", "lucroPresumido", "lucroReal"]),
-    mainStack: z.enum(["frontend", "mobile", "fullstack", "devops"]),
-    workload: z.enum(["normal", "high", "overloaded"]),
     monthlyCosts: z
         .string()
         .nonempty("Custos mensais são obrigatórios")
@@ -47,6 +25,7 @@ export const WIZARD_PROFILE_SCHEMA = z.object({
         .string()
         .nonempty("Reserva financeira é obrigatória")
         .regex(/^\d+(?:[.,]\d{1,2})?$/, "Informe um valor numérico válido"),
+    experienceLevel: z.enum(EXPERIENCE_LEVEL_VALUES),
 });
 
 export type WizardProfileFormValues = z.infer<typeof WIZARD_PROFILE_SCHEMA>;
@@ -60,15 +39,15 @@ export const CLIENT_TYPE_OPTIONS = [
 ] as const;
 
 export const DIGITAL_EXPERIENCE_OPTIONS = [
-    { value: "none", label: "Leigo / Iniciante (+20%)" },
+    { value: "none", label: "Iniciante" },
     { value: "beginner", label: "Consciente" },
     { value: "experienced", label: "Experiente" },
     { value: "advanced", label: "Madura" },
 ] as const;
 
 export const RECURRING_CLIENT_OPTIONS = [
-    { value: "yes", label: "Sim (-10%)" },
-    { value: "no", label: "Não (0%)" },
+    { value: "yes", label: "Sim" },
+    { value: "no", label: "Não" },
 ] as const;
 
 export const LOCATION_OPTIONS = [
@@ -79,10 +58,10 @@ export const LOCATION_OPTIONS = [
 ] as const;
 
 export const BUSINESS_IMPACT_OPTIONS = [
-    { value: "low", label: "Baixo impacto" },
-    { value: "medium", label: "Médio impacto" },
-    { value: "high", label: "Alto impacto (+25%)" },
-    { value: "strategic", label: "Estratégico (+25%)" },
+    { value: "low", label: "Baixo" },
+    { value: "medium", label: "Médio" },
+    { value: "high", label: "Alto" },
+    { value: "strategic", label: "Estratégico" },
 ] as const;
 
 export const WIZARD_CLIENT_SCHEMA = z.object({
@@ -102,13 +81,6 @@ export const BILLING_METHOD_OPTIONS = [
     { value: "milestone", label: "Por marcos" },
 ] as const;
 
-export const PAYMENT_METHOD_OPTIONS = [
-    { value: "pix", label: "PIX (0%)" },
-    { value: "boleto", label: "Boleto (0%)" },
-    { value: "creditCard", label: "Cartão de Crédito (-4%)" },
-    { value: "international", label: "Internacional (-10%)" },
-] as const;
-
 export const INSTALLMENT_OPTIONS = [
     { value: "oneTime", label: "À vista" },
     { value: "two", label: "2x" },
@@ -120,8 +92,8 @@ export const PAYMENT_TERM_OPTIONS = [
     { value: "sevenDays", label: "7 dias" },
     { value: "fifteenDays", label: "15 dias" },
     { value: "thirtyDays", label: "30 dias" },
-    { value: "fortyFiveDays", label: "45 dias (+5%)" },
-    { value: "sixtyDays", label: "60 dias (+5%)" },
+    { value: "fortyFiveDays", label: "45 dias" },
+    { value: "sixtyDays", label: "60 dias" },
 ] as const;
 
 export const DOWN_PAYMENT_OPTIONS = [
@@ -144,7 +116,6 @@ export const FORMAL_CONTRACT_OPTIONS = [
 
 export const WIZARD_ADJUSTMENTS_SCHEMA = z.object({
     billingMethod: z.enum(["fixed", "hourly", "subscription", "milestone"]),
-    paymentMethod: z.enum(["pix", "boleto", "creditCard", "international"]),
     installmentOption: z.enum(["oneTime", "two", "three", "fourPlus"]),
     paymentTerm: z.enum(["sevenDays", "fifteenDays", "thirtyDays", "fortyFiveDays", "sixtyDays"]),
     downPayment: z.enum(["none", "tenPercent", "twentyPercent", "thirtyPercent", "fiftyPercent"]),
@@ -155,33 +126,29 @@ export const WIZARD_ADJUSTMENTS_SCHEMA = z.object({
 export type WizardAdjustmentsFormValues = z.infer<typeof WIZARD_ADJUSTMENTS_SCHEMA>;
 
 export const PROJECT_TYPE_OPTIONS = [
-    { value: "landing", label: "Landing Page" },
+    { value: "landing", label: "Landing" },
     { value: "website", label: "Website" },
     { value: "webapp", label: "Web App" },
     { value: "mobile", label: "Mobile App" },
-    { value: "api", label: "API / Backend" },
+    { value: "api", label: "API" },
 ] as const;
 
 export const COMPLEXITY_OPTIONS = [
-    { value: "low", label: "Baixa (0%)" },
-    { value: "medium", label: "Média (0%)" },
-    { value: "high", label: "Alta (0%)" },
+    { value: "low", label: "Baixa" },
+    { value: "medium", label: "Média" },
+    { value: "high", label: "Alta" },
 ] as const;
 
 export const WIZARD_PROJECT_SCHEMA = z.object({
     projectType: z.enum(["landing", "website", "webapp", "mobile", "api"]),
     complexity: z.enum(["low", "medium", "high"]),
-    deadline: z.string().nonempty("Informe um prazo estimado (ex: 4 semanas)"),
+    deadline: z.string().nonempty("Informe um prazo estimado"),
     scopeDocumented: z.boolean(),
     maintenance: z.boolean(),
-    meetingsFrequency: z.enum(["diaria", "semanal", "quinzenal", "mensal"]),
+    meetingsFrequency: z.string().nonempty("Informe a frequência de reuniões"),
     externalDependencies: z.string().optional(),
     reuseComponents: z.boolean(),
     toolsUsed: z.string().optional(),
-    estimatedHours: z
-        .string()
-        .nonempty("Horas estimadas são obrigatórias")
-        .regex(/^\d+$/, "Informe um valor inteiro"),
 });
 
 export type WizardProjectFormValues = z.infer<typeof WIZARD_PROJECT_SCHEMA>;

@@ -1,7 +1,6 @@
-export { colors, lightPalette, darkPalette } from './colors';
+export { colors } from './colors';
 export { spacing } from './spacing';
 export { typography } from './typography';
-export { ThemeProvider, useTheme } from './ThemeContext';
 
 export const radii = {
   sm: 8,

@@ -1,10 +1,17 @@
-import React from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
+import {
+    ActionSheetIOS,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    Text,
+    View,
+} from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Calendar, Clock3, Link, Wrench } from "lucide-react-native";
+import { Calendar, ChevronDown, Link, Clock3 } from "lucide-react-native";
 
-import { Button, Input, Select, Switch } from "@/components/ui";
+import { Button, Input } from "@/components/ui";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { useWizardNavigation } from "@/hooks";
 import { useWizardStore } from "@/store";
@@ -15,13 +22,6 @@ import {
     type WizardProjectFormValues,
 } from "../schema";
 
-const MEETINGS_FREQUENCY_OPTIONS = [
-    { value: "diaria", label: "Diária (+20% preço)" },
-    { value: "semanal", label: "Semanal" },
-    { value: "quinzenal", label: "Quinzenal" },
-    { value: "mensal", label: "Mensal" },
-] as const;
-
 export function WizardProjectScreen() {
     const { goToClient, goBack } = useWizardNavigation();
     const project = useWizardStore((s) => s.project);
@@ -31,26 +31,74 @@ export function WizardProjectScreen() {
     const {
         control,
         handleSubmit,
+        setValue,
+        watch,
         formState: { errors, isSubmitting },
     } = useForm<WizardProjectFormValues>({
         mode: "onBlur",
         resolver: zodResolver(WIZARD_PROJECT_SCHEMA),
         defaultValues: {
-            projectType: (project.projectType as any) || "webapp",
-            complexity: (project.complexity as any) || "medium",
+            projectType: project.projectType || "webapp",
+            complexity: project.complexity || "medium",
             deadline: project.deadline || "",
-            scopeDocumented: project.scopeDocumented ?? false,
-            maintenance: project.maintenance ?? false,
-            meetingsFrequency: (project.meetingsFrequency as any) || "semanal",
-            externalDependencies: project.externalDependencies || "",
-            reuseComponents: project.reuseComponents ?? false,
-            toolsUsed: project.toolsUsed || "",
-            estimatedHours: project.estimatedHours || "",
+            scopeDocumented: !!project.deadline ? true : false,
+            maintenance:
+                project.maintenance === "yes" || project.maintenance === "true" ? true : false,
+            meetingsFrequency: project.meetings || "Semanal",
+            externalDependencies: project.projectType || "",
+            reuseComponents: false,
+            toolsUsed: project.projectType || "",
         },
     });
 
+    const projectType = watch("projectType");
+    const complexity = watch("complexity");
+    const scopeDocumented = watch("scopeDocumented");
+    const maintenance = watch("maintenance");
+
+    const showOptions = <T extends string | boolean>(
+        title: string,
+        options: ReadonlyArray<{ label: string; value: T }>,
+        onSelect: (value: T) => void,
+    ) => {
+        if (Platform.OS === "ios") {
+            const labels = options.map((option) => option.label);
+            ActionSheetIOS.showActionSheetWithOptions(
+                {
+                    title,
+                    options: [...labels, "Cancelar"],
+                    cancelButtonIndex: labels.length,
+                },
+                (buttonIndex) => {
+                    if (buttonIndex < labels.length) {
+                        onSelect(options[buttonIndex].value);
+                    }
+                },
+            );
+            return;
+        }
+
+        Alert.alert(title, undefined, [
+            ...options.map((option) => ({
+                text: option.label,
+                onPress: () => onSelect(option.value),
+            })),
+            { text: "Cancelar", style: "cancel" as const },
+        ]);
+    };
+
     const handleSaveProject = async (values: WizardProjectFormValues) => {
-        setProject(values);
+        // Persist only the fields relevant to store.ProjectData shape
+        setProject({
+            projectType: values.projectType,
+            complexity: values.complexity,
+            deadline: values.deadline,
+            scopeDocumented: values.scopeDocumented,
+            isUrgent: "",
+            meetings: values.meetingsFrequency,
+            maintenance: values.maintenance ? "yes" : "no",
+        });
+
         await persistDraft();
         goToClient();
     };
@@ -62,204 +110,278 @@ export function WizardProjectScreen() {
                 className="flex-1"
                 keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 24}
             >
-                <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-                    <View className="gap-6 pb-8">
-                        <View className="gap-2">
-                            <Text className="text-2xl font-bold text-foreground dark:text-white">
-                                Contexto do projeto
-                            </Text>
-                            <Text className="text-sm leading-6 text-muted-foreground">
-                                Conte as principais características técnicas e operacionais do projeto.
-                            </Text>
-                        </View>
-
-                        {/* General Project Section */}
-                        <View className="gap-4 rounded-3xl border border-border dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/20 p-5">
-                            <Controller
-                                control={control}
-                                name="projectType"
-                                render={({ field }) => (
-                                    <Select
-                                        label="Tipo de produto"
-                                        placeholder="Selecione o produto..."
-                                        value={field.value}
-                                        options={PROJECT_TYPE_OPTIONS}
-                                        onValueChange={field.onChange}
-                                        error={errors.projectType?.message}
-                                    />
-                                )}
-                            />
-
-                            <Controller
-                                control={control}
-                                name="complexity"
-                                render={({ field }) => (
-                                    <Select
-                                        label="Complexidade do projeto"
-                                        placeholder="Selecione a complexidade..."
-                                        value={field.value}
-                                        options={COMPLEXITY_OPTIONS}
-                                        onValueChange={field.onChange}
-                                        error={errors.complexity?.message}
-                                    />
-                                )}
-                            />
-                        </View>
-
-                        {/* Metrics and Deadlines Section */}
-                        <View className="gap-4 rounded-3xl border border-border dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/20 p-5">
-                            <Controller
-                                control={control}
-                                name="estimatedHours"
-                                render={({ field }) => (
-                                    <Input
-                                        label="Horas estimadas de trabalho"
-                                        placeholder="Ex: 120"
-                                        keyboardType="numeric"
-                                        value={field.value}
-                                        onChangeText={field.onChange}
-                                        onBlur={field.onBlur}
-                                        error={errors.estimatedHours?.message}
-                                        helper="Esforço total em horas de desenvolvimento."
-                                        leftIcon={<Clock3 size={18} className="text-primary" />}
-                                        className="rounded-2xl"
-                                        inputClassName="py-3 text-sm"
-                                    />
-                                )}
-                            />
-
-                            <Controller
-                                control={control}
-                                name="deadline"
-                                render={({ field }) => (
-                                    <Input
-                                        label="Prazo de entrega (ex: 4 semanas)"
-                                        placeholder="Ex: 8 semanas"
-                                        value={field.value}
-                                        onChangeText={field.onChange}
-                                        onBlur={field.onBlur}
-                                        error={errors.deadline?.message}
-                                        helper="Período total estipulado para entrega."
-                                        leftIcon={<Calendar size={18} className="text-primary" />}
-                                        className="rounded-2xl"
-                                        inputClassName="py-3 text-sm"
-                                    />
-                                )}
-                            />
-                        </View>
-
-                        {/* Switch Toggles for Scope & Tech */}
-                        <View className="gap-4 rounded-3xl border border-border dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/20 p-5">
-                            <Controller
-                                control={control}
-                                name="scopeDocumented"
-                                render={({ field }) => (
-                                    <Switch
-                                        value={field.value}
-                                        onValueChange={field.onChange}
-                                        label="Escopo detalhado e documentado"
-                                    />
-                                )}
-                            />
-
-                            <Controller
-                                control={control}
-                                name="maintenance"
-                                render={({ field }) => (
-                                    <Switch
-                                        value={field.value}
-                                        onValueChange={field.onChange}
-                                        label="Previsão de manutenção mensal recorrente"
-                                    />
-                                )}
-                            />
-
-                            <Controller
-                                control={control}
-                                name="reuseComponents"
-                                render={({ field }) => (
-                                    <Switch
-                                        value={field.value}
-                                        onValueChange={field.onChange}
-                                        label="Reaproveitamento expressivo de componentes"
-                                    />
-                                )}
-                            />
-                        </View>
-
-                        {/* Operations & Integrations Section */}
-                        <View className="gap-4 rounded-3xl border border-border dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/20 p-5">
-                            <Controller
-                                control={control}
-                                name="meetingsFrequency"
-                                render={({ field }) => (
-                                    <Select
-                                        label="Frequência de alinhamentos"
-                                        placeholder="Selecione a frequência..."
-                                        value={field.value}
-                                        options={MEETINGS_FREQUENCY_OPTIONS}
-                                        onValueChange={field.onChange}
-                                        error={errors.meetingsFrequency?.message}
-                                    />
-                                )}
-                            />
-
-                            <Controller
-                                control={control}
-                                name="externalDependencies"
-                                render={({ field }) => (
-                                    <Input
-                                        label="Dependências externas criticas"
-                                        placeholder="Ex: API de pagamentos, IA, legado"
-                                        value={field.value}
-                                        onChangeText={field.onChange}
-                                        onBlur={field.onBlur}
-                                        error={errors.externalDependencies?.message}
-                                        helper="APIs, sistemas de terceiros ou legados."
-                                        leftIcon={<Link size={18} className="text-primary" />}
-                                        className="rounded-2xl"
-                                        inputClassName="py-3 text-sm"
-                                    />
-                                )}
-                            />
-
-                            <Controller
-                                control={control}
-                                name="toolsUsed"
-                                render={({ field }) => (
-                                    <Input
-                                        label="Ferramentas e bibliotecas"
-                                        placeholder="Ex: React, Node, PostgreSQL"
-                                        value={field.value}
-                                        onChangeText={field.onChange}
-                                        onBlur={field.onBlur}
-                                        error={errors.toolsUsed?.message}
-                                        helper="Tecnologias principais de desenvolvimento."
-                                        leftIcon={<Wrench size={18} className="text-primary" />}
-                                        className="rounded-2xl"
-                                        inputClassName="py-3 text-sm"
-                                    />
-                                )}
-                            />
-                        </View>
-
-                        {/* Navigation Actions */}
-                        <View className="gap-3 pt-2">
-                            <Button
-                                size="md"
-                                label="Próximo"
-                                onPress={handleSubmit(handleSaveProject)}
-                                isLoading={isSubmitting}
-                            />
-                            <Button
-                                size="md"
-                                variant="ghost"
-                                label="Voltar"
-                                onPress={goBack}
-                            />
-                        </View>
+                <View className="space-y-6">
+                    <View className="space-y-3">
+                        <Text className="text-2xl font-semibold text-foreground">
+                            Contexto do projeto
+                        </Text>
+                        <Text className="text-sm leading-6 text-muted-foreground">
+                            Conte de forma sucinta o escopo e características do projeto.
+                        </Text>
                     </View>
-                </ScrollView>
+
+                    <View className="space-y-4 rounded-[28px] border border-input bg-background p-4">
+                        <View className="space-y-2">
+                            <Text className="text-sm font-medium text-foreground">
+                                O que será construído
+                            </Text>
+                            <Text className="text-xs text-muted-foreground">
+                                Selecione o tipo e a complexidade do produto.
+                            </Text>
+                        </View>
+
+                        <Pressable
+                            onPress={() =>
+                                showOptions("Tipo de projeto", PROJECT_TYPE_OPTIONS, (value) =>
+                                    setValue("projectType", value as any, { shouldValidate: true }),
+                                )
+                            }
+                            className="rounded-2xl border border-input bg-muted px-4 py-4"
+                        >
+                            <View className="flex-row items-center justify-between">
+                                <View>
+                                    <Text className="text-sm font-medium text-foreground">
+                                        Tipo de projeto
+                                    </Text>
+                                    <Text className="text-sm text-muted-foreground">
+                                        {PROJECT_TYPE_OPTIONS.find(
+                                            (opt) => opt.value === projectType,
+                                        )?.label ?? "Selecione"}
+                                    </Text>
+                                </View>
+                                <ChevronDown size={20} color="#64748b" />
+                            </View>
+                        </Pressable>
+
+                        <Pressable
+                            onPress={() =>
+                                showOptions("Complexidade", COMPLEXITY_OPTIONS, (value) =>
+                                    setValue("complexity", value as any, { shouldValidate: true }),
+                                )
+                            }
+                            className="rounded-2xl border border-input bg-muted px-4 py-4"
+                        >
+                            <View className="flex-row items-center justify-between">
+                                <View>
+                                    <Text className="text-sm font-medium text-foreground">
+                                        Complexidade
+                                    </Text>
+                                    <Text className="text-sm text-muted-foreground">
+                                        {COMPLEXITY_OPTIONS.find((opt) => opt.value === complexity)
+                                            ?.label ?? "Selecione"}
+                                    </Text>
+                                </View>
+                                <ChevronDown size={20} color="#64748b" />
+                            </View>
+                        </Pressable>
+                    </View>
+
+                    <View className="space-y-4 rounded-[28px] border border-input bg-background p-4">
+                        <View className="space-y-2">
+                            <Text className="text-sm font-medium text-foreground">
+                                Detalhes do escopo
+                            </Text>
+                            <Text className="text-xs text-muted-foreground">
+                                Adicione informações que vão deixar o projeto mais claro.
+                            </Text>
+                        </View>
+
+                        <Controller
+                            control={control}
+                            name="deadline"
+                            render={({ field }) => (
+                                <Input
+                                    label="Prazo estimado"
+                                    placeholder="Ex: 3 meses"
+                                    value={field.value}
+                                    onChangeText={field.onChange}
+                                    onBlur={field.onBlur}
+                                    error={errors.deadline?.message}
+                                    helper="Informe o período em que pretende entregar o trabalho."
+                                    leftIcon={<Calendar size={18} color="#0f766e" />}
+                                    className="rounded-2xl"
+                                    inputClassName="py-3 text-sm"
+                                />
+                            )}
+                        />
+
+                        <Controller
+                            control={control}
+                            name="scopeDocumented"
+                            render={({ field }) => (
+                                <Pressable
+                                    onPress={() =>
+                                        showOptions(
+                                            "Escopo documentado",
+                                            [
+                                                { label: "Sim", value: true },
+                                                { label: "Não", value: false },
+                                            ],
+                                            field.onChange,
+                                        )
+                                    }
+                                    className="rounded-2xl border border-input bg-muted px-4 py-4"
+                                >
+                                    <View className="flex-row items-center justify-between">
+                                        <View>
+                                            <Text className="text-sm font-medium text-foreground">
+                                                Escopo documentado
+                                            </Text>
+                                            <Text className="text-sm text-muted-foreground">
+                                                {field.value ? "Sim" : "Não"}
+                                            </Text>
+                                        </View>
+                                        <ChevronDown size={20} color="#64748b" />
+                                    </View>
+                                </Pressable>
+                            )}
+                        />
+
+                        <Controller
+                            control={control}
+                            name="maintenance"
+                            render={({ field }) => (
+                                <Pressable
+                                    onPress={() =>
+                                        showOptions(
+                                            "Manutenção pós-entrega",
+                                            [
+                                                { label: "Sim", value: true },
+                                                { label: "Não", value: false },
+                                            ],
+                                            field.onChange,
+                                        )
+                                    }
+                                    className="rounded-2xl border border-input bg-muted px-4 py-4"
+                                >
+                                    <View className="flex-row items-center justify-between">
+                                        <View>
+                                            <Text className="text-sm font-medium text-foreground">
+                                                Manutenção pós-entrega
+                                            </Text>
+                                            <Text className="text-sm text-muted-foreground">
+                                                {field.value ? "Sim" : "Não"}
+                                            </Text>
+                                        </View>
+                                        <ChevronDown size={20} color="#64748b" />
+                                    </View>
+                                </Pressable>
+                            )}
+                        />
+                    </View>
+
+                    <View className="space-y-4 rounded-[28px] border border-input bg-background p-4">
+                        <View className="space-y-2">
+                            <Text className="text-sm font-medium text-foreground">
+                                Como o processo vai funcionar
+                            </Text>
+                            <Text className="text-xs text-muted-foreground">
+                                Compartilhe o que torna a entrega mais previsível.
+                            </Text>
+                        </View>
+
+                        <Controller
+                            control={control}
+                            name="meetingsFrequency"
+                            render={({ field }) => (
+                                <Input
+                                    label="Frequência de reuniões"
+                                    placeholder="Ex: Semanal"
+                                    value={field.value}
+                                    onChangeText={field.onChange}
+                                    onBlur={field.onBlur}
+                                    helper="Como serão as checagens de progresso?"
+                                    leftIcon={<Clock3 size={18} color="#0f766e" />}
+                                    className="rounded-2xl"
+                                    inputClassName="py-3 text-sm"
+                                />
+                            )}
+                        />
+
+                        <Controller
+                            control={control}
+                            name="externalDependencies"
+                            render={({ field }) => (
+                                <Input
+                                    label="Dependências externas"
+                                    placeholder="APIs, serviços ou terceiros"
+                                    value={field.value}
+                                    onChangeText={field.onChange}
+                                    onBlur={field.onBlur}
+                                    helper="Liste integrações ou serviços de terceiros."
+                                    leftIcon={<Link size={18} color="#0f766e" />}
+                                    className="rounded-2xl"
+                                    inputClassName="py-3 text-sm"
+                                />
+                            )}
+                        />
+
+                        <Controller
+                            control={control}
+                            name="reuseComponents"
+                            render={({ field }) => (
+                                <View className="space-y-3">
+                                    <Text className="text-sm font-medium text-foreground">
+                                        Reaproveitamento
+                                    </Text>
+                                    <Text className="text-xs text-muted-foreground">
+                                        Existem componentes ou design system reutilizáveis?
+                                    </Text>
+                                    <View className="flex-row gap-2">
+                                        <Button
+                                            size="sm"
+                                            variant={field.value ? "primary" : "ghost"}
+                                            label="Sim"
+                                            onPress={() => field.onChange(true)}
+                                            className="rounded-2xl"
+                                        />
+                                        <Button
+                                            size="sm"
+                                            variant={!field.value ? "ghost" : "secondary"}
+                                            label="Não"
+                                            onPress={() => field.onChange(false)}
+                                            className="rounded-2xl"
+                                        />
+                                    </View>
+                                </View>
+                            )}
+                        />
+
+                        <Controller
+                            control={control}
+                            name="toolsUsed"
+                            render={({ field }) => (
+                                <Input
+                                    label="Ferramentas utilizadas"
+                                    placeholder="Ex: React, Expo, Firebase"
+                                    value={field.value}
+                                    onChangeText={field.onChange}
+                                    onBlur={field.onBlur}
+                                    helper="Principais ferramentas e stacks previstas para o projeto."
+                                    className="rounded-2xl"
+                                    inputClassName="py-3 text-sm"
+                                />
+                            )}
+                        />
+                    </View>
+
+                    <View className="space-y-3 pt-1">
+                        <Button
+                            size="lg"
+                            label="Próximo"
+                            onPress={handleSubmit(handleSaveProject)}
+                            isLoading={isSubmitting}
+                            className="rounded-3xl"
+                        />
+                        <Button
+                            size="lg"
+                            variant="ghost"
+                            label="Voltar"
+                            onPress={goBack}
+                            className="rounded-3xl"
+                        />
+                    </View>
+                </View>
             </KeyboardAvoidingView>
         </ScreenContainer>
     );

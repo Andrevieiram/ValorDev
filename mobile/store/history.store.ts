@@ -31,8 +31,6 @@ interface HistoryState {
 
   hydrate: () => Promise<void>;
   setItems: (items: HistoryItem[]) => void;
-  addItem: (item: Omit<HistoryItem, 'id' | 'createdAt'>) => Promise<void>;
-  removeItem: (id: string) => Promise<void>;
   /** Ponto de integração futuro com backend */
   fetchHistory: () => Promise<void>;
 }
@@ -44,37 +42,19 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
 
   hydrate: async () => {
     const stored = await loadJson<HistoryItem[]>(STORAGE_KEYS.history);
-    if (stored && stored.length > 0) {
+    if (stored?.length) {
       set({ items: stored, isHydrated: true });
       return;
     }
-    // Pre-populate with mock data if storage is empty
-    await persistHistory(MOCK_HISTORY);
-    set({ items: MOCK_HISTORY, isHydrated: true });
+    set({ isHydrated: true });
   },
 
   setItems: (items) => set({ items }),
 
-  addItem: async (item) => {
-    const newItem: HistoryItem = {
-      ...item,
-      id: Math.random().toString(36).substring(2, 9),
-      createdAt: new Date().toISOString(),
-    };
-    const updated = [newItem, ...get().items];
-    set({ items: updated });
-    await persistHistory(updated);
-  },
-
-  removeItem: async (id) => {
-    const updated = get().items.filter((item) => item.id !== id);
-    set({ items: updated });
-    await persistHistory(updated);
-  },
-
   fetchHistory: async () => {
     set({ isLoading: true });
     try {
+      // TODO: substituir por chamada API (ex.: GET /proposals)
       const stored = await loadJson<HistoryItem[]>(STORAGE_KEYS.history);
       set({ items: stored ?? MOCK_HISTORY });
     } finally {

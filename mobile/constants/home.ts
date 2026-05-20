@@ -3,7 +3,7 @@ export const HOME_RECENT_LIMIT = 2;
 
 export const HOME_COPY = {
   greeting: 'Olá,',
-  defaultUserName: 'Visitante',
+  defaultUserName: 'Dev',
   tipMessage:
     'Projetos com escopo indefinido tendem a gerar retrabalho. Sempre inclua uma margem de segurança.',
   hero: {

@@ -2,10 +2,10 @@ export const ROUTES = {
     home: "/(tabs)",
     history: "/(tabs)/history",
     profile: "/(tabs)/profile",
-    setupProfile: "/setup-profile",
     settings: "/settings",
     wizard: {
         intro: "/wizard",
+        profile: "/wizard/profile",
         project: "/wizard/project",
         client: "/wizard/client",
         adjustments: "/wizard/adjustments",
