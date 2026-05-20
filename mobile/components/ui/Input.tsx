@@ -1,18 +1,22 @@
 import { forwardRef } from 'react';
 import {
-  Text,
   TextInput,
   View,
   type TextInputProps,
 } from 'react-native';
 
+import { Label, Caption } from './Typography';
+
 import { cn } from '@/utils';
+import { useTheme } from '@/theme';
 
 export interface InputProps extends TextInputProps {
   label?: string;
   helper?: string;
   error?: string;
   leftIcon?: React.ReactNode;
+  labelClassName?: string;
+  helperClassName?: string;
   containerClassName?: string;
   inputClassName?: string;
 }
@@ -23,6 +27,8 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
     helper,
     error,
     leftIcon,
+    labelClassName,
+    helperClassName,
     containerClassName,
     inputClassName,
     className,
@@ -30,11 +36,11 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
   },
   ref,
 ) {
+  const { colors } = useTheme();
+
   return (
     <View className={cn('gap-2', containerClassName)}>
-      {label ? (
-        <Text className="text-sm font-medium text-foreground">{label}</Text>
-      ) : null}
+      {label ? <Label className={labelClassName}>{label}</Label> : null}
 
       <View className="relative">
         {leftIcon ? (
@@ -45,22 +51,23 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
 
         <TextInput
           ref={ref}
-          placeholderTextColor="#71717a"
+          placeholderTextColor="#94a3b8"
           className={cn(
-            'w-full rounded-xl border border-input bg-muted px-4 py-3 text-base text-foreground',
+            'w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-900 hover:border-slate-300 focus:border-primary',
             leftIcon && 'pl-12',
             error && 'border-destructive',
             inputClassName,
             className,
           )}
+          style={{ fontFamily: 'Inter_400Regular' }}
           {...props}
         />
       </View>
 
       {error ? (
-        <Text className="text-sm text-destructive">{error}</Text>
+        <Caption className="text-destructive font-medium">{error}</Caption>
       ) : helper ? (
-        <Text className="text-sm text-muted-foreground">{helper}</Text>
+        <Caption className={helperClassName}>{helper}</Caption>
       ) : null}
     </View>
   );

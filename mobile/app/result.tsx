@@ -1,10 +1,11 @@
+import React, { useMemo } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
-import { useMemo } from "react";
+import { useRouter } from "expo-router";
 
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { Badge, Button, Card } from "@/components/ui";
 import { useWizardNavigation } from "@/hooks";
-import { useWizardStore } from "@/store";
+import { useWizardStore, useHistoryStore } from "@/store";
 import { calculatePricingResult } from "@/features/pricing";
 import { formatCurrency } from "@/utils";
 
@@ -14,8 +15,17 @@ const riskLabelMap = {
     high: { label: "Alto risco", variant: "danger" as const },
 };
 
+const projectTypeLabels: Record<string, string> = {
+    landing: "Landing page",
+    website: "Website",
+    webapp: "Web App",
+    mobile: "App móvel",
+    api: "API",
+};
+
 export default function ResultScreen() {
-    const { goBack } = useWizardNavigation();
+    const { goBack, goHome } = useWizardNavigation();
+    const router = useRouter();
     const profile = useWizardStore((s) => s.profile);
     const project = useWizardStore((s) => s.project);
     const client = useWizardStore((s) => s.client);
@@ -40,10 +50,10 @@ export default function ResultScreen() {
         [profile, project, client, adjustments, riskReport],
     );
 
-    const positiveHighlights = riskReport?.positiveFactors.slice(0, 2) ?? [
+    const positiveHighlights = riskReport?.positiveFactors.slice(0, 3) ?? [
         "Ajuste final com base no perfil do cliente.",
     ];
-    const riskHighlights = riskReport?.riskFactors.slice(0, 2) ?? [
+    const riskHighlights = riskReport?.riskFactors.slice(0, 3) ?? [
         "Risco calculado a partir do escopo e prazo.",
     ];
 
@@ -60,42 +70,55 @@ export default function ResultScreen() {
     ];
 
     const handleExport = () =>
-        Alert.alert("Exportar PDF", "Essa função de exportação será disponibilizada em breve.");
+        Alert.alert("Exportar PDF", "Essa função de exportação em PDF será disponibilizada em breve.");
 
-    const handleSave = () =>
-        Alert.alert(
-            "Salvar cálculo",
-            "O cálculo já está pronto para ser usado como base de proposta.",
-        );
+    const handleSave = async () => {
+        try {
+            await useHistoryStore.getState().addItem({
+                name: projectTypeLabels[project.projectType] || 'Projeto Personalizado',
+                value: result.recommended,
+                date: new Date().toLocaleDateString('pt-BR'),
+                status: 'sent',
+            });
+            Alert.alert(
+                "Sucesso",
+                "O cálculo foi salvo com sucesso no seu histórico!",
+                [
+                    { text: "Ver Histórico", onPress: () => router.replace("/history") },
+                    { text: "Ir para Início", onPress: () => goHome() }
+                ]
+            );
+        } catch (error) {
+            Alert.alert("Erro", "Não foi possível salvar o cálculo.");
+        }
+    };
 
     return (
         <ScreenContainer>
-            <ScrollView contentContainerStyle={{ paddingVertical: 24 }} className="px-4">
-                <View className="space-y-6">
-                    <View className="space-y-3">
-                        <Text className="text-2xl font-semibold text-foreground">
-                            Estimativa final
+            <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+                <View className="gap-6 pb-8">
+                    <View className="gap-2">
+                        <Text className="text-2xl text-foreground" style={{ fontFamily: 'Inter_700Bold' }}>
+                            Estimativa comercial
                         </Text>
                         <Text className="text-sm leading-6 text-muted-foreground">
-                            Proposta premium preparada para transmitir confiança ao cliente.
+                            Proposta premium calculada com base no perfil técnico e condições comerciais.
                         </Text>
                     </View>
 
-                    <Card variant="elevated" className="space-y-4 p-5">
-                        <View className="items-center gap-3">
-                            <Text className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
-                                Valor recomendado
-                            </Text>
-                            <Text className="text-5xl font-bold text-foreground">
-                                {formatCurrency(result.recommended)}
-                            </Text>
-                            <Text className="text-center text-sm text-muted-foreground">
-                                Esse valor reflete o perfil do projeto, o risco e o posicionamento
-                                de mercado.
-                            </Text>
-                        </View>
+                    {/* Main Value Display */}
+                    <Card variant="elevated" className="gap-4 p-6 items-center">
+                        <Text className="text-xs uppercase tracking-[0.2em] text-muted-foreground" style={{ fontFamily: 'Inter_600SemiBold' }}>
+                            Valor recomendado
+                        </Text>
+                        <Text className="text-5xl text-primary my-2" style={{ fontFamily: 'JetBrainsMono_700Bold' }}>
+                            {formatCurrency(result.recommended)}
+                        </Text>
+                        <Text className="text-center text-sm text-muted-foreground leading-5 px-2">
+                            Preço otimizado para cobertura de impostos, riscos e margem líquida pretendida.
+                        </Text>
 
-                        <View className="flex-row flex-wrap justify-center gap-3">
+                        <View className="flex-row flex-wrap justify-center gap-2 pt-2">
                             <Badge
                                 size="sm"
                                 variant={riskLabelMap[result.riskLevel].variant}
@@ -109,94 +132,101 @@ export default function ResultScreen() {
                         </View>
                     </Card>
 
-                    <Card variant="outlined" className="space-y-4 p-5">
-                        <Text className="text-sm font-medium text-foreground">
-                            Resumo da proposta
+                    {/* Proposal Range & Breakdown */}
+                    <Card variant="outlined" className="gap-4 p-5">
+                        <Text className="text-sm font-bold text-foreground dark:text-white">
+                            Composição da proposta
                         </Text>
-                        <View className="space-y-3">
+                        <View className="gap-3">
                             {result.breakdown.map((item) => (
-                                <View key={item.label} className="flex-row justify-between">
+                                <View key={item.label} className="flex-row justify-between items-start">
                                     <View className="flex-1 pr-3">
-                                        <Text className="text-sm text-muted-foreground">
+                                        <Text className="text-sm font-semibold text-foreground dark:text-slate-200">
                                             {item.label}
                                         </Text>
-                                        <Text className="text-xs text-slate-500">
+                                        <Text className="text-xs text-muted-foreground">
                                             {item.description}
                                         </Text>
                                     </View>
-                                    <Text className="text-sm font-semibold text-foreground">
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
                                         {item.value >= 0 ? "+" : ""}
                                         {formatCurrency(item.value)}
                                     </Text>
                                 </View>
                             ))}
                         </View>
-                        <View className="border-t border-border pt-4">
+
+                        <View className="border-t border-border dark:border-white/5 pt-4">
                             <View className="flex-row justify-between">
-                                <Text className="text-sm font-medium text-foreground">
-                                    Faixa de proposta
+                                <Text className="text-sm font-bold text-foreground dark:text-white">
+                                    Faixa recomendada de negociação
                                 </Text>
-                                <Text className="text-sm text-muted-foreground">
-                                    {formatCurrency(result.minimum)} —{" "}
-                                    {formatCurrency(result.premium)}
+                                <Text className="text-sm font-semibold text-primary">
+                                    {formatCurrency(result.minimum)} — {formatCurrency(result.premium)}
                                 </Text>
                             </View>
                         </View>
                     </Card>
 
-                    <Card variant="outlined" className="space-y-4 p-5">
-                        <Text className="text-sm font-medium text-foreground">
+                    {/* Detail Justification */}
+                    <Card variant="outlined" className="gap-4 p-5">
+                        <Text className="text-sm font-bold text-foreground dark:text-white">
                             Por que esse valor
                         </Text>
-                        <Text className="text-sm text-muted-foreground">
-                            Os pontos abaixo ajudam a entender a inteligência da proposta.
-                        </Text>
-                        <View className="space-y-3">
-                            <View>
-                                <Text className="text-xs uppercase tracking-[0.15em] text-muted-foreground mb-2">
-                                    Fatores positivos
-                                </Text>
-                                {positiveHighlights.map((item) => (
-                                    <Text key={item} className="text-sm text-foreground">
-                                        • {item}
+                        <View className="gap-4">
+                            {positiveHighlights.length > 0 && (
+                                <View>
+                                    <Text className="text-xs uppercase tracking-[0.15em] text-primary font-bold mb-2">
+                                        Fatores positivos
                                     </Text>
-                                ))}
-                            </View>
-                            <View>
-                                <Text className="text-xs uppercase tracking-[0.15em] text-muted-foreground mb-2">
-                                    Fatores de atenção
-                                </Text>
-                                {riskHighlights.map((item) => (
-                                    <Text key={item} className="text-sm text-destructive">
-                                        • {item}
+                                    {positiveHighlights.map((item) => (
+                                        <Text key={item} className="text-sm text-foreground dark:text-slate-200 leading-5">
+                                            • {item}
+                                        </Text>
+                                    ))}
+                                </View>
+                            )}
+
+                            {riskHighlights.length > 0 && (
+                                <View>
+                                    <Text className="text-xs uppercase tracking-[0.15em] text-destructive font-bold mb-2">
+                                        Fatores de atenção
                                     </Text>
-                                ))}
-                            </View>
+                                    {riskHighlights.map((item) => (
+                                        <Text key={item} className="text-sm text-destructive leading-5">
+                                            • {item}
+                                        </Text>
+                                    ))}
+                                </View>
+                            )}
                         </View>
                     </Card>
 
-                    <Card variant="outlined" className="space-y-4 p-5">
-                        <Text className="text-sm font-medium text-foreground">
+                    {/* Quick Insights */}
+                    <Card variant="outlined" className="gap-3 p-5">
+                        <Text className="text-sm font-bold text-foreground dark:text-white">
                             Insights rápidos
                         </Text>
-                        <View className="space-y-2">
+                        <View className="gap-2">
                             {insights.map((insight) => (
-                                <Text key={insight} className="text-sm text-foreground">
+                                <Text key={insight} className="text-sm text-foreground dark:text-slate-200 leading-5">
                                     • {insight}
                                 </Text>
                             ))}
                         </View>
                     </Card>
 
-                    <View className="space-y-3">
-                        <Button size="lg" label="Salvar cálculo" onPress={handleSave} />
+                    {/* Navigation Actions */}
+                    <View className="gap-3 pt-2">
+                        <Button size="lg" label="Salvar no Histórico" onPress={handleSave} className="rounded-3xl shadow-md py-4" />
                         <Button
                             size="lg"
                             variant="secondary"
                             label="Exportar PDF"
                             onPress={handleExport}
+                            className="rounded-3xl"
                         />
-                        <Button size="lg" variant="ghost" label="Recalcular" onPress={goBack} />
+                        <Button size="lg" variant="ghost" label="Refazer cálculo" onPress={goBack} className="rounded-3xl" />
                     </View>
                 </View>
             </ScrollView>
