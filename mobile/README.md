@@ -39,8 +39,8 @@ Certifique-se de ter instalado em sua máquina:
 * Node.js (versão 18 ou superior recomendada)
 * npm ou yarn
 
-### 1. Instalar Dependências
-Navegue até esta pasta (`mobile`) e instale as dependências:
+### 1. Clonar e Instalar Dependências
+Navegue até a pasta do projeto e instale as dependências:
 ```bash
 npm install
 ```
