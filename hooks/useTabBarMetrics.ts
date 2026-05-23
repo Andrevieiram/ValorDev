@@ -7,6 +7,7 @@ export function useTabBarMetrics() {
 
     return {
         TAB_BAR_INNER_HEIGHT,
+        occupiedHeight: TAB_BAR_INNER_HEIGHT + insets.bottom,
 
         tabBarStyle: {
             paddingTop: 8,

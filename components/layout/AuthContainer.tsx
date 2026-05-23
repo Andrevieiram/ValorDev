@@ -14,7 +14,7 @@ export function AuthContainer({ children }: AuthContainerProps) {
     <ImageBackground
       source={require("@/assets/fundo_page.png")}
       className="flex-1"
-      style={isWeb ? { width: '100vw', minHeight: '100vh' } : {}}
+      style={isWeb ? ({ width: '100vw', minHeight: '100vh' } as any) : {}}
       resizeMode={isWeb ? "cover" : "stretch"}
     >
       <KeyboardAvoidingView

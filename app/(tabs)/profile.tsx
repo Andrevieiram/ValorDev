@@ -1,6 +1,14 @@
 import React from "react";
 import { useRouter } from "expo-router";
-import { ChevronRight, Settings, LogOut, User, DollarSign, Clock, Shield } from "lucide-react-native";
+import {
+    ChevronRight,
+    Settings,
+    LogOut,
+    User,
+    DollarSign,
+    Clock,
+    Shield,
+} from "lucide-react-native";
 import { Pressable, Text, View, Alert, Platform } from "react-native";
 
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
@@ -30,29 +38,30 @@ export default function ProfileScreen() {
             return;
         }
 
-        Alert.alert(
-            "Encerrar Sessão",
-            "Deseja realmente sair da sua conta?",
-            [
-                { text: "Cancelar", style: "cancel" },
-                {
-                    text: "Sair",
-                    style: "destructive",
-                    onPress: async () => {
-                        await logout();
-                        router.replace("/auth");
-                    },
+        Alert.alert("Encerrar Sessão", "Deseja realmente sair da sua conta?", [
+            { text: "Cancelar", style: "cancel" },
+            {
+                text: "Sair",
+                style: "destructive",
+                onPress: async () => {
+                    await logout();
+                    router.replace("/auth");
                 },
-            ]
-        );
+            },
+        ]);
     };
 
     return (
-        <ScreenContainer>
+        <ScreenContainer maxWidth="simple">
             <View className="gap-6 pb-24">
                 {/* Header Profile Title */}
                 <MotionFadeUp delay={0} className="gap-1">
-                    <Text className="text-2xl text-foreground" style={{ fontFamily: 'Inter_700Bold' }}>Perfil</Text>
+                    <Text
+                        className="text-2xl text-foreground"
+                        style={{ fontFamily: "Inter_700Bold" }}
+                    >
+                        Perfil
+                    </Text>
                     <Text className="text-sm text-muted-foreground">
                         Visualize suas credenciais e perfil de trabalho padrão.
                     </Text>
@@ -65,7 +74,10 @@ export default function ProfileScreen() {
                             <User size={28} className="text-primary" />
                         </View>
                         <View className="flex-1 justify-center">
-                            <Text className="text-lg text-foreground leading-5" style={{ fontFamily: 'Inter_700Bold' }}>
+                            <Text
+                                className="text-lg text-foreground leading-5"
+                                style={{ fontFamily: "Inter_700Bold" }}
+                            >
                                 {user?.name || "Visitante"}
                             </Text>
                             <Text className="text-xs text-muted-foreground mt-0.5">
@@ -77,24 +89,33 @@ export default function ProfileScreen() {
 
                 {/* Quick Profile Summary */}
                 <MotionFadeUp delay={200} className="gap-3">
-                    <Text className="text-xs uppercase tracking-[0.1em] text-muted-foreground pl-1" style={{ fontFamily: 'Inter_700Bold' }}>
+                    <Text
+                        className="text-xs uppercase tracking-[0.1em] text-muted-foreground pl-1 pb-3"
+                        style={{ fontFamily: "Inter_700Bold" }}
+                    >
                         Resumo Financeiro Padrão
                     </Text>
                     <Card variant="outlined" className="gap-3">
                         <View className="flex-row items-center justify-between">
                             <View className="flex-row items-center gap-2">
                                 <DollarSign size={16} className="text-primary" />
-                                <Text className="text-sm text-muted-foreground">Renda Desejada</Text>
+                                <Text className="text-sm text-muted-foreground">
+                                    Renda Desejada
+                                </Text>
                             </View>
                             <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
-                                {profile.desiredIncome ? formatCurrency(Number(profile.desiredIncome)) : "—"}
+                                {profile.desiredIncome
+                                    ? formatCurrency(Number(profile.desiredIncome))
+                                    : "—"}
                             </Text>
                         </View>
                         <Divider />
                         <View className="flex-row items-center justify-between">
                             <View className="flex-row items-center gap-2">
                                 <Clock size={16} className="text-primary" />
-                                <Text className="text-sm text-muted-foreground">Horas Disponíveis</Text>
+                                <Text className="text-sm text-muted-foreground">
+                                    Horas Disponíveis
+                                </Text>
                             </View>
                             <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
                                 {profile.hoursPerWeek ? `${profile.hoursPerWeek}h / sem` : "—"}
@@ -115,7 +136,10 @@ export default function ProfileScreen() {
 
                 {/* Option Menu Navigation */}
                 <MotionFadeUp delay={300} className="gap-3">
-                    <Text className="text-xs uppercase tracking-[0.1em] text-muted-foreground pl-1" style={{ fontFamily: 'Inter_700Bold' }}>
+                    <Text
+                        className="text-xs uppercase tracking-[0.1em] text-muted-foreground pl-1 pb-3"
+                        style={{ fontFamily: "Inter_700Bold" }}
+                    >
                         Opções e Conta
                     </Text>
 

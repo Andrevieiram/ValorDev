@@ -10,7 +10,7 @@ import { cn } from '@/utils';
 interface ScreenContainerProps extends ScrollViewProps {
   scrollable?: boolean;
   withTabBar?: boolean;
-  maxWidth?: 'wizard' | 'container' | 'none';
+  maxWidth?: 'wizard' | 'container' | 'simple' | 'none';
   className?: string;
   children: React.ReactNode;
 }
@@ -33,14 +33,28 @@ export function ScreenContainer({
     : insets.bottom + spacing.lg;
 
   const isWeb = Platform.OS === 'web';
-  const maxWidthValue = maxWidth === 'wizard' ? 600 : maxWidth === 'container' ? 1200 : undefined;
+  const maxWidthValue =
+    maxWidth === 'wizard'
+      ? 700
+      : maxWidth === 'container'
+        ? 1100
+        : maxWidth === 'simple'
+          ? 900
+          : undefined;
 
   const content = (
     <View
       className={cn('flex-1 bg-background px-6', className)}
       style={[
         { paddingTop: insets.top + spacing.lg, paddingBottom: bottomPadding },
-        isWeb && maxWidthValue ? { maxWidth: maxWidthValue, width: '100%', alignSelf: 'center' as const } : undefined,
+        isWeb && maxWidthValue
+          ? {
+              maxWidth: maxWidthValue,
+              width: '100%',
+              alignSelf: 'center' as const,
+              marginHorizontal: 'auto' as const,
+            }
+          : undefined,
       ]}
     >
       {children}

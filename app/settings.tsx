@@ -27,7 +27,7 @@ export default function SettingsScreen() {
     const { theme, currency, language, setTheme, setCurrency, setLanguage } = useSettingsStore();
 
     return (
-        <ScreenContainer>
+        <ScreenContainer maxWidth="simple">
             <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
                 <View className="gap-6 pb-8">
                     <View className="gap-2">
