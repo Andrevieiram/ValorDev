@@ -1,6 +1,14 @@
 import React from "react";
 import { useRouter } from "expo-router";
-import { ChevronRight, Settings, LogOut, User, DollarSign, Clock, Shield } from "lucide-react-native";
+import {
+    ChevronRight,
+    Settings,
+    LogOut,
+    User,
+    DollarSign,
+    Clock,
+    Shield,
+} from "lucide-react-native";
 import { Pressable, Text, View, Alert, Platform } from "react-native";
 
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
@@ -32,25 +40,21 @@ export default function ProfileScreen() {
             return;
         }
 
-        Alert.alert(
-            "Encerrar Sessão",
-            "Deseja realmente sair da sua conta?",
-            [
-                { text: "Cancelar", style: "cancel" },
-                {
-                    text: "Sair",
-                    style: "destructive",
-                    onPress: async () => {
-                        await logout();
-                        router.replace("/auth");
-                    },
+        Alert.alert("Encerrar Sessão", "Deseja realmente sair da sua conta?", [
+            { text: "Cancelar", style: "cancel" },
+            {
+                text: "Sair",
+                style: "destructive",
+                onPress: async () => {
+                    await logout();
+                    router.replace("/auth");
                 },
-            ]
-        );
+            },
+        ]);
     };
 
     return (
-        <ScreenContainer>
+        <ScreenContainer maxWidth="simple">
             <View className="gap-6 pb-24">
                 {/* Header Profile Title */}
                 <View className="gap-1">

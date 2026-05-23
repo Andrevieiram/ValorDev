@@ -34,7 +34,7 @@ export function WizardRiskScreen() {
               : "bg-red-500";
 
     return (
-        <ScreenContainer>
+        <ScreenContainer maxWidth="wizard">
             <KeyboardAvoidingView
                 behavior={Platform.select({ ios: "padding", android: "height" })}
                 className="flex-1"

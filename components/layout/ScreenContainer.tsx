@@ -10,7 +10,7 @@ import { cn } from '@/utils';
 interface ScreenContainerProps extends ScrollViewProps {
   scrollable?: boolean;
   withTabBar?: boolean;
-  maxWidth?: 'wizard' | 'container' | 'none';
+  maxWidth?: 'wizard' | 'container' | 'simple' | 'none';
   className?: string;
   children: React.ReactNode;
 }

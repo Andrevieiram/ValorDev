@@ -42,7 +42,7 @@ export default function HistoryScreen() {
     };
 
     return (
-        <ScreenContainer>
+        <ScreenContainer maxWidth="container">
             <View className="gap-6 pb-24">
                 {/* Header */}
                 <View className="gap-1">

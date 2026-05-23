@@ -23,7 +23,7 @@ export default function HomeScreen() {
   } = useHomeScreen();
 
   return (
-    <ScreenContainer>
+    <ScreenContainer maxWidth="container">
       <AnimatedSection delay={0}>
         <HomeHeader userName={userName} />
       </AnimatedSection>

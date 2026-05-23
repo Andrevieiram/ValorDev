@@ -17,7 +17,7 @@ export function WizardIntroScreen() {
     const { colors } = useTheme();
 
     return (
-        <ScreenContainer className="justify-between pb-8">
+        <ScreenContainer maxWidth="wizard" className="justify-between pb-8">
             <View className="gap-6">
                 {/* Header */}
                 <View className="gap-3">
