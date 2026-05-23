@@ -1,7 +1,8 @@
 export const ROUTES = {
     home: "/(tabs)",
-    history: "/(tabs)/history",
-    profile: "/(tabs)/profile",
+    history: "/history",
+    profile: "/profile",
+    dashboard: "/dashboard",
     setupProfile: "/setup-profile",
     settings: "/settings",
     wizard: {

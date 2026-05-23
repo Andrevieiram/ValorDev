@@ -16,7 +16,7 @@ export default function Index() {
   }
 
   if (user || skipped) {
-    return <Redirect href={ROUTES.home} />;
+    return <Redirect href={ROUTES.home as any} />;
   }
 
   return <Redirect href="/auth" />;

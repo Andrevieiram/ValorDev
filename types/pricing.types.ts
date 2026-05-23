@@ -104,6 +104,8 @@ export interface PricingAlert {
     message: string;
 }
 
+export type Probability = 'alta' | 'media' | 'baixa' | 'fechada' | 'perdida';
+
 export interface HistoryItem {
     id: string;
     name: string;
@@ -111,4 +113,5 @@ export interface HistoryItem {
     date: string;
     status: "draft" | "sent";
     createdAt: string;
+    probability?: Probability;
 }

@@ -38,7 +38,7 @@ function InnerLayout() {
       />
       <Stack.Screen
         name="setup-profile"
-        options={{ title: 'Perfil Financeiro', presentation: 'card' }}
+        options={{ title: 'Perfil Financeiro', presentation: 'card', headerBackTitle: 'Voltar' }}
       />
       <Stack.Screen
         name="result"
@@ -46,7 +46,7 @@ function InnerLayout() {
       />
       <Stack.Screen
         name="settings"
-        options={{ title: 'Configurações', presentation: 'card' }}
+        options={{ title: 'Configurações', presentation: 'card', headerBackTitle: 'Voltar' }}
       />
       <Stack.Screen name="+not-found" options={{ title: 'Oops!' }} />
     </Stack>

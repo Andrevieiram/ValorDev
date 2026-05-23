@@ -21,7 +21,7 @@ export function RecentCalculationsSection({
   return (
     <View className="mb-6">
       <View className="flex-row items-center justify-between mb-4">
-        <Text className="text-lg font-semibold text-foreground">
+        <Text className="text-lg font-semibold text-foreground dark:text-white">
           {HOME_COPY.recent.title}
         </Text>
         <Pressable

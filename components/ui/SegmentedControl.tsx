@@ -40,15 +40,11 @@ export function SegmentedControl({
   return (
     <View
       className={`flex-row p-1.5 rounded-2xl gap-1.5 ${className}`}
-      style={
-        isWeb
-          ? undefined
-          : {
-              backgroundColor: containerBg,
-              borderWidth: 1,
-              borderColor: containerBorder,
-            }
-      }
+      style={{
+          backgroundColor: containerBg,
+          borderWidth: 1,
+          borderColor: containerBorder,
+      }}
     >
       {options.map((opt) => {
         const isActive = opt.value === value;
@@ -62,20 +58,16 @@ export function SegmentedControl({
                 ? "bg-primary dark:bg-blue-500 border border-primary/20 dark:border-blue-400/20"
                 : "active:bg-blue-100/60 dark:active:bg-blue-900/30"
             }`}
-            style={
-              isWeb
-                ? undefined
-                : {
-                    backgroundColor: isActive ? activeBg : inactiveBg,
-                    borderWidth: 1,
-                    borderColor: isActive ? activeBorder : inactiveBorder,
-                    shadowColor: isActive ? "#2563eb" : "transparent",
-                    shadowOpacity: isActive ? 0.2 : 0,
-                    shadowRadius: isActive ? 8 : 0,
-                    shadowOffset: { width: 0, height: isActive ? 2 : 0 },
-                    elevation: isActive ? 3 : 0,
-                  }
-            }
+            style={{
+                backgroundColor: isActive ? activeBg : inactiveBg,
+                borderWidth: 1,
+                borderColor: isActive ? activeBorder : inactiveBorder,
+                shadowColor: isActive ? "#2563eb" : "transparent",
+                shadowOpacity: isActive ? 0.2 : 0,
+                shadowRadius: isActive ? 8 : 0,
+                shadowOffset: { width: 0, height: isActive ? 2 : 0 },
+                elevation: isActive ? 3 : 0,
+            }}
           >
             <Text
               className={`text-[11px] text-center px-0.5 leading-tight ${

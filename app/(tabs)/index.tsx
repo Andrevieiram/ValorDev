@@ -62,7 +62,7 @@ export default function HomeScreen() {
 
         <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
           <Button
-            variant="ghost"
+            variant="secondary"
             size="md"
             label="Agora não"
             onPress={closeProfileModal}
