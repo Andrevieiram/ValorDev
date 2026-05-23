@@ -6,8 +6,14 @@ import { useTabBarMetrics } from "@/hooks";
 import { useTheme } from "@/theme";
 
 export default function TabLayout() {
-    const { colors } = useTheme();
+    const { colors, theme } = useTheme();
     const { tabBarStyle } = useTabBarMetrics();
+
+    const isDark = theme === "dark";
+
+    const tabBarBg = isDark ? "#0f172a" : "#ffffff";
+    const tabBarBorder = isDark ? "#1e293b" : "#e5e7eb";
+    const sceneBg = isDark ? "#04060a" : "#f8fafc";
 
     return (
         <Tabs
@@ -15,24 +21,24 @@ export default function TabLayout() {
                 headerShown: false,
 
                 sceneStyle: {
-                    backgroundColor: "#f8fafc",
+                    backgroundColor: sceneBg,
                 },
 
                 tabBarActiveTintColor: colors.primary,
-                tabBarInactiveTintColor: colors.textMuted,
+                tabBarInactiveTintColor: isDark ? "#64748b" : "#94a3b8",
 
                 tabBarStyle: {
                     ...tabBarStyle,
 
-                    backgroundColor: "#ffffff",
+                    backgroundColor: tabBarBg,
 
                     borderTopWidth: 1,
-                    borderTopColor: "#e5e7eb",
+                    borderTopColor: tabBarBorder,
 
                     elevation: 8,
 
                     shadowColor: "#000",
-                    shadowOpacity: 0.04,
+                    shadowOpacity: isDark ? 0.3 : 0.04,
                     shadowRadius: 8,
                     shadowOffset: {
                         width: 0,

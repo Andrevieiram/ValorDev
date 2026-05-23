@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { SCREEN_CONTENT_GAP_ABOVE_TAB_BAR } from '@/constants/layout';
 import { useTabBarMetrics } from '@/hooks';
-import { spacing } from '@/theme';
+import { spacing, useTheme } from '@/theme';
 import { AmbientBackground } from './AmbientBackground';
 import { cn } from '@/utils';
 
@@ -27,20 +27,34 @@ export function ScreenContainer({
   const safeInsets = useSafeAreaInsets();
   const insets = safeInsets || { top: 0, bottom: 0, left: 0, right: 0 };
   const { occupiedHeight: tabBarOccupiedHeight } = useTabBarMetrics();
+  const { theme } = useTheme();
+
+  const isDark = theme === 'dark';
+  const isWeb = Platform.OS === 'web';
+
+  // No mobile nativo, usamos cor hexadecimal pois CSS variables não funcionam
+  // No web, deixamos o Tailwind cuidar via bg-background
+  const bgColor = isDark ? '#04060a' : '#f8fafc';
 
   const bottomPadding = withTabBar
     ? tabBarOccupiedHeight + SCREEN_CONTENT_GAP_ABOVE_TAB_BAR
     : insets.bottom + spacing.lg;
 
-  const isWeb = Platform.OS === 'web';
   const maxWidthValue = maxWidth === 'wizard' ? 600 : maxWidth === 'container' ? 1200 : undefined;
 
   const content = (
     <View
       className={cn('flex-1 bg-background px-6', className)}
       style={[
-        { paddingTop: insets.top + spacing.lg, paddingBottom: bottomPadding },
-        isWeb && maxWidthValue ? { maxWidth: maxWidthValue, width: '100%', alignSelf: 'center' as const } : undefined,
+        {
+          paddingTop: insets.top + spacing.lg,
+          paddingBottom: bottomPadding,
+          // No nativo sobrescreve bg-background (que depende de CSS var) com hex direto
+          ...(isWeb ? {} : { backgroundColor: bgColor }),
+        },
+        isWeb && maxWidthValue
+          ? { maxWidth: maxWidthValue, width: '100%', alignSelf: 'center' as const }
+          : undefined,
       ]}
     >
       {children}
@@ -61,6 +75,7 @@ export function ScreenContainer({
       <AmbientBackground />
       <ScrollView
         className="flex-1 bg-transparent"
+        style={isWeb ? undefined : { backgroundColor: bgColor }}
         contentContainerStyle={[{ flexGrow: 1 }, contentContainerStyle]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}

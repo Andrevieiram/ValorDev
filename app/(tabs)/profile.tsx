@@ -4,8 +4,9 @@ import { ChevronRight, Settings, LogOut, User, DollarSign, Clock, Shield } from 
 import { Pressable, Text, View, Alert, Platform } from "react-native";
 
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
-import { Card, Divider, MotionFadeUp } from "@/components/ui";
+import { Card, Divider } from "@/components/ui";
 import { useAuthStore, useWizardStore } from "@/store";
+import { useTheme } from "@/theme";
 import { formatCurrency } from "@/utils";
 
 const taxRegimeLabels: Record<string, string> = {
@@ -19,6 +20,7 @@ export default function ProfileScreen() {
     const router = useRouter();
     const { user, logout } = useAuthStore();
     const profile = useWizardStore((s) => s.profile);
+    const { colors } = useTheme();
 
     const handleLogout = async () => {
         if (Platform.OS === "web") {
@@ -51,71 +53,104 @@ export default function ProfileScreen() {
         <ScreenContainer>
             <View className="gap-6 pb-24">
                 {/* Header Profile Title */}
-                <MotionFadeUp delay={0} className="gap-1">
-                    <Text className="text-2xl text-foreground" style={{ fontFamily: 'Inter_700Bold' }}>Perfil</Text>
-                    <Text className="text-sm text-muted-foreground">
+                <View className="gap-1">
+                    <Text
+                        className="text-2xl text-foreground"
+                        style={{ fontFamily: "Inter_700Bold", color: colors.foreground }}
+                    >
+                        Perfil
+                    </Text>
+                    <Text
+                        className="text-sm text-muted-foreground"
+                        style={{ color: colors.textMuted }}
+                    >
                         Visualize suas credenciais e perfil de trabalho padrão.
                     </Text>
-                </MotionFadeUp>
+                </View>
 
                 {/* Profile Card Info */}
-                <MotionFadeUp delay={100}>
-                    <Card variant="glass" className="flex-row items-center gap-4">
-                        <View className="w-14 h-14 rounded-full bg-primary/10 items-center justify-center">
-                            <User size={28} className="text-primary" />
-                        </View>
-                        <View className="flex-1 justify-center">
-                            <Text className="text-lg text-foreground leading-5" style={{ fontFamily: 'Inter_700Bold' }}>
-                                {user?.name || "Visitante"}
-                            </Text>
-                            <Text className="text-xs text-muted-foreground mt-0.5">
-                                {user?.email || "modo_visitante@valordev.com"}
-                            </Text>
-                        </View>
-                    </Card>
-                </MotionFadeUp>
+                <Card variant="glass" className="flex-row items-center gap-4">
+                    <View
+                        className="w-14 h-14 rounded-full items-center justify-center"
+                        style={{ backgroundColor: `${colors.primary}18` }}
+                    >
+                        <User size={28} color={colors.primary} />
+                    </View>
+                    <View className="flex-1 justify-center">
+                        <Text
+                            className="text-lg leading-5"
+                            style={{ fontFamily: "Inter_700Bold", color: colors.foreground }}
+                        >
+                            {user?.name || "Visitante"}
+                        </Text>
+                        <Text className="text-xs mt-0.5" style={{ color: colors.textMuted }}>
+                            {user?.email || "modo_visitante@valordev.com"}
+                        </Text>
+                    </View>
+                </Card>
 
                 {/* Quick Profile Summary */}
-                <MotionFadeUp delay={200} className="gap-3">
-                    <Text className="text-xs uppercase tracking-[0.1em] text-muted-foreground pl-1" style={{ fontFamily: 'Inter_700Bold' }}>
+                <View className="gap-3">
+                    <Text
+                        className="text-xs uppercase tracking-[0.1em] pl-1"
+                        style={{ fontFamily: "Inter_700Bold", color: colors.textMuted }}
+                    >
                         Resumo Financeiro Padrão
                     </Text>
                     <Card variant="outlined" className="gap-3">
                         <View className="flex-row items-center justify-between">
                             <View className="flex-row items-center gap-2">
-                                <DollarSign size={16} className="text-primary" />
-                                <Text className="text-sm text-muted-foreground">Renda Desejada</Text>
+                                <DollarSign size={16} color={colors.primary} />
+                                <Text className="text-sm" style={{ color: colors.textMuted }}>
+                                    Renda Desejada
+                                </Text>
                             </View>
-                            <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                            <Text
+                                className="text-sm"
+                                style={{ fontFamily: "Inter_600SemiBold", color: colors.foreground }}
+                            >
                                 {profile.desiredIncome ? formatCurrency(Number(profile.desiredIncome)) : "—"}
                             </Text>
                         </View>
                         <Divider />
                         <View className="flex-row items-center justify-between">
                             <View className="flex-row items-center gap-2">
-                                <Clock size={16} className="text-primary" />
-                                <Text className="text-sm text-muted-foreground">Horas Disponíveis</Text>
+                                <Clock size={16} color={colors.primary} />
+                                <Text className="text-sm" style={{ color: colors.textMuted }}>
+                                    Horas Disponíveis
+                                </Text>
                             </View>
-                            <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                            <Text
+                                className="text-sm"
+                                style={{ fontFamily: "Inter_600SemiBold", color: colors.foreground }}
+                            >
                                 {profile.hoursPerWeek ? `${profile.hoursPerWeek}h / sem` : "—"}
                             </Text>
                         </View>
                         <Divider />
                         <View className="flex-row items-center justify-between">
                             <View className="flex-row items-center gap-2">
-                                <Shield size={16} className="text-primary" />
-                                <Text className="text-sm text-muted-foreground">Regime Fiscal</Text>
+                                <Shield size={16} color={colors.primary} />
+                                <Text className="text-sm" style={{ color: colors.textMuted }}>
+                                    Regime Fiscal
+                                </Text>
                             </View>
-                            <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                            <Text
+                                className="text-sm"
+                                style={{ fontFamily: "Inter_600SemiBold", color: colors.foreground }}
+                            >
                                 {taxRegimeLabels[profile.taxRegime] ?? "MEI"}
                             </Text>
                         </View>
                     </Card>
-                </MotionFadeUp>
+                </View>
 
                 {/* Option Menu Navigation */}
-                <MotionFadeUp delay={300} className="gap-3">
-                    <Text className="text-xs uppercase tracking-[0.1em] text-muted-foreground pl-1" style={{ fontFamily: 'Inter_700Bold' }}>
+                <View className="gap-3">
+                    <Text
+                        className="text-xs uppercase tracking-[0.1em] pl-1"
+                        style={{ fontFamily: "Inter_700Bold", color: colors.textMuted }}
+                    >
                         Opções e Conta
                     </Text>
 
@@ -123,15 +158,19 @@ export default function ProfileScreen() {
                         {/* Edit Financial Profile Button */}
                         <Pressable
                             onPress={() => router.push("/setup-profile")}
-                            className="flex-row items-center justify-between p-4 active:bg-slate-50 dark:active:bg-white/5"
+                            className="flex-row items-center justify-between p-4"
+                            style={({ pressed }) => pressed ? { opacity: 0.7 } : {}}
                         >
                             <View className="flex-row items-center gap-3">
-                                <DollarSign size={20} className="text-foreground dark:text-white" />
-                                <Text className="text-sm font-semibold text-foreground dark:text-white">
+                                <DollarSign size={20} color={colors.foreground} />
+                                <Text
+                                    className="text-sm"
+                                    style={{ fontFamily: "Inter_600SemiBold", color: colors.foreground }}
+                                >
                                     Editar Perfil Financeiro
                                 </Text>
                             </View>
-                            <ChevronRight size={18} className="text-muted-foreground" />
+                            <ChevronRight size={18} color={colors.textMuted} />
                         </Pressable>
 
                         <Divider />
@@ -139,15 +178,19 @@ export default function ProfileScreen() {
                         {/* Settings Button */}
                         <Pressable
                             onPress={() => router.push("/settings")}
-                            className="flex-row items-center justify-between p-4 active:bg-slate-50 dark:active:bg-white/5"
+                            className="flex-row items-center justify-between p-4"
+                            style={({ pressed }) => pressed ? { opacity: 0.7 } : {}}
                         >
                             <View className="flex-row items-center gap-3">
-                                <Settings size={20} className="text-foreground dark:text-white" />
-                                <Text className="text-sm font-semibold text-foreground dark:text-white">
+                                <Settings size={20} color={colors.foreground} />
+                                <Text
+                                    className="text-sm"
+                                    style={{ fontFamily: "Inter_600SemiBold", color: colors.foreground }}
+                                >
                                     Configurações do Aplicativo
                                 </Text>
                             </View>
-                            <ChevronRight size={18} className="text-muted-foreground" />
+                            <ChevronRight size={18} color={colors.textMuted} />
                         </Pressable>
 
                         <Divider />
@@ -155,18 +198,22 @@ export default function ProfileScreen() {
                         {/* Logout Button */}
                         <Pressable
                             onPress={handleLogout}
-                            className="flex-row items-center justify-between p-4 active:bg-slate-50 dark:active:bg-white/5"
+                            className="flex-row items-center justify-between p-4"
+                            style={({ pressed }) => pressed ? { opacity: 0.7 } : {}}
                         >
                             <View className="flex-row items-center gap-3">
-                                <LogOut size={20} className="text-red-500" />
-                                <Text className="text-sm font-semibold text-red-500">
+                                <LogOut size={20} color={colors.danger} />
+                                <Text
+                                    className="text-sm"
+                                    style={{ fontFamily: "Inter_600SemiBold", color: colors.danger }}
+                                >
                                     Sair da Conta
                                 </Text>
                             </View>
-                            <ChevronRight size={18} className="text-muted-foreground" />
+                            <ChevronRight size={18} color={colors.textMuted} />
                         </Pressable>
                     </Card>
-                </MotionFadeUp>
+                </View>
             </View>
         </ScreenContainer>
     );

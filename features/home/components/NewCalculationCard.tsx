@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Plus, TrendingUp } from 'lucide-react-native';
-import { Text, View } from 'react-native';
+import { Text, View, Pressable } from 'react-native';
 
 import { Button } from '@/components/ui';
 import { HOME_COPY } from '@/constants';
@@ -49,17 +49,23 @@ export function NewCalculationCard({ onPress }: NewCalculationCardProps) {
         </View>
 
         {/* Botão branco com texto primary */}
-        <Button
-          variant="secondary"
-          size="lg"
-          className="w-full bg-white/95 border-0 rounded-xl"
-          textStyle={{ color: '#2563eb', fontFamily: 'Inter_700Bold' }}
-          label={HOME_COPY.hero.cta}
-          leftIcon={<Plus color="#2563eb" size={20} strokeWidth={2.5} />}
+        <Pressable
           onPress={onPress}
           accessibilityRole="button"
           accessibilityLabel={HOME_COPY.hero.cta}
-        />
+          className="w-full flex-row items-center justify-center rounded-xl bg-white/95 py-3.5 px-6 min-h-[50px] active:bg-white/80 active:scale-[0.98] transition-all"
+          style={({ pressed }) => ({
+            backgroundColor: pressed ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.95)',
+            transform: [{ scale: pressed ? 0.98 : 1 }]
+          })}
+        >
+          <View className="flex-row items-center justify-center gap-2">
+            <Plus color="#2563eb" size={20} strokeWidth={2.5} />
+            <Text style={{ color: '#2563eb', fontFamily: 'Inter_700Bold', fontSize: 16 }}>
+              {HOME_COPY.hero.cta}
+            </Text>
+          </View>
+        </Pressable>
       </LinearGradient>
     </View>
   );

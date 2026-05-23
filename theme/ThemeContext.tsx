@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { Platform, useColorScheme as useRNColorScheme } from "react-native";
+import { Platform } from "react-native";
 import { useColorScheme as useNWColorScheme } from "nativewind";
 import { useSettingsStore } from "@/store/settings.store";
 import { lightPalette, darkPalette } from "./colors";
@@ -32,38 +32,28 @@ function applyDOMClass(theme: Theme) {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const settingsTheme = useSettingsStore((s) => s.theme);
+  const isHydrated = useSettingsStore((s) => s.isHydrated);
   const setThemeStore = useSettingsStore((s) => s.setTheme);
 
-  // NativeWind setColorScheme — funciona agora que darkMode: 'class' está no tailwind.config.js
+  // NativeWind setColorScheme — aplica dark: classes no React Native nativo
   const { setColorScheme } = useNWColorScheme();
 
   // Estado local do tema ativo
-  const [activeTheme, setActiveTheme] = useState<Theme>(settingsTheme ?? "light");
+  const [activeTheme, setActiveTheme] = useState<Theme>("light");
 
-  // Sincronizar quando o tema da store muda (ex: após hidratação do AsyncStorage)
+  // Sincroniza APÓS a hidratação do AsyncStorage estar completa
+  // Isso garante que o tema salvo seja aplicado corretamente no mobile
   useEffect(() => {
+    if (!isHydrated) return; // Aguarda a store estar hidratada
     const t = settingsTheme ?? "light";
     setActiveTheme(t);
     applyDOMClass(t);
-
-    // Informa o NativeWind — ativa as classes dark: nos componentes RN
     try {
       setColorScheme(t);
     } catch {
       // Ignorar se ainda não inicializado
     }
-  }, [settingsTheme]);
-
-  // Aplicar no primeiro mount
-  useEffect(() => {
-    applyDOMClass(activeTheme);
-    try {
-      setColorScheme(activeTheme);
-    } catch {
-      //
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [settingsTheme, isHydrated]);
 
   const activeColors = activeTheme === "dark" ? darkPalette : lightPalette;
 

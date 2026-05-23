@@ -17,15 +17,16 @@ export { ErrorBoundary } from 'expo-router';
 SplashScreen.preventAutoHideAsync();
 
 function InnerLayout() {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === "dark";
 
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: colors.background },
-        headerTintColor: colors.foreground,
+        headerStyle: { backgroundColor: isDark ? "#0f172a" : "#ffffff" },
+        headerTintColor: isDark ? "#f8fafc" : "#0f172a",
         headerTitleStyle: { fontFamily: 'Inter_600SemiBold', fontWeight: '600' },
-        contentStyle: { backgroundColor: colors.background },
+        contentStyle: { backgroundColor: isDark ? "#04060a" : "#f8fafc" },
         animation: 'slide_from_right',
       }}
     >
