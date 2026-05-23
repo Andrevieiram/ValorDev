@@ -16,7 +16,7 @@ export function AmbientBackground() {
   const blurClass = Platform.OS === 'web' ? 'blur-[90px]' : 'blur-3xl';
 
   return (
-    <View className="absolute inset-0 overflow-hidden pointer-events-none z-[-1]" aria-hidden={true}>
+    <View pointerEvents="none" className="absolute inset-0 overflow-hidden pointer-events-none z-[-1]" aria-hidden={true}>
       <Animated.View 
         entering={FadeIn.duration(2000)}
         className={`absolute -top-40 left-1/4 w-[500px] h-[500px] bg-primary/10 dark:bg-primary/20 rounded-full animate-pulse ${blurClass}`} 

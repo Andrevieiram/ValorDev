@@ -2,8 +2,6 @@ import { Slot, Tabs, usePathname, useRouter } from "expo-router";
 import { Clock, Home, User, PieChart } from "lucide-react-native";
 import { Platform, Pressable, Text, View } from "react-native";
 
-import { TAB_BAR_INNER_HEIGHT } from "@/constants/layout";
-import { useTabBarMetrics } from "@/hooks";
 import { useTheme } from "@/theme";
 
 const WEB_TABS = [
@@ -15,17 +13,64 @@ const WEB_TABS = [
 
 export default function TabLayout() {
     const { colors, theme } = useTheme();
-    const { tabBarStyle } = useTabBarMetrics();
     const pathname = usePathname();
     const router = useRouter();
 
-    // A mesma tab bar nativa (rodapé) será usada em todas as plataformas (incluindo Web responsivo e Monitor)
     const isDark = theme === "dark";
 
     const tabBarBg = isDark ? "#0f172a" : "#ffffff";
     const tabBarBorder = isDark ? "#1e293b" : "#e5e7eb";
     const sceneBg = isDark ? "#04060a" : "#f8fafc";
 
+    // --- WEB: layout próprio com navegação no topo/rodapé customizada ---
+    if (Platform.OS === "web") {
+        return (
+            <View style={{ flex: 1, backgroundColor: sceneBg }}>
+                <Slot />
+                {/* Barra de navegação inferior para a Web */}
+                <View
+                    style={{
+                        height: 70,
+                        backgroundColor: tabBarBg,
+                        borderTopWidth: 1,
+                        borderTopColor: tabBarBorder,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-around",
+                        paddingBottom: 10,
+                        paddingTop: 6,
+                    }}
+                >
+                    {WEB_TABS.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = pathname === item.path || (item.path === "/" && pathname === "");
+                        const color = isActive ? colors.primary : (isDark ? "#64748b" : "#94a3b8");
+
+                        return (
+                            <Pressable
+                                key={item.name}
+                                onPress={() => router.replace(item.href as any)}
+                                style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 2 }}
+                            >
+                                <Icon color={color} size={22} />
+                                <Text
+                                    style={{
+                                        color,
+                                        fontFamily: isActive ? "Inter_600SemiBold" : "Inter_500Medium",
+                                        fontSize: 11,
+                                    }}
+                                >
+                                    {item.title}
+                                </Text>
+                            </Pressable>
+                        );
+                    })}
+                </View>
+            </View>
+        );
+    }
+
+    // --- MOBILE: Tab bar nativa 100% padrão, sem override de tamanho ---
     return (
         <Tabs
             screenOptions={{
@@ -38,38 +83,20 @@ export default function TabLayout() {
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: isDark ? "#64748b" : "#94a3b8",
 
-                tabBarLabelPosition: 'below-icon', // Força o texto embaixo do ícone mesmo em telas grandes na web
-
                 tabBarStyle: {
-                    ...tabBarStyle,
-
                     backgroundColor: tabBarBg,
-
                     borderTopWidth: 1,
                     borderTopColor: tabBarBorder,
-
                     elevation: 8,
-
                     shadowColor: "#000",
                     shadowOpacity: isDark ? 0.3 : 0.04,
                     shadowRadius: 8,
-                    shadowOffset: {
-                        width: 0,
-                        height: -2,
-                    },
-                    ...(Platform.OS === 'web' && {
-                        height: 70, // O container principal com altura generosa
-                        paddingBottom: 10,
-                        paddingTop: 6,
-                    })
+                    shadowOffset: { width: 0, height: -2 },
                 },
 
                 tabBarLabelStyle: {
                     fontFamily: "Inter_500Medium",
                     fontSize: 12,
-                    ...(Platform.OS === 'web' && {
-                        marginTop: 2,
-                    })
                 },
             }}
         >
