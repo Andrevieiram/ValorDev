@@ -1,11 +1,12 @@
 import { create } from 'zustand';
+import { nanoid } from 'nanoid';
 
-import { STORAGE_KEYS } from '@/constants';
+import { STORAGE_KEYS, STORAGE_VERSION } from '@/constants';
 import type { HistoryItem } from '@/types';
 import { loadJson, persistJson } from './persistence';
 
-/** Dados mock — substituir por fetch da API em features/history */
-const MOCK_HISTORY: HistoryItem[] = [
+/** Dados mock — apenas carregados em __DEV__ ou quando storage está vazio */
+const MOCK_HISTORY: HistoryItem[] = __DEV__ ? [
   {
     id: '1',
     name: 'E-commerce App',
@@ -60,9 +61,7 @@ const MOCK_HISTORY: HistoryItem[] = [
     createdAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
     probability: 'fechada',
   },
-];
-
-const LOCAL_HISTORY_KEY = 'valordev_history_v2';
+] : [];
 
 interface HistoryState {
   items: HistoryItem[];
@@ -84,14 +83,29 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
   isHydrated: false,
 
   hydrate: async () => {
-    const stored = await loadJson<HistoryItem[]>(LOCAL_HISTORY_KEY);
-    if (stored && stored.length > 0) {
-      set({ items: stored, isHydrated: true });
+    const stored = await loadJson<HistoryItem[] | HistoryPayload>(STORAGE_KEYS.history);
+
+    // Suportar ambos formatos: array antigo e novo com versionamento
+    let items: HistoryItem[] = [];
+    if (stored) {
+      if (Array.isArray(stored)) {
+        items = stored;
+      } else if ('items' in stored && Array.isArray(stored.items)) {
+        items = stored.items;
+      }
+    }
+
+    if (items.length > 0) {
+      set({ items, isHydrated: true });
       return;
     }
-    // Pre-populate with mock data if storage is empty
-    await persistHistory(MOCK_HISTORY);
-    set({ items: MOCK_HISTORY, isHydrated: true });
+    // Pre-populate with mock data only if in development and storage is empty
+    if (MOCK_HISTORY.length > 0) {
+      await persistHistory(MOCK_HISTORY);
+      set({ items: MOCK_HISTORY, isHydrated: true });
+    } else {
+      set({ items: [], isHydrated: true });
+    }
   },
 
   setItems: (items) => set({ items }),
@@ -99,7 +113,7 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
   addItem: async (item) => {
     const newItem: HistoryItem = {
       ...item,
-      id: Math.random().toString(36).substring(2, 9),
+      id: nanoid(9),
       createdAt: new Date().toISOString(),
       probability: item.probability || 'media',
     };
@@ -125,15 +139,34 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
   fetchHistory: async () => {
     set({ isLoading: true });
     try {
-      const stored = await loadJson<HistoryItem[]>(LOCAL_HISTORY_KEY);
-      set({ items: stored ?? MOCK_HISTORY });
+      const stored = await loadJson<HistoryItem[] | HistoryPayload>(STORAGE_KEYS.history);
+
+      let items: HistoryItem[] = [];
+      if (stored) {
+        if (Array.isArray(stored)) {
+          items = stored;
+        } else if ('items' in stored && Array.isArray(stored.items)) {
+          items = stored.items;
+        }
+      }
+
+      set({ items });
     } finally {
       set({ isLoading: false });
     }
   },
 }));
 
-/** Persiste histórico localmente após mutações futuras */
+interface HistoryPayload {
+  version: number;
+  items: HistoryItem[];
+}
+
+/** Persiste histórico localmente com versionamento */
 export async function persistHistory(items: HistoryItem[]) {
-  await persistJson(LOCAL_HISTORY_KEY, items);
+  const payload: HistoryPayload = {
+    version: STORAGE_VERSION,
+    items,
+  };
+  await persistJson(STORAGE_KEYS.history, payload);
 }

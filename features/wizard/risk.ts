@@ -1,4 +1,4 @@
-import type { AdjustmentsData, ClientData, ProfileData, ProjectData, RiskReport } from "@/types";
+import type { AdjustmentsData, ClientData, ProjectData, RiskReport } from "@/types";
 
 const clamp = (value: number) => Math.min(100, Math.max(0, value));
 
@@ -8,134 +8,101 @@ const parseDeadlineWeeks = (deadline: string) => {
     return Number(match[1]);
 };
 
-export function calculateWizardRisk(
-    profile: ProfileData,
+export function calculateRisk(
     project: ProjectData,
     client: ClientData,
     adjustments: AdjustmentsData,
 ): RiskReport {
     let score = 50;
-    const riskFactors: string[] = [];
-    const positiveFactors: string[] = [];
+    const factors: Array<{ name: string; score: number }> = [];
 
     // 1. Complexidade do Projeto
+    let complexityScore = 0;
     if (project.complexity === "high") {
-        score += 15;
-        riskFactors.push("Alta complexidade técnica");
+        complexityScore = 15;
     } else if (project.complexity === "medium") {
-        score += 5;
-        riskFactors.push("Complexidade média");
-    } else {
-        positiveFactors.push("Baixa complexidade do projeto");
+        complexityScore = 5;
     }
+    score += complexityScore;
+    factors.push({ name: "Complexidade do Projeto", score: complexityScore });
 
     // 2. Escopo
-    if (!project.scopeDocumented) {
-        score += 20;
-        riskFactors.push("Escopo do projeto não documentado");
-    } else {
-        positiveFactors.push("Escopo formalmente documentado");
-    }
+    const scopeScore = !project.scopeDocumented ? 20 : 0;
+    score += scopeScore;
+    factors.push({ name: "Escopo Documentado", score: scopeScore });
 
     // 3. Prazo (Urgência)
+    let deadlineScore = 0;
     const weeks = parseDeadlineWeeks(project.deadline || "");
     if (weeks !== null) {
         if (weeks < 2) {
-            score += 25;
-            riskFactors.push("Prazo extremamente crítico (menos de 2 semanas)");
+            deadlineScore = 25;
         } else if (weeks <= 4) {
-            score += 10;
-            riskFactors.push("Prazo curto (até 4 semanas)");
-        } else {
-            positiveFactors.push("Prazo confortável para entrega");
+            deadlineScore = 10;
         }
     } else {
-        // Fallback para prazos genéricos curtos
         const lowerDeadline = (project.deadline || "").toLowerCase();
         if (lowerDeadline.includes("urgente") || lowerDeadline.includes("correndo")) {
-            score += 20;
-            riskFactors.push("Caráter de urgência relatado");
-        } else {
-            positiveFactors.push("Cronograma padrão informado");
+            deadlineScore = 20;
         }
     }
+    score += deadlineScore;
+    factors.push({ name: "Prazo/Urgência", score: deadlineScore });
 
     // 4. Reuniões
+    let meetingsScore = 0;
     if (project.meetingsFrequency === "diaria") {
-        score += 8;
-        riskFactors.push("Reuniões diárias (alto overhead de comunicação)");
-    } else if (project.meetingsFrequency === "semanal" || project.meetingsFrequency === "quinzenal") {
-        positiveFactors.push("Frequência de reuniões ideal para alinhamento");
+        meetingsScore = 8;
     } else if (project.meetingsFrequency === "mensal") {
-        score += 10;
-        riskFactors.push("Pouca frequência de reuniões (risco de desvios)");
+        meetingsScore = 10;
     }
+    score += meetingsScore;
+    factors.push({ name: "Frequência de Reuniões", score: meetingsScore });
 
     // 5. Dependências Externas
-    if (project.externalDependencies && project.externalDependencies.trim().length > 0) {
-        score += 15;
-        riskFactors.push(`Dependências de terceiros: ${project.externalDependencies}`);
-    } else {
-        positiveFactors.push("Livre de dependências de terceiros");
-    }
+    const depsScore = project.externalDependencies && project.externalDependencies.trim().length > 0 ? 15 : 0;
+    score += depsScore;
+    factors.push({ name: "Dependências Externas", score: depsScore });
 
     // 6. Reaproveitamento de componentes
-    if (project.reuseComponents) {
-        score -= 5;
-        positiveFactors.push("Reaproveitamento de componentes (reduz prazo/risco)");
-    }
+    const reuseScore = project.reuseComponents ? -5 : 0;
+    score += reuseScore;
+    factors.push({ name: "Reuso de Componentes", score: reuseScore });
 
-    // 7. Perfil Profissional
-    if (profile.experienceLevel === "junior") {
-        score += 15;
-        riskFactors.push("Profissional nível júnior no comando");
-    } else if (profile.experienceLevel === "senior") {
-        score -= 10;
-        positiveFactors.push("Profissional sênior de alta bagagem");
-    }
-
-    // 8. Maturidade Digital do Cliente
+    // 7. Maturidade Digital do Cliente
+    let clientExpScore = 0;
     if (client.digitalExperience === "none") {
-        score += 20;
-        riskFactors.push("Cliente leigo / sem maturidade digital");
+        clientExpScore = 20;
     } else if (client.digitalExperience === "advanced") {
-        score -= 5;
-        positiveFactors.push("Cliente altamente maduro digitalmente");
+        clientExpScore = -5;
     }
+    score += clientExpScore;
+    factors.push({ name: "Maturidade Digital do Cliente", score: clientExpScore });
 
-    // 9. Cliente Recorrente
+    // 8. Cliente Recorrente
+    let recurringScore = 0;
     if (client.recurringClient === "yes") {
-        score -= 10;
-        positiveFactors.push("Cliente parceiro e recorrente");
+        recurringScore = -10;
     } else {
-        score += 5;
-        riskFactors.push("Cliente novo (sem histórico de parceria)");
+        recurringScore = 5;
     }
+    score += recurringScore;
+    factors.push({ name: "Cliente Recorrente", score: recurringScore });
 
-    // 10. Contrato Formal e Financeiro
-    if (adjustments.formalContract === "no") {
-        score += 25;
-        riskFactors.push("Sem contrato formal firmado");
-    } else {
-        positiveFactors.push("Contrato de prestação de serviço assegurado");
-    }
+    // 9. Contrato Formal
+    const contractScore = adjustments.formalContract === "no" ? 25 : 0;
+    score += contractScore;
+    factors.push({ name: "Contrato Formal", score: contractScore });
 
-    if (adjustments.downPayment === "none") {
-        score += 15;
-        riskFactors.push("Ausência de pagamento de sinal / entrada");
-    } else {
-        positiveFactors.push("Garantia de sinal / entrada na assinatura");
-    }
-
-    if (adjustments.paymentMethod === "international") {
-        score += 8;
-        riskFactors.push("Recebimento internacional (risco cambial/taxas)");
-    }
+    // 10. Pagamento de Sinal
+    const downPaymentScore = adjustments.downPayment === "none" ? 15 : 0;
+    score += downPaymentScore;
+    factors.push({ name: "Pagamento de Sinal", score: downPaymentScore });
 
     const finalScore = clamp(score);
     const level = finalScore >= 70 ? "high" : finalScore >= 40 ? "medium" : "low";
 
-    const summary =
+    const recommendation =
         level === "high"
             ? "Alto risco estrutural. É fortemente recomendado exigir contrato e cobrar sinal."
             : level === "medium"
@@ -145,8 +112,7 @@ export function calculateWizardRisk(
     return {
         score: finalScore,
         level,
-        summary,
-        riskFactors,
-        positiveFactors,
+        factors,
+        recommendation,
     };
 }

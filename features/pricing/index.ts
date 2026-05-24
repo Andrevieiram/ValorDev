@@ -8,25 +8,17 @@ import type {
     ProjectData,
     RiskReport,
 } from "@/types";
-
-const clamp = (value: number) => Math.min(100, Math.max(0, value));
-
-const parseNumber = (value: string | number) => {
-    if (typeof value === "number") return value;
-    const normalized = value
-        .trim()
-        .replace(/[R$\s]/g, "")
-        .replace(/\./g, "")
-        .replace(/,/g, ".");
-    const parsed = Number(normalized);
-    return Number.isFinite(parsed) ? parsed : 0;
-};
-
-const parseDeadlineWeeks = (deadline: string) => {
-    const match = deadline.match(/(\d+)\s*(semana|semanas|week|weeks)/i);
-    if (!match) return null;
-    return Number(match[1]);
-};
+import {
+    HOURLY_RATE_CONFIG,
+    STACK_MULTIPLIERS,
+    WORKLOAD_MULTIPLIERS,
+    PROJECT_MULTIPLIERS,
+    CLIENT_MULTIPLIERS,
+    FINANCIAL_MULTIPLIERS,
+    PRICE_RANGE,
+    CONFIDENCE_CONFIG,
+} from "@/constants/pricing";
+import { clamp, parseNumber, parseDeadlineWeeks } from "./utils";
 
 export function calculatePricingResult(
     profile: ProfileData,
@@ -35,91 +27,101 @@ export function calculatePricingResult(
     adjustments: AdjustmentsData,
     risk: RiskReport,
 ): PricingResult {
-    // 1. Calcular Valor-Hora Base (RF-002)
+    // 1. Calcular Valor-Hora Base (RF-006)
+    // Valor/Hora = (Rendimento + Despesas de Trabalho + Gastos Pessoais) / Horas Produtivas Mensais
     const desiredIncome = parseNumber(profile.desiredIncome);
+    const monthlyCosts = parseNumber(profile.monthlyCosts) || 0;
+    const financialReserve = parseNumber(profile.financialReserve) || 0;
     const hoursPerWeek = parseNumber(profile.hoursPerWeek) || 40;
-    const rawHourlyRate = desiredIncome / (hoursPerWeek * 4.33);
+    const monthlyHours = hoursPerWeek * HOURLY_RATE_CONFIG.WEEKS_PER_MONTH;
 
-    // Ajuste Tributário
-    let taxAdjustment = 0;
-    if (profile.taxRegime === "mei") taxAdjustment = 0.02;
-    else if (profile.taxRegime === "simples") taxAdjustment = 0.05;
-    else if (profile.taxRegime === "lucroPresumido") taxAdjustment = 0.08;
-    else if (profile.taxRegime === "lucroReal") taxAdjustment = 0.13;
+    const totalMonthlyNeeds = desiredIncome + monthlyCosts + financialReserve;
+    const baseHourlyRate = totalMonthlyNeeds / monthlyHours;
 
     // Ajuste Especialidade/Stack
-    let stackAdjustment = 0;
-    if (profile.mainStack === "frontend") stackAdjustment = 0.20;
-    else if (profile.mainStack === "mobile") stackAdjustment = 0.25;
-    else if (profile.mainStack === "fullstack") stackAdjustment = 0.30;
-    else if (profile.mainStack === "devops") stackAdjustment = 0.40;
+    const stackAdjustment =
+      (STACK_MULTIPLIERS[profile.mainStack as keyof typeof STACK_MULTIPLIERS] ??
+       STACK_MULTIPLIERS.default);
 
     // Ajuste de Carga de Trabalho
-    let workloadAdjustment = 0;
-    if (profile.workload === "high") workloadAdjustment = 0.15;
-    else if (profile.workload === "overloaded") workloadAdjustment = 0.30;
+    const workloadAdjustment =
+      (WORKLOAD_MULTIPLIERS[profile.workload as keyof typeof WORKLOAD_MULTIPLIERS] ??
+       WORKLOAD_MULTIPLIERS.normal);
 
-    // Valor-hora final
-    const finalHourlyRate = rawHourlyRate * (1 + taxAdjustment + stackAdjustment + workloadAdjustment);
+    // Valor-hora com ajustes de especialidade e carga
+    const adjustedHourlyRate = baseHourlyRate * stackAdjustment * workloadAdjustment;
 
     // 2. Preço de Base do Projeto (RF-003)
     const estimatedHours = parseNumber(project.estimatedHours) || 80;
-    const projectBasePrice = Math.max(3000, Math.round(finalHourlyRate * estimatedHours));
+    const projectBasePrice = Math.max(
+      HOURLY_RATE_CONFIG.MIN_PROJECT_PRICE,
+      Math.round(adjustedHourlyRate * estimatedHours),
+    );
 
     // 3. Multiplicadores de Projeto (RF-003)
     let projectMult = 0;
     const weeks = parseDeadlineWeeks(project.deadline || "");
     if (weeks !== null && weeks < 2) {
-        projectMult += 0.30; // Urgência
+        projectMult += PROJECT_MULTIPLIERS.urgency;
     }
     if (!project.scopeDocumented) {
-        projectMult += 0.25; // Escopo não documentado
+        projectMult += PROJECT_MULTIPLIERS.undocumentedScope;
     }
     if (project.meetingsFrequency === "diaria") {
-        projectMult += 0.20; // Reuniões frequentes
+        projectMult += PROJECT_MULTIPLIERS.dailyMeetings;
     }
     if (project.maintenance) {
-        projectMult += 0.10; // Manutenção pós-projeto
+        projectMult += PROJECT_MULTIPLIERS.maintenance;
     }
     if (project.reuseComponents) {
-        projectMult -= 0.15; // Reaproveitamento
+        projectMult += PROJECT_MULTIPLIERS.componentReuse;
     }
 
     // 4. Multiplicadores do Cliente (RF-004)
     let clientMult = 0;
     if (client.digitalExperience === "none") {
-        clientMult += 0.20; // Cliente leigo
+        clientMult += CLIENT_MULTIPLIERS.noDigitalExperience;
     }
     if (client.recurringClient === "yes") {
-        clientMult -= 0.10; // Desconto de recorrência
+        clientMult += CLIENT_MULTIPLIERS.recurringClientDiscount;
     }
     if (client.businessImpact === "high" || client.businessImpact === "strategic") {
-        clientMult += 0.25; // Alto impacto financeiro
+        clientMult += CLIENT_MULTIPLIERS.highBusinessImpact;
     }
 
     // 5. Ajustes Financeiros (RF-006)
     let financialMult = 0;
     if (adjustments.paymentMethod === "creditCard") {
-        financialMult -= 0.04; // Taxa do cartão de crédito
+        financialMult += FINANCIAL_MULTIPLIERS.creditCardFee;
     } else if (adjustments.paymentMethod === "international") {
-        financialMult -= 0.10; // Taxa de remessa internacional
+        financialMult += FINANCIAL_MULTIPLIERS.internationalFee;
     }
 
     if (adjustments.paymentTerm === "fortyFiveDays" || adjustments.paymentTerm === "sixtyDays") {
-        financialMult += 0.05; // Prazo longo (30-60 dias)
+        financialMult += FINANCIAL_MULTIPLIERS.longPaymentTerm;
     }
 
     // Soma final de ajustes
     const totalAdjustment = projectMult + clientMult + financialMult;
-    
+
     // Valor Recomendado, Mínimo e Premium
     const recommended = Math.round(projectBasePrice * (1 + totalAdjustment));
-    const minimum = Math.round(recommended * 0.88);
-    const premium = Math.round(recommended * 1.15);
+    const minimum = Math.round(recommended * PRICE_RANGE.minimum);
+    const premium = Math.round(recommended * PRICE_RANGE.premium);
 
     // Confiança (RF-007)
+    const confidenceBonus =
+      adjustments.formalContract === "yes"
+        ? CONFIDENCE_CONFIG.formalContractBonus
+        : CONFIDENCE_CONFIG.noContractPenalty;
     const confidence = clamp(
-        Math.round(75 + (100 - risk.score) * 0.2 + (adjustments.formalContract === "yes" ? 5 : -10))
+      Math.round(
+        CONFIDENCE_CONFIG.baseScore +
+          (100 - risk.score) * CONFIDENCE_CONFIG.riskFactor +
+          confidenceBonus,
+      ),
+      CONFIDENCE_CONFIG.min,
+      CONFIDENCE_CONFIG.max,
     );
 
     // Breakdown Items
@@ -127,7 +129,7 @@ export function calculatePricingResult(
         {
             label: "Valor Base Técnico",
             value: projectBasePrice,
-            description: `Baseado em ${estimatedHours}h estimadas no valor-hora de R$ ${Math.round(finalHourlyRate)}/h (incluso stack, impostos e carga).`,
+            description: `Baseado em ${estimatedHours}h estimadas no valor-hora de R$ ${Math.round(adjustedHourlyRate)}/h (incluso stack, impostos e carga).`,
         },
         {
             label: "Ajustes do Escopo & Cronograma",

@@ -2,10 +2,11 @@
  * Abstração de persistência para facilitar migração futura
  * (AsyncStorage, MMKV, backend sync, etc.)
  *
- * No web, usa localStorage. No mobile, usa AsyncStorage.
+ * No web, usa localStorage. No mobile, usa SecureStore para dados sensíveis (auth) e AsyncStorage para outros.
  */
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 
 export interface PersistenceAdapter {
     getItem(key: string): Promise<string | null>;
@@ -37,6 +38,35 @@ const webPersistence: PersistenceAdapter = {
         }
     },
 };
+
+// ---------- Mobile: SecureStore (para dados sensíveis) ----------
+
+let secureStoreAdapter: PersistenceAdapter | null = null;
+
+async function getSecureStoreAdapter(): Promise<PersistenceAdapter> {
+    if (secureStoreAdapter) return secureStoreAdapter;
+
+    try {
+        secureStoreAdapter = {
+            async getItem(key) {
+                return SecureStore.getItemAsync(key);
+            },
+
+            async setItem(key, value) {
+                await SecureStore.setItemAsync(key, value);
+            },
+
+            async removeItem(key) {
+                await SecureStore.deleteItemAsync(key);
+            },
+        };
+    } catch (error) {
+        console.warn("[persistence] SecureStore initialization failed:", error);
+        secureStoreAdapter = inMemoryPersistence;
+    }
+
+    return secureStoreAdapter;
+}
 
 // ---------- Mobile: AsyncStorage ----------
 
@@ -126,6 +156,47 @@ export async function loadJson<T>(key: string): Promise<T | null> {
 export async function removePersisted(key: string): Promise<void> {
     const adapter = await resolveAdapter();
     await adapter.removeItem(key);
+}
+
+// ---------- Operações sensíveis (autenticação, etc.) ----------
+
+export async function persistSensitiveJson<T>(key: string, value: T): Promise<void> {
+    if (Platform.OS === "web") {
+        // Web: usa localStorage (menos seguro, mas sem opção melhor)
+        await persistJson(key, value);
+    } else {
+        // Mobile: usa SecureStore
+        const adapter = await getSecureStoreAdapter();
+        await adapter.setItem(key, JSON.stringify(value));
+    }
+}
+
+export async function loadSensitiveJson<T>(key: string): Promise<T | null> {
+    if (Platform.OS === "web") {
+        // Web: usa localStorage
+        return loadJson<T>(key);
+    } else {
+        // Mobile: usa SecureStore
+        const adapter = await getSecureStoreAdapter();
+        const raw = await adapter.getItem(key);
+        if (!raw) return null;
+        try {
+            return JSON.parse(raw) as T;
+        } catch {
+            return null;
+        }
+    }
+}
+
+export async function removeSensitivePersisted(key: string): Promise<void> {
+    if (Platform.OS === "web") {
+        // Web: usa localStorage
+        await removePersisted(key);
+    } else {
+        // Mobile: usa SecureStore
+        const adapter = await getSecureStoreAdapter();
+        await adapter.removeItem(key);
+    }
 }
 
 export { inMemoryPersistence };

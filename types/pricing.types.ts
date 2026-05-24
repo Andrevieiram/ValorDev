@@ -71,9 +71,8 @@ export interface AdjustmentsData {
 export interface RiskReport {
     score: number;
     level: RiskLevel;
-    summary: string;
-    riskFactors: string[];
-    positiveFactors: string[];
+    factors: Array<{ name: string; score: number }>;
+    recommendation: string;
 }
 
 export interface WizardFormData {
@@ -105,13 +104,14 @@ export interface PricingAlert {
 }
 
 export type Probability = 'alta' | 'media' | 'baixa' | 'fechada' | 'perdida';
+export type HistoryStatus = "draft" | "sent" | "won" | "lost";
 
 export interface HistoryItem {
     id: string;
     name: string;
     value: number;
     date: string;
-    status: "draft" | "sent";
+    status: HistoryStatus;
     createdAt: string;
     probability?: Probability;
 }

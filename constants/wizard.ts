@@ -13,4 +13,11 @@ export const STORAGE_KEYS = {
     wizardDraft: "@pricing-pro/wizard-draft",
     history: "@pricing-pro/history",
     settings: "@pricing-pro/settings",
+    authSession: "@pricing-pro/auth-session",
+    wizardProfile: "@pricing-pro/wizard-profile",
+    wizardProject: "@pricing-pro/wizard-project",
+    wizardClient: "@pricing-pro/wizard-client",
+    wizardAdjustments: "@pricing-pro/wizard-adjustments",
 } as const;
+
+export const STORAGE_VERSION = 1;

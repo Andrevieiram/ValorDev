@@ -164,6 +164,8 @@ export default function ProfileScreen() {
                             onPress={() => router.push("/setup-profile")}
                             className="flex-row items-center justify-between p-4"
                             style={({ pressed }) => pressed ? { opacity: 0.7 } : {}}
+                            accessibilityRole="menuitem"
+                            accessibilityLabel="Editar Perfil Financeiro"
                         >
                             <View className="flex-row items-center gap-3">
                                 <DollarSign size={20} color={colors.foreground} />
@@ -184,6 +186,8 @@ export default function ProfileScreen() {
                             onPress={() => router.push("/settings")}
                             className="flex-row items-center justify-between p-4"
                             style={({ pressed }) => pressed ? { opacity: 0.7 } : {}}
+                            accessibilityRole="menuitem"
+                            accessibilityLabel="Configurações do Aplicativo"
                         >
                             <View className="flex-row items-center gap-3">
                                 <Settings size={20} color={colors.foreground} />
@@ -204,6 +208,8 @@ export default function ProfileScreen() {
                             onPress={handleLogout}
                             className="flex-row items-center justify-between p-4"
                             style={({ pressed }) => pressed ? { opacity: 0.7 } : {}}
+                            accessibilityRole="menuitem"
+                            accessibilityLabel="Sair da Conta"
                         >
                             <View className="flex-row items-center gap-3">
                                 <LogOut size={20} color={colors.danger} />

@@ -215,7 +215,12 @@ export default function HistoryScreen() {
                                             style={{ outlineStyle: 'none' } as any}
                                         />
                                         {search.length > 0 && (
-                                            <Pressable onPress={() => setSearch("")} hitSlop={8}>
+                                            <Pressable
+                                                onPress={() => setSearch("")}
+                                                hitSlop={8}
+                                                accessibilityRole="button"
+                                                accessibilityLabel="Limpar busca"
+                                            >
                                                 <Text className="text-xs text-primary font-medium">Limpar</Text>
                                             </Pressable>
                                         )}
@@ -223,10 +228,6 @@ export default function HistoryScreen() {
                                 </View>
                             </View>
                         }
-                        data={filteredAndSortedItems}
-                        keyExtractor={(item) => item.id}
-                        showsVerticalScrollIndicator={false}
-
                         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
                         renderItem={({ item, index }) => {
                             const prob = item.probability || 'media';
@@ -251,6 +252,8 @@ export default function HistoryScreen() {
                                                 onPress={() => handleDelete(item.id, item.name)}
                                                 className="p-2 rounded-full active:scale-95 bg-red-50 dark:bg-red-900/20"
                                                 hitSlop={8}
+                                                accessibilityRole="button"
+                                                accessibilityLabel={`Deletar ${item.name}`}
                                             >
                                                 <Trash2 size={16} color="#ef4444" />
                                             </Pressable>
