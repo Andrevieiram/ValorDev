@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { Card, MotionFadeUp, SegmentedControl, Modal, Button } from "@/components/ui";
+import { SkeletonCard } from "@/components/ui/SkeletonLoader";
 import { useHistoryStore } from "@/store";
 import { formatCurrency } from "@/utils";
 import { Probability } from "@/types";
@@ -27,7 +28,7 @@ const PROBABILITY_WEIGHTS: Record<Probability, number> = {
 
 export default function HistoryScreen() {
     const router = useRouter();
-    const { items, removeItem, updateItemProbability } = useHistoryStore();
+    const { items, isLoading, removeItem, updateItemProbability } = useHistoryStore();
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState<"date" | "probability">("date");
     
@@ -88,7 +89,13 @@ export default function HistoryScreen() {
     return (
         <ScreenContainer maxWidth="container" scrollable={false}>
             <View className="flex-1 pb-24">
-                {filteredAndSortedItems.length === 0 ? (
+                {isLoading ? (
+                    <View className="gap-4 pt-4">
+                        <SkeletonCard count={3} />
+                        <SkeletonCard count={2} />
+                        <SkeletonCard count={4} />
+                    </View>
+                ) : filteredAndSortedItems.length === 0 ? (
                     <View className="flex-1">
                         <View className="gap-6 mb-6">
                             {/* Header */}
