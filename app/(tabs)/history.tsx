@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { FlatList, Text, View, Pressable, TextInput, Alert } from "react-native";
-import { Trash2, Search, Calendar, Sliders, ChevronDown } from "lucide-react-native";
+import { Trash2, Search, Calendar, Sliders, ChevronDown, Zap } from "lucide-react-native";
+import { useRouter } from "expo-router";
 
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { Card, MotionFadeUp, SegmentedControl, Modal, Button } from "@/components/ui";
@@ -25,6 +26,7 @@ const PROBABILITY_WEIGHTS: Record<Probability, number> = {
 };
 
 export default function HistoryScreen() {
+    const router = useRouter();
     const { items, removeItem, updateItemProbability } = useHistoryStore();
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState<"date" | "probability">("date");
@@ -148,12 +150,43 @@ export default function HistoryScreen() {
                                 </View>
                             </View>
                         </View>
-                        
-                        <MotionFadeUp delay={300} className="py-12 items-center justify-center gap-3">
-                            <Sliders size={32} color="#94a3b8" />
-                            <Text className="text-base text-muted-foreground text-center font-medium">
-                                {search.length > 0 ? "Nenhum cálculo corresponde à busca." : "Nenhum cálculo salvo ainda."}
-                            </Text>
+
+                        <MotionFadeUp delay={300} className="flex-1 items-center justify-center gap-6 px-6">
+                            {search.length > 0 ? (
+                                <>
+                                    <Sliders size={48} color="#94a3b8" />
+                                    <View className="items-center gap-2">
+                                        <Text className="text-lg font-semibold text-foreground">
+                                            Nenhum resultado encontrado
+                                        </Text>
+                                        <Text className="text-sm text-muted-foreground text-center">
+                                            Tente ajustar sua busca ou navegue por ordem alfabética.
+                                        </Text>
+                                    </View>
+                                </>
+                            ) : (
+                                <>
+                                    <View className="items-center gap-2">
+                                        <Zap size={56} color="#6366f1" strokeWidth={1.5} />
+                                    </View>
+                                    <View className="items-center gap-3">
+                                        <View>
+                                            <Text className="text-xl font-bold text-foreground text-center">
+                                                Comece seu primeiro cálculo
+                                            </Text>
+                                            <Text className="text-sm text-muted-foreground text-center mt-2 leading-5">
+                                                Use o wizard de precificação para gerar estimativas precisas e gerenciar suas propostas.
+                                            </Text>
+                                        </View>
+                                        <Button
+                                            size="md"
+                                            label="Ir ao Wizard"
+                                            onPress={() => router.push("/(tabs)/wizard")}
+                                            className="mt-2 min-w-[200px]"
+                                        />
+                                    </View>
+                                </>
+                            )}
                         </MotionFadeUp>
                     </View>
                 ) : (
