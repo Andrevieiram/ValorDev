@@ -1,0 +1,3 @@
+com\valordev\api\common\config\SecurityConfig.class
+com\valordev\api\common\exception\GlobalExceptionHandler.class
+com\valordev\api\ValorDevApplication.class
