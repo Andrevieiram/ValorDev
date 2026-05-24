@@ -2,6 +2,7 @@ import React from "react";
 import { Text, View, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { WizardProgress } from "@/components/wizard/WizardProgress";
 import { Badge, Button, Card } from "@/components/ui";
 import { useWizardNavigation } from "@/hooks";
 import { useWizardStore } from "@/store";
@@ -108,13 +109,13 @@ export default function WizardReviewScreen() {
     const summaryRisk = riskReport ?? {
         score: 0,
         level: "medium" as const,
-        summary: "O risco ainda será preparado no passo anterior.",
-        riskFactors: [],
-        positiveFactors: [],
+        factors: [],
+        recommendation: "O risco ainda será preparado no passo anterior.",
     };
 
     return (
         <ScreenContainer maxWidth="wizard">
+            <WizardProgress current={5} />
             <KeyboardAvoidingView
                 behavior={Platform.select({ ios: "padding", android: "height" })}
                 className="flex-1"
@@ -318,19 +319,19 @@ export default function WizardReviewScreen() {
                             </View>
 
                             <Text className="text-sm font-semibold text-foreground dark:text-slate-100 leading-6">
-                                {summaryRisk.summary}
+                                {summaryRisk.recommendation}
                             </Text>
 
                             <View className="gap-2">
-                                {summaryRisk.riskFactors.slice(0, 3).map((factor) => (
-                                    <Text key={factor} className="text-sm text-destructive font-medium">
-                                        • {factor}
-                                    </Text>
-                                ))}
-                                {summaryRisk.positiveFactors.slice(0, 3).map((factor) => (
-                                    <Text key={factor} className="text-sm text-foreground dark:text-slate-200">
-                                        • {factor}
-                                    </Text>
+                                {summaryRisk.factors.slice(0, 3).map((factor) => (
+                                    <View key={factor.name} className="flex-row justify-between">
+                                        <Text className="text-sm text-foreground flex-1">
+                                            {factor.name}
+                                        </Text>
+                                        <Text className={`text-sm font-medium ${factor.score > 0 ? 'text-destructive' : factor.score < 0 ? 'text-emerald-500' : 'text-muted-foreground'}`}>
+                                            {factor.score > 0 ? '+' : ''}{factor.score}
+                                        </Text>
+                                    </View>
                                 ))}
                             </View>
                         </Card>

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
 import { Card, Button } from "@/components/ui";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { WizardProgress } from "@/components/wizard/WizardProgress";
 import { useWizardNavigation } from "@/hooks";
 import { useWizardStore } from "@/store";
 import { calculateRisk } from "../risk";
@@ -34,6 +35,7 @@ export function WizardRiskScreen() {
 
     return (
         <ScreenContainer maxWidth="wizard">
+            <WizardProgress current={4} />
             <KeyboardAvoidingView
                 behavior={Platform.select({ ios: "padding", android: "height" })}
                 className="flex-1"

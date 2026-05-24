@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button, Select } from "@/components/ui";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { WizardProgress } from "@/components/wizard/WizardProgress";
 import { useWizardNavigation } from "@/hooks";
 import { useWizardStore } from "@/store";
 import {
@@ -47,6 +48,7 @@ export function WizardClientScreen() {
 
     return (
         <ScreenContainer maxWidth="wizard">
+            <WizardProgress current={2} />
             <KeyboardAvoidingView
                 behavior={Platform.select({ ios: "padding", android: "height" })}
                 className="flex-1"

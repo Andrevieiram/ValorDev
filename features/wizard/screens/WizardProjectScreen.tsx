@@ -6,6 +6,7 @@ import { Calendar, Clock3, Link, Wrench } from "lucide-react-native";
 
 import { Button, Input, Select, Switch } from "@/components/ui";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { WizardProgress } from "@/components/wizard/WizardProgress";
 import { useWizardNavigation } from "@/hooks";
 import { useWizardStore } from "@/store";
 import {
@@ -57,6 +58,7 @@ export function WizardProjectScreen() {
 
     return (
         <ScreenContainer maxWidth="wizard">
+            <WizardProgress current={1} />
             <KeyboardAvoidingView
                 behavior={Platform.select({ ios: "padding", android: "height" })}
                 className="flex-1"
