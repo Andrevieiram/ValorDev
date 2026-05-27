@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Platform } from "react-native";
-import { useTheme } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
 
 export interface SegmentedControlOption {
   value: string;
@@ -20,7 +20,8 @@ export function SegmentedControl({
   onChange,
   className = "",
 }: SegmentedControlProps) {
-  const { theme } = useTheme();
+  const themeContext = useTheme();
+  const theme = themeContext?.theme || "light";
   const isDark = theme === "dark";
   const isWeb = Platform.OS === "web";
 

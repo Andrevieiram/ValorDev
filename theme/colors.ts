@@ -1,4 +1,4 @@
-export const colors = {
+export const lightPalette = {
   background: '#ffffff',
   foreground: '#18181b',
   card: '#ffffff',
@@ -8,7 +8,9 @@ export const colors = {
   secondaryForeground: '#18181b',
   muted: '#f4f4f5',
   mutedForeground: '#71717a',
+  textMuted: '#71717a',
   destructive: '#ef4444',
+  danger: '#ef4444',
   success: '#10b981',
   successLight: '#d1fae5',
   warning: '#f59e0b',
@@ -19,5 +21,31 @@ export const colors = {
   input: '#e4e4e7',
   ring: '#2563eb',
 } as const;
+
+export const darkPalette = {
+  background: '#09090b',
+  foreground: '#fafafa',
+  card: '#18181b',
+  primary: '#3b82f6',
+  primaryForeground: '#0a0a0a',
+  secondary: '#27272a',
+  secondaryForeground: '#fafafa',
+  muted: '#27272a',
+  mutedForeground: '#a1a1aa',
+  textMuted: '#a1a1aa',
+  destructive: '#f87171',
+  danger: '#f87171',
+  success: '#34d399',
+  successLight: '#064e3b',
+  warning: '#fbbf24',
+  warningLight: '#78350f',
+  info: '#60a5fa',
+  infoLight: '#0c4a6e',
+  border: '#27272a',
+  input: '#27272a',
+  ring: '#3b82f6',
+} as const;
+
+export const colors = lightPalette;
 
 export type ColorToken = keyof typeof colors;

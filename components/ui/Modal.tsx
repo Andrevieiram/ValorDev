@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal as RNModal, Pressable, Text, View } from "react-native";
 import { X } from "lucide-react-native";
-import { useTheme } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
 
 export interface ModalProps {
     visible: boolean;
@@ -12,12 +12,14 @@ export interface ModalProps {
 }
 
 export function Modal({ visible, onClose, title, children }: ModalProps) {
-    const { colors, theme } = useTheme();
+    const themeContext = useTheme();
+    const { colors, theme } = themeContext || {};
     const isDark = theme === "dark";
 
     const modalBg = isDark ? "#0f172a" : "#ffffff";
     const modalBorder = isDark ? "rgba(255,255,255,0.08)" : "#e2e8f0";
     const closeBg = isDark ? "#1e293b" : "#f1f5f9";
+    const closeColor = colors?.foreground || "#18181b";
 
     return (
         <RNModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -64,7 +66,7 @@ export function Modal({ visible, onClose, title, children }: ModalProps) {
                                 style={{
                                     fontSize: 18,
                                     fontFamily: "Inter_700Bold",
-                                    color: colors.foreground,
+                                    color: closeColor,
                                     flex: 1,
                                     paddingRight: 8,
                                 }}
@@ -82,7 +84,7 @@ export function Modal({ visible, onClose, title, children }: ModalProps) {
                                     opacity: pressed ? 0.8 : 1,
                                 })}
                             >
-                                <X size={18} color={colors.textMuted} />
+                                <X size={18} color={colors?.textMuted || "#64748b"} />
                             </Pressable>
                         </View>
 

@@ -15,16 +15,6 @@ export function WizardIntroScreen() {
     const { goToNextStep } = useWizardNavigation();
 
     return (
-<<<<<<< HEAD:mobile/features/wizard/screens/WizardIntroScreen.tsx
-        <ScreenContainer className="justify-between pb-8">
-            <View className="space-y-6">
-                <View className="space-y-3">
-                    <Text className="text-3xl font-semibold text-foreground">
-                        Comece seu cálculo de precificação
-                    </Text>
-                    <Text className="text-base leading-7 text-muted-foreground">
-                        Um fluxo mobile-first para estimar valor de projetos com clareza e rapidez.
-=======
         <ScreenContainer maxWidth="wizard" className="justify-between pb-8">
             <View className="gap-6">
                 {/* Header */}
@@ -40,7 +30,6 @@ export function WizardIntroScreen() {
                         style={{ fontFamily: 'Inter_300Light' }}
                     >
                         Um fluxo guiado para estimar o valor de seus projetos de software com clareza e precisão.
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:features/wizard/screens/WizardIntroScreen.tsx
                     </Text>
                 </View>
 

@@ -81,16 +81,10 @@ export default function WizardReviewScreen() {
                             </Text>
                         </View>
 
-<<<<<<< HEAD:mobile/app/wizard/review.tsx
-                        <Card variant="outlined" className="space-y-4 p-4">
-                            <Text className="text-sm font-medium text-foreground">
-                                Resumo financeiro
-=======
                         {/* Financial Profile Card */}
                         <Card variant="outlined" className="gap-4">
                             <Text className="text-sm font-semibold text-primary">
                                 1. Perfil do Desenvolvedor
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:app/wizard/review.tsx
                             </Text>
                             <View className="space-y-3">
                                 <View className="flex-row justify-between">
@@ -122,18 +116,12 @@ export default function WizardReviewScreen() {
                             </View>
                         </Card>
 
-<<<<<<< HEAD:mobile/app/wizard/review.tsx
-                        <Card variant="outlined" className="space-y-4 p-4">
-                            <Text className="text-sm font-medium text-foreground">Projeto</Text>
-                            <View className="space-y-3">
-=======
                         {/* Project Details Card */}
                         <Card variant="outlined" className="gap-4">
                             <Text className="text-sm font-semibold text-primary">
                                 2. Contexto do Projeto
                             </Text>
                             <View className="gap-3">
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:app/wizard/review.tsx
                                 <View className="flex-row justify-between">
                                     <Text className="text-sm text-muted-foreground">Tipo</Text>
                                     <Text className="text-sm font-semibold text-foreground">
@@ -159,18 +147,12 @@ export default function WizardReviewScreen() {
                             </View>
                         </Card>
 
-<<<<<<< HEAD:mobile/app/wizard/review.tsx
-                        <Card variant="outlined" className="space-y-4 p-4">
-                            <Text className="text-sm font-medium text-foreground">Cliente</Text>
-                            <View className="space-y-3">
-=======
                         {/* Client Card */}
                         <Card variant="outlined" className="gap-4">
                             <Text className="text-sm font-semibold text-primary">
                                 3. Perfil do Cliente
                             </Text>
                             <View className="gap-3">
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:app/wizard/review.tsx
                                 <View className="flex-row justify-between">
                                     <Text className="text-sm text-muted-foreground">
                                         Cliente recorrente
@@ -198,63 +180,8 @@ export default function WizardReviewScreen() {
                             </View>
                         </Card>
 
-<<<<<<< HEAD:mobile/app/wizard/review.tsx
-                        <Card variant="outlined" className="space-y-4 p-4">
-=======
-                        {/* Commercial Terms Card */}
-                        <Card variant="outlined" className="gap-4">
-                            <Text className="text-sm font-semibold text-primary">
-                                4. Ajustes e Condições Comerciais
-                            </Text>
-                            <View className="gap-3">
-                                <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">Modelo de precificação</Text>
-                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
-                                        {billingMethodLabels[adjustments.billingMethod] ?? "—"}
-                                    </Text>
-                                </View>
-                                <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">Meio de pagamento</Text>
-                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
-                                        {paymentMethodLabels[adjustments.paymentMethod] ?? "—"}
-                                    </Text>
-                                </View>
-                                <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">Sinal / Entrada</Text>
-                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
-                                        {downPaymentLabels[adjustments.downPayment] ?? "—"}
-                                    </Text>
-                                </View>
-                                <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">Opção de parcelamento</Text>
-                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
-                                        {installmentLabels[adjustments.installmentOption] ?? "—"}
-                                    </Text>
-                                </View>
-                                <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">Prazo de recebimento</Text>
-                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
-                                        {paymentTermLabels[adjustments.paymentTerm] ?? "—"}
-                                    </Text>
-                                </View>
-                                <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">Contrato formal assinado</Text>
-                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
-                                        {yesNoLabels[adjustments.formalContract] ?? "—"}
-                                    </Text>
-                                </View>
-                                <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">Recorrência ativada</Text>
-                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
-                                        {yesNoLabels[adjustments.recurringBilling] ?? "—"}
-                                    </Text>
-                                </View>
-                            </View>
-                        </Card>
-
                         {/* Consolidated Risk Card */}
                         <Card variant="outlined" className="gap-4">
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:app/wizard/review.tsx
                             <View className="flex-row items-center justify-between">
                                 <View>
                                     <Text className="text-sm font-medium text-foreground">

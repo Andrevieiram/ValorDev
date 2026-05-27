@@ -15,6 +15,7 @@ export type {
     PricingBreakdownItem,
     PricingAlert,
     HistoryItem,
+    Probability,
 } from "./pricing.types";
 
 export type { TabRoute, WizardRoute, AppRoute, RouteHref } from "./navigation.types";

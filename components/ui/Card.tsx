@@ -1,6 +1,6 @@
 import { Platform, Pressable, View, type PressableProps, type ViewProps } from "react-native";
 import { cn } from "@/utils";
-import { useTheme } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
 
 type CardVariant = "default" | "outlined" | "elevated" | "glass";
 
@@ -35,7 +35,8 @@ const nativeStyles = {
 };
 
 export function Card({ variant = "default", onPress, className, children, style, ...props }: CardProps) {
-    const { theme } = useTheme();
+    const themeContext = useTheme();
+    const theme = themeContext?.theme || "light";
     const isWeb = Platform.OS === "web";
 
     const base = cn(

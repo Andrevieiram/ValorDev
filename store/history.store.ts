@@ -71,12 +71,9 @@ interface HistoryState {
 
   hydrate: () => Promise<void>;
   setItems: (items: HistoryItem[]) => void;
-<<<<<<< HEAD:mobile/store/history.store.ts
-=======
   addItem: (item: Omit<HistoryItem, 'id' | 'createdAt'>) => Promise<void>;
   removeItem: (id: string) => Promise<void>;
   updateItemProbability: (id: string, probability: import('@/types').Probability) => Promise<void>;
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:store/history.store.ts
   /** Ponto de integração futuro com backend */
   fetchHistory: () => Promise<void>;
 }
@@ -87,13 +84,8 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
   isHydrated: false,
 
   hydrate: async () => {
-<<<<<<< HEAD:mobile/store/history.store.ts
-    const stored = await loadJson<HistoryItem[]>(STORAGE_KEYS.history);
-    if (stored?.length) {
-=======
     const stored = await loadJson<HistoryItem[]>(LOCAL_HISTORY_KEY);
     if (stored && stored.length > 0) {
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:store/history.store.ts
       set({ items: stored, isHydrated: true });
       return;
     }
@@ -102,13 +94,6 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
 
   setItems: (items) => set({ items }),
 
-<<<<<<< HEAD:mobile/store/history.store.ts
-  fetchHistory: async () => {
-    set({ isLoading: true });
-    try {
-      // TODO: substituir por chamada API (ex.: GET /proposals)
-      const stored = await loadJson<HistoryItem[]>(STORAGE_KEYS.history);
-=======
   addItem: async (item) => {
     const newItem: HistoryItem = {
       ...item,
@@ -139,7 +124,6 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
     set({ isLoading: true });
     try {
       const stored = await loadJson<HistoryItem[]>(LOCAL_HISTORY_KEY);
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:store/history.store.ts
       set({ items: stored ?? MOCK_HISTORY });
     } finally {
       set({ isLoading: false });

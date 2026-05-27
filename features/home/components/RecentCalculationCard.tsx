@@ -19,10 +19,6 @@ export function RecentCalculationCard({ item, onPress }: RecentCalculationCardPr
     <Card
       variant="outlined"
       onPress={onPress}
-<<<<<<< HEAD:mobile/features/home/components/RecentCalculationCard.tsx
-      className="active:border-primary/50"
-=======
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:features/home/components/RecentCalculationCard.tsx
       accessibilityRole="button"
       accessibilityLabel={`${item.name}, ${formatCurrency(item.value)}`}
     >

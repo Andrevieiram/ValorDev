@@ -1,8 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-<<<<<<< HEAD:mobile/global.css
-=======
 
 @layer base {
   html, body, #root {
@@ -56,4 +54,3 @@
     background-color: #04060a;
   }
 }
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:global.css
