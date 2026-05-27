@@ -12,11 +12,8 @@
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
     "@hookform/resolvers": "^5.2.2",
-<<<<<<< HEAD:mobile/package.json
-=======
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/drawer": "^7.10.2",
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:package.json
     "@react-navigation/native": "^7.1.8",
     "babel-preset-expo": "~54.0.10",
     "clsx": "^2.1.1",
