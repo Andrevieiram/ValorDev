@@ -69,21 +69,12 @@ export default function ResultScreen() {
         );
 
     return (
-<<<<<<< HEAD:mobile/app/result.tsx
-        <ScreenContainer>
-            <ScrollView contentContainerStyle={{ paddingVertical: 24 }} className="px-4">
-                <View className="space-y-6">
-                    <View className="space-y-3">
-                        <Text className="text-2xl font-semibold text-foreground">
-                            Estimativa final
-=======
         <ScreenContainer maxWidth="simple">
             <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
                 <View className="gap-6 pb-8">
                     <View className="gap-2">
                         <Text className="text-2xl text-foreground" style={{ fontFamily: 'Inter_700Bold' }}>
                             Estimativa comercial
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:app/result.tsx
                         </Text>
                         <Text className="text-sm leading-6 text-muted-foreground">
                             Proposta premium preparada para transmitir confiança ao cliente.
@@ -118,16 +109,10 @@ export default function ResultScreen() {
                         </View>
                     </Card>
 
-<<<<<<< HEAD:mobile/app/result.tsx
-                    <Card variant="outlined" className="space-y-4 p-5">
-                        <Text className="text-sm font-medium text-foreground">
-                            Resumo da proposta
-=======
                     {/* Proposal Range & Breakdown */}
                     <Card variant="outlined" className="gap-4">
                         <Text className="text-sm font-bold text-foreground dark:text-white">
                             Composição da proposta
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:app/result.tsx
                         </Text>
                         <View className="space-y-3">
                             {result.breakdown.map((item) => (
@@ -160,14 +145,9 @@ export default function ResultScreen() {
                         </View>
                     </Card>
 
-<<<<<<< HEAD:mobile/app/result.tsx
-                    <Card variant="outlined" className="space-y-4 p-5">
-                        <Text className="text-sm font-medium text-foreground">
-=======
                     {/* Detail Justification */}
                     <Card variant="outlined" className="gap-4">
                         <Text className="text-sm font-bold text-foreground dark:text-white">
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:app/result.tsx
                             Por que esse valor
                         </Text>
                         <Text className="text-sm text-muted-foreground">
@@ -197,14 +177,9 @@ export default function ResultScreen() {
                         </View>
                     </Card>
 
-<<<<<<< HEAD:mobile/app/result.tsx
-                    <Card variant="outlined" className="space-y-4 p-5">
-                        <Text className="text-sm font-medium text-foreground">
-=======
                     {/* Quick Insights */}
                     <Card variant="outlined" className="gap-3">
                         <Text className="text-sm font-bold text-foreground dark:text-white">
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:app/result.tsx
                             Insights rápidos
                         </Text>
                         <View className="space-y-2">

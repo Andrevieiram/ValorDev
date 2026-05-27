@@ -14,7 +14,7 @@ import { Pressable, Text, View, Alert, Platform } from "react-native";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { Card, Divider } from "@/components/ui";
 import { useAuthStore, useWizardStore } from "@/store";
-import { useTheme } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
 import { formatCurrency } from "@/utils";
 
 const taxRegimeLabels: Record<string, string> = {
@@ -28,7 +28,8 @@ export default function ProfileScreen() {
     const router = useRouter();
     const { user, logout } = useAuthStore();
     const profile = useWizardStore((s) => s.profile);
-    const { colors } = useTheme();
+    const themeContext = useTheme();
+    const colors = themeContext?.colors || { primary: '#2563eb', background: '#ffffff', foreground: '#18181b' };
 
     const handleLogout = async () => {
         if (Platform.OS === "web") {

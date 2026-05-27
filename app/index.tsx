@@ -1,11 +1,10 @@
 import { Redirect } from 'expo-router';
+import { ActivityIndicator, View } from 'react-native';
 
 import { ROUTES } from '@/constants';
+import { useAuthStore } from '@/store';
 
 export default function Index() {
-<<<<<<< HEAD:mobile/app/index.tsx
-  return <Redirect href={ROUTES.home} />;
-=======
   const { user, skipped, isHydrated } = useAuthStore();
 
   if (!isHydrated) {
@@ -21,5 +20,4 @@ export default function Index() {
   }
 
   return <Redirect href="/auth" />;
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:app/index.tsx
 }

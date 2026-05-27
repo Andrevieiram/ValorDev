@@ -33,6 +33,8 @@ export interface ProfileData {
     mainStack: string;
     monthlyCosts: string;
     financialReserve: string;
+    taxRegime?: string;
+    workload?: string;
 }
 
 export interface ProjectData {
@@ -103,9 +105,10 @@ export type Probability = 'alta' | 'media' | 'baixa' | 'fechada' | 'perdida';
 export interface HistoryItem {
     id: string;
     name: string;
+    clientName?: string;
     value: number;
     date: string;
-    status: "draft" | "sent";
+    status: "draft" | "sent" | "won" | "lost";
     createdAt: string;
     probability?: Probability;
 }

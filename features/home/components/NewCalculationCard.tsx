@@ -31,18 +31,8 @@ export function NewCalculationCard({ onPress }: NewCalculationCardProps) {
           <TrendingUp color="rgba(255,255,255,0.6)" size={40} strokeWidth={1.5} />
         </View>
 
-<<<<<<< HEAD:mobile/features/home/components/NewCalculationCard.tsx
-        <Button
-          variant="secondary"
-          size="lg"
-          className="w-full bg-white"
-          textClassName="text-primary font-semibold"
-          label={HOME_COPY.hero.cta}
-          leftIcon={<Plus color={colors.primary} size={20} strokeWidth={2.5} />}
-=======
         {/* Botão branco com texto primary */}
         <Pressable
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:features/home/components/NewCalculationCard.tsx
           onPress={onPress}
           accessibilityRole="button"
           accessibilityLabel={HOME_COPY.hero.cta}

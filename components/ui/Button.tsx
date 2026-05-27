@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 
+import { useTheme } from '@/theme/ThemeContext';
 import { cn } from '@/utils';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
@@ -22,6 +23,8 @@ export interface ButtonProps extends PressableProps {
   children?: React.ReactNode;
   className?: string;
   textClassName?: string;
+  textStyle?: any;
+  style?: any;
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
@@ -73,22 +76,19 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
     children,
     className,
     textClassName,
-<<<<<<< HEAD:mobile/components/ui/Button.tsx
-=======
     textStyle,
     style: customStyle,
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:components/ui/Button.tsx
     ...props
   },
   ref,
 ) {
   const isDisabled = disabled || isLoading;
   const content = children ?? label;
-<<<<<<< HEAD:mobile/components/ui/Button.tsx
-=======
-  const { colors, theme } = useTheme();
+  const themeContext = useTheme();
+  const { colors, theme } = themeContext || {};
   const isWeb = Platform.OS === 'web';
   const isDark = theme === 'dark';
+  const primaryColor = colors?.primary || '#2563eb';
 
   const resolveCustomStyle = (state: any) =>
     typeof customStyle === 'function' ? customStyle(state) : customStyle;
@@ -123,12 +123,14 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
         ref={ref}
         disabled={isDisabled}
         className={cn(
-          'overflow-hidden rounded-xl',
+          'flex-row items-center justify-center rounded-xl bg-primary',
           isDisabled && 'opacity-50',
           className
         )}
         style={(state) => [
           {
+            ...sizePadding[size],
+            backgroundColor: state.pressed ? '#1d4ed8' : '#2563eb',
             shadowColor: '#2563eb',
             shadowOffset: { width: 0, height: state.pressed ? 2 : 6 },
             shadowOpacity: state.pressed ? 0.2 : 0.35,
@@ -140,20 +142,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
         ]}
         {...props}
       >
-        <LinearGradient
-          colors={['#2563eb', '#06b6d4']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[
-            {
-              alignItems: 'center',
-              justifyContent: 'center',
-              ...sizePadding[size],
-            },
-          ]}
-        >
-          {textNode('#ffffff', 'Inter_600SemiBold')}
-        </LinearGradient>
+        {textNode('#ffffff', 'Inter_600SemiBold')}
       </Pressable>
     );
   }
@@ -171,8 +160,8 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
         style={(state) => [
           {
             borderWidth: 1.5,
-            borderColor: colors.primary,
-            backgroundColor: state.pressed ? `${colors.primary}15` : 'transparent',
+            borderColor: primaryColor,
+            backgroundColor: state.pressed ? `${primaryColor}15` : 'transparent',
             transform: [{ scale: state.pressed ? 0.98 : 1 }],
             ...sizePadding[size],
           },
@@ -180,7 +169,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
         ]}
         {...props}
       >
-        {textNode(colors.primary)}
+        {textNode(primaryColor)}
       </Pressable>
     );
   }
@@ -216,7 +205,6 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
       </Pressable>
     );
   }
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:components/ui/Button.tsx
 
   // destructive
   return (
@@ -224,19 +212,13 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
       ref={ref}
       disabled={isDisabled}
       className={cn(
-<<<<<<< HEAD:mobile/components/ui/Button.tsx
-        'flex-row items-center justify-center rounded-xl min-h-[48px]',
-        variantStyles[variant],
-        sizeStyles[size],
-=======
         'flex-row items-center justify-center rounded-xl',
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:components/ui/Button.tsx
         isDisabled && 'opacity-50',
         className,
       )}
       style={(state) => [
         {
-          backgroundColor: state.pressed ? '#dc2626' : colors.danger,
+          backgroundColor: state.pressed ? '#b91c1c' : '#ef4444',
           transform: [{ scale: state.pressed ? 0.98 : 1 }],
           ...sizePadding[size],
         },
@@ -245,9 +227,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
       {...props}
     >
       {isLoading ? (
-        <ActivityIndicator
-          color={variant === 'primary' || variant === 'destructive' ? '#fff' : '#18181b'}
-        />
+        <ActivityIndicator color="#fff" />
       ) : typeof content === 'string' || typeof content === 'number' ? (
         <View className="flex-row items-center justify-center gap-2">
           {leftIcon}

@@ -14,6 +14,7 @@ export interface InputProps extends TextInputProps {
   error?: string;
   leftIcon?: React.ReactNode;
   containerClassName?: string;
+  labelClassName?: string;
   inputClassName?: string;
 }
 
@@ -24,6 +25,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
     error,
     leftIcon,
     containerClassName,
+    labelClassName,
     inputClassName,
     className,
     ...props
@@ -33,7 +35,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
   return (
     <View className={cn('gap-2', containerClassName)}>
       {label ? (
-        <Text className="text-sm font-medium text-foreground">{label}</Text>
+        <Text className={cn('text-sm font-medium text-foreground', labelClassName)}>{label}</Text>
       ) : null}
 
       <View className="relative">
@@ -47,11 +49,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
           ref={ref}
           placeholderTextColor="#71717a"
           className={cn(
-<<<<<<< HEAD:mobile/components/ui/Input.tsx
-            'w-full rounded-xl border border-input bg-muted px-4 py-3 text-base text-foreground',
-=======
             'w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 px-4 py-3.5 text-sm text-slate-900 dark:text-slate-100 hover:border-slate-300 dark:hover:border-slate-600 focus:border-primary dark:focus:border-primary',
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:components/ui/Input.tsx
             leftIcon && 'pl-12',
             error && 'border-destructive dark:border-destructive',
             inputClassName,

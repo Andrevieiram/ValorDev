@@ -55,7 +55,7 @@ export default function SetupProfileScreen() {
     };
 
     return (
-        <>
+        <View className="flex-1">
             <Stack.Screen
                 options={{
                     title: "Perfil Financeiro",
@@ -330,6 +330,6 @@ export default function SetupProfileScreen() {
                     </ScrollView>
                 </KeyboardAvoidingView>
             </ScreenContainer>
-        </>
+        </View>
     );
 }

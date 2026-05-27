@@ -52,13 +52,8 @@ export function WizardRiskScreen() {
                             </Text>
                         </View>
 
-<<<<<<< HEAD:mobile/features/wizard/screens/WizardRiskScreen.tsx
-                        <Card variant="outlined" className="space-y-4 p-4">
-                            <View className="space-y-2">
-=======
                         <Card variant="outlined" className="gap-4">
                             <View className="gap-2">
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:features/wizard/screens/WizardRiskScreen.tsx
                                 <Text className="text-sm font-medium text-foreground">
                                     Nível de risco
                                 </Text>
@@ -89,13 +84,8 @@ export function WizardRiskScreen() {
                             </Text>
                         </Card>
 
-<<<<<<< HEAD:mobile/features/wizard/screens/WizardRiskScreen.tsx
-                        <View className="space-y-4">
-                            <Card variant="outlined" className="p-4">
-=======
                         <View className="gap-4">
                             <Card variant="outlined">
->>>>>>> 066b9274ae9ab4cd8513a16eb933b545f1194f3a:features/wizard/screens/WizardRiskScreen.tsx
                                 <Text className="text-sm font-medium text-foreground mb-3">
                                     Fatores de atenção
                                 </Text>
