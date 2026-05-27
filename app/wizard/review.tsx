@@ -1,6 +1,8 @@
+import React from "react";
 import { Text, View, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { WizardProgress } from "@/components/wizard/WizardProgress";
 import { Badge, Button, Card } from "@/components/ui";
 import { useWizardNavigation } from "@/hooks";
 import { useWizardStore } from "@/store";
@@ -41,13 +43,63 @@ const impactLabels: Record<string, string> = {
     strategic: "Impacto estratégico",
 };
 
+const taxRegimeLabels: Record<string, string> = {
+    mei: "MEI (~6%)",
+    simples: "Simples Nacional (~15%)",
+    lucro_presumido: "Lucro Presumido (~24%)",
+    clt: "Equivalente CLT",
+};
+
+const mainStackLabels: Record<string, string> = {
+    frontend: "Frontend",
+    backend: "Backend",
+    fullstack: "Fullstack / Mobile",
+    devops: "DevOps / SRE",
+    design: "UI/UX Design",
+};
+
+const workloadLabels: Record<string, string> = {
+    normal: "Normal",
+    high: "Elevada (+10%)",
+    overloaded: "Sobrecarga (+25%)",
+};
+
+const paymentMethodLabels: Record<string, string> = {
+    pix: "PIX",
+    boleto: "Boleto bancário",
+    creditCard: "Cartão de Crédito",
+    international: "Transf. Internacional",
+};
+
+const installmentLabels: Record<string, string> = {
+    oneTime: "À vista",
+    twoInstallments: "2x sem juros",
+    threeInstallments: "3x sem juros",
+    fourOrMore: "4x ou mais (+juros)",
+};
+
+const downPaymentLabels: Record<string, string> = {
+    none: "Sem sinal",
+    twentyPercent: "20% no início",
+    thirtyPercent: "30% no início",
+    fiftyPercent: "50% no início",
+};
+
+const paymentTermLabels: Record<string, string> = {
+    thirtyDays: "30 dias pós entrega",
+    fifteenDays: "15 dias pós entrega",
+    immediate: "Imediato após aceite",
+};
+
 const yesNoLabels: Record<string, string> = {
     yes: "Sim",
     no: "Não",
+    true: "Sim",
+    false: "Não",
 };
 
 export default function WizardReviewScreen() {
-    const { goHome, goToResult, goBack } = useWizardNavigation();
+    const { goToResult, goBack } = useWizardNavigation();
     const profile = useWizardStore((s) => s.profile);
     const project = useWizardStore((s) => s.project);
     const client = useWizardStore((s) => s.client);
@@ -57,27 +109,26 @@ export default function WizardReviewScreen() {
     const summaryRisk = riskReport ?? {
         score: 0,
         level: "medium" as const,
-        summary: "O risco ainda será preparado no passo anterior.",
-        riskFactors: [],
-        positiveFactors: [],
+        factors: [],
+        recommendation: "O risco ainda será preparado no passo anterior.",
     };
 
     return (
         <ScreenContainer maxWidth="wizard">
+            <WizardProgress current={5} />
             <KeyboardAvoidingView
                 behavior={Platform.select({ ios: "padding", android: "height" })}
                 className="flex-1"
                 keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 24}
             >
-                <ScrollView contentContainerStyle={{ paddingVertical: 24 }} className="px-4">
-                    <View className="space-y-5">
-                        <View className="space-y-2">
-                            <Text className="text-2xl font-semibold text-foreground">
+                <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+                    <View className="gap-6 pb-8">
+                        <View className="gap-2">
+                            <Text className="text-2xl font-bold text-foreground dark:text-white">
                                 Revisão executiva
                             </Text>
                             <Text className="text-sm leading-6 text-muted-foreground">
-                                Confira os principais pontos do projeto antes de gerar a estimativa
-                                final.
+                                Verifique as informações consolidadas antes de gerar a proposta comercial.
                             </Text>
                         </View>
 
@@ -86,31 +137,35 @@ export default function WizardReviewScreen() {
                             <Text className="text-sm font-semibold text-primary">
                                 1. Perfil do Desenvolvedor
                             </Text>
-                            <View className="space-y-3">
+                            <View className="gap-3">
                                 <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">
-                                        Renda desejada
-                                    </Text>
-                                    <Text className="text-sm font-semibold text-foreground">
-                                        {profile.desiredIncome
-                                            ? formatCurrency(Number(profile.desiredIncome))
-                                            : "—"}
+                                    <Text className="text-sm text-muted-foreground">Renda mensal desejada</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                                        {profile.desiredIncome ? formatCurrency(Number(profile.desiredIncome)) : "—"}
                                     </Text>
                                 </View>
                                 <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">
-                                        Horas semanais
-                                    </Text>
-                                    <Text className="text-sm font-semibold text-foreground">
-                                        {profile.hoursPerWeek ? `${profile.hoursPerWeek} h` : "—"}
+                                    <Text className="text-sm text-muted-foreground">Horas semanais</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                                        {profile.hoursPerWeek ? `${profile.hoursPerWeek}h / semana` : "—"}
                                     </Text>
                                 </View>
                                 <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">
-                                        Modelo de cobrança
+                                    <Text className="text-sm text-muted-foreground">Regime Tributário</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                                        {taxRegimeLabels[profile.taxRegime] ?? "—"}
                                     </Text>
-                                    <Text className="text-sm font-semibold text-foreground">
-                                        {billingMethodLabels[adjustments.billingMethod] ?? "—"}
+                                </View>
+                                <View className="flex-row justify-between">
+                                    <Text className="text-sm text-muted-foreground">Especialidade / Stack</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                                        {mainStackLabels[profile.mainStack] ?? "—"}
+                                    </Text>
+                                </View>
+                                <View className="flex-row justify-between">
+                                    <Text className="text-sm text-muted-foreground">Carga de trabalho</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                                        {workloadLabels[profile.workload] ?? "—"}
                                     </Text>
                                 </View>
                             </View>
@@ -123,25 +178,33 @@ export default function WizardReviewScreen() {
                             </Text>
                             <View className="gap-3">
                                 <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">Tipo</Text>
-                                    <Text className="text-sm font-semibold text-foreground">
+                                    <Text className="text-sm text-muted-foreground">Tipo de projeto</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
                                         {projectTypeLabels[project.projectType] ?? "—"}
                                     </Text>
                                 </View>
                                 <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">
-                                        Complexidade
-                                    </Text>
-                                    <Text className="text-sm font-semibold text-foreground">
+                                    <Text className="text-sm text-muted-foreground">Complexidade</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
                                         {complexityLabels[project.complexity] ?? "—"}
                                     </Text>
                                 </View>
                                 <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">
-                                        Prazo estimado
+                                    <Text className="text-sm text-muted-foreground">Horas estimadas</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                                        {project.estimatedHours ? `${project.estimatedHours}h` : "—"}
                                     </Text>
-                                    <Text className="text-sm font-semibold text-foreground">
+                                </View>
+                                <View className="flex-row justify-between">
+                                    <Text className="text-sm text-muted-foreground">Prazo de entrega</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
                                         {project.deadline || "—"}
+                                    </Text>
+                                </View>
+                                <View className="flex-row justify-between">
+                                    <Text className="text-sm text-muted-foreground">Reaproveitamento de comp.</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                                        {yesNoLabels[String(project.reuseComponents)] ?? "—"}
                                     </Text>
                                 </View>
                             </View>
@@ -154,27 +217,72 @@ export default function WizardReviewScreen() {
                             </Text>
                             <View className="gap-3">
                                 <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">
-                                        Cliente recorrente
-                                    </Text>
-                                    <Text className="text-sm font-semibold text-foreground">
+                                    <Text className="text-sm text-muted-foreground">Cliente recorrente</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
                                         {yesNoLabels[client.recurringClient] ?? "—"}
                                     </Text>
                                 </View>
                                 <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">
-                                        Maturidade digital
-                                    </Text>
-                                    <Text className="text-sm font-semibold text-foreground">
+                                    <Text className="text-sm text-muted-foreground">Maturidade digital</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
                                         {maturityLabels[client.digitalExperience] ?? "—"}
                                     </Text>
                                 </View>
                                 <View className="flex-row justify-between">
-                                    <Text className="text-sm text-muted-foreground">
-                                        Impacto do projeto
-                                    </Text>
-                                    <Text className="text-sm font-semibold text-foreground">
+                                    <Text className="text-sm text-muted-foreground">Impacto no negócio</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
                                         {impactLabels[client.businessImpact] ?? "—"}
+                                    </Text>
+                                </View>
+                            </View>
+                        </Card>
+
+                        {/* Commercial Terms Card */}
+                        <Card variant="outlined" className="gap-4">
+                            <Text className="text-sm font-semibold text-primary">
+                                4. Ajustes e Condições Comerciais
+                            </Text>
+                            <View className="gap-3">
+                                <View className="flex-row justify-between">
+                                    <Text className="text-sm text-muted-foreground">Modelo de precificação</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                                        {billingMethodLabels[adjustments.billingMethod] ?? "—"}
+                                    </Text>
+                                </View>
+                                <View className="flex-row justify-between">
+                                    <Text className="text-sm text-muted-foreground">Meio de pagamento</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                                        {paymentMethodLabels[adjustments.paymentMethod] ?? "—"}
+                                    </Text>
+                                </View>
+                                <View className="flex-row justify-between">
+                                    <Text className="text-sm text-muted-foreground">Sinal / Entrada</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                                        {downPaymentLabels[adjustments.downPayment] ?? "—"}
+                                    </Text>
+                                </View>
+                                <View className="flex-row justify-between">
+                                    <Text className="text-sm text-muted-foreground">Opção de parcelamento</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                                        {installmentLabels[adjustments.installmentOption] ?? "—"}
+                                    </Text>
+                                </View>
+                                <View className="flex-row justify-between">
+                                    <Text className="text-sm text-muted-foreground">Prazo de recebimento</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                                        {paymentTermLabels[adjustments.paymentTerm] ?? "—"}
+                                    </Text>
+                                </View>
+                                <View className="flex-row justify-between">
+                                    <Text className="text-sm text-muted-foreground">Contrato formal assinado</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                                        {yesNoLabels[adjustments.formalContract] ?? "—"}
+                                    </Text>
+                                </View>
+                                <View className="flex-row justify-between">
+                                    <Text className="text-sm text-muted-foreground">Recorrência ativada</Text>
+                                    <Text className="text-sm font-semibold text-foreground dark:text-slate-100">
+                                        {yesNoLabels[adjustments.recurringBilling] ?? "—"}
                                     </Text>
                                 </View>
                             </View>
@@ -184,11 +292,11 @@ export default function WizardReviewScreen() {
                         <Card variant="outlined" className="gap-4">
                             <View className="flex-row items-center justify-between">
                                 <View>
-                                    <Text className="text-sm font-medium text-foreground">
-                                        Risco consolidado
+                                    <Text className="text-sm font-bold text-foreground dark:text-white">
+                                        5. Análise de Risco Consolidada
                                     </Text>
-                                    <Text className="text-xs text-muted-foreground">
-                                        Visão simples do status do risco antes da estimativa.
+                                    <Text className="text-xs text-muted-foreground mt-0.5">
+                                        Score consolidado do projeto
                                     </Text>
                                 </View>
                                 <Badge
@@ -210,35 +318,36 @@ export default function WizardReviewScreen() {
                                 />
                             </View>
 
-                            <Text className="text-sm font-semibold text-foreground">
-                                {summaryRisk.summary}
+                            <Text className="text-sm font-semibold text-foreground dark:text-slate-100 leading-6">
+                                {summaryRisk.recommendation}
                             </Text>
 
-                            <View className="space-y-2">
-                                {summaryRisk.riskFactors.slice(0, 2).map((factor) => (
-                                    <Text key={factor} className="text-sm text-destructive">
-                                        • {factor}
-                                    </Text>
-                                ))}
-                                {summaryRisk.positiveFactors.slice(0, 2).map((factor) => (
-                                    <Text key={factor} className="text-sm text-foreground">
-                                        • {factor}
-                                    </Text>
+                            <View className="gap-2">
+                                {summaryRisk.factors.slice(0, 3).map((factor) => (
+                                    <View key={factor.name} className="flex-row justify-between">
+                                        <Text className="text-sm text-foreground flex-1">
+                                            {factor.name}
+                                        </Text>
+                                        <Text className={`text-sm font-medium ${factor.score > 0 ? 'text-destructive' : factor.score < 0 ? 'text-emerald-500' : 'text-muted-foreground'}`}>
+                                            {factor.score > 0 ? '+' : ''}{factor.score}
+                                        </Text>
+                                    </View>
                                 ))}
                             </View>
                         </Card>
 
-                        <View className="space-y-3 pt-1">
+                        {/* Navigation Actions */}
+                        <View className="gap-3 pt-2">
                             <Button
                                 size="lg"
-                                label="Gerar estimativa"
+                                label="Gerar estimativa comercial"
                                 onPress={goToResult}
-                                className="rounded-3xl"
+                                className="rounded-3xl shadow-md py-4 animate-pulse"
                             />
                             <Button
                                 size="lg"
                                 variant="ghost"
-                                label="Voltar"
+                                label="Voltar e alterar"
                                 onPress={goBack}
                                 className="rounded-3xl"
                             />

@@ -1,12 +1,15 @@
 import React, { useState, useMemo } from "react";
 import { FlatList, Text, View, Pressable, TextInput, Alert } from "react-native";
-import { Trash2, Search, Calendar, Sliders, ChevronDown } from "lucide-react-native";
+import { Trash2, Search, Calendar, Sliders, ChevronDown, Zap } from "lucide-react-native";
+import { useRouter } from "expo-router";
 
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { Card, MotionFadeUp, SegmentedControl, Modal, Button } from "@/components/ui";
+import { SkeletonCard } from "@/components/ui/SkeletonLoader";
 import { useHistoryStore } from "@/store";
 import { formatCurrency } from "@/utils";
 import { Probability } from "@/types";
+import { useTheme } from "@/theme";
 
 const PROBABILITY_COLORS: Record<Probability, { bg: string; text: string; label: string }> = {
     fechada: { bg: 'rgba(34,197,94,0.15)', text: '#22c55e', label: 'Fechada' },
@@ -25,12 +28,16 @@ const PROBABILITY_WEIGHTS: Record<Probability, number> = {
 };
 
 export default function HistoryScreen() {
-    const { items, removeItem, updateItemProbability } = useHistoryStore();
+    const router = useRouter();
+    const { items, isLoading, removeItem, updateItemProbability } = useHistoryStore();
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState<"date" | "probability">("date");
     
     // Modal State
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+
+    const { colors, theme } = useTheme();
+    const isDark = theme === 'dark';
 
     const filteredAndSortedItems = useMemo(() => {
         let result = [...items];
@@ -86,15 +93,21 @@ export default function HistoryScreen() {
     return (
         <ScreenContainer maxWidth="container" scrollable={false}>
             <View className="flex-1 pb-24">
-                {filteredAndSortedItems.length === 0 ? (
+                {isLoading ? (
+                    <View className="gap-4 pt-4">
+                        <SkeletonCard count={3} />
+                        <SkeletonCard count={2} />
+                        <SkeletonCard count={4} />
+                    </View>
+                ) : filteredAndSortedItems.length === 0 ? (
                     <View className="flex-1">
                         <View className="gap-6 mb-6">
                             {/* Header */}
                             <View className="gap-1">
-                                <Text className="text-2xl text-foreground" style={{ fontFamily: 'Inter_700Bold' }}>
+                                <Text className="text-2xl text-foreground" style={{ fontFamily: 'Inter_700Bold', color: colors.foreground }}>
                                     Histórico de Precificações
                                 </Text>
-                                <Text className="text-sm text-muted-foreground" style={{ fontFamily: 'Inter_400Regular' }}>
+                                <Text className="text-sm text-muted-foreground" style={{ fontFamily: 'Inter_400Regular', color: colors.textMuted }}>
                                     Acompanhe, busque e gerencie suas propostas salvas.
                                 </Text>
                             </View>
@@ -102,18 +115,18 @@ export default function HistoryScreen() {
                             {/* Dashboard Metrics Card */}
                             <Card variant="glass" className="flex-row justify-between items-center">
                                 <View className="gap-1">
-                                    <Text className="text-xs uppercase tracking-[0.1em] text-muted-foreground" style={{ fontFamily: 'Inter_600SemiBold' }}>
+                                    <Text className="text-xs uppercase tracking-[0.1em] text-muted-foreground" style={{ fontFamily: 'Inter_600SemiBold', color: colors.textMuted }}>
                                         Total Estimado
                                     </Text>
-                                    <Text className="text-2xl text-primary" style={{ fontFamily: 'JetBrainsMono_700Bold' }}>
+                                    <Text className="text-2xl text-primary" style={{ fontFamily: 'JetBrainsMono_700Bold', color: colors.primary }}>
                                         {formatCurrency(totals.totalValue)}
                                     </Text>
                                 </View>
                                 <View className="gap-1 items-end">
-                                    <Text className="text-xs uppercase tracking-[0.1em] text-muted-foreground" style={{ fontFamily: 'Inter_600SemiBold' }}>
+                                    <Text className="text-xs uppercase tracking-[0.1em] text-muted-foreground" style={{ fontFamily: 'Inter_600SemiBold', color: colors.textMuted }}>
                                         Calculados
                                     </Text>
-                                    <Text className="text-2xl text-foreground" style={{ fontFamily: 'JetBrainsMono_700Bold' }}>
+                                    <Text className="text-2xl text-foreground" style={{ fontFamily: 'JetBrainsMono_700Bold', color: colors.foreground }}>
                                         {totals.count} {totals.count === 1 ? "item" : "itens"}
                                     </Text>
                                 </View>
@@ -130,30 +143,64 @@ export default function HistoryScreen() {
                                     onChange={(v) => setSortBy(v as any)}
                                 />
 
-                                <View className="flex-row items-center border border-border dark:border-white/10 rounded-2xl bg-slate-50 dark:bg-slate-900/20 px-4 py-3 gap-3">
-                                    <Search size={18} color="#94a3b8" />
+                                <View 
+                                    className="flex-row items-center border rounded-2xl px-4 py-3 gap-3"
+                                    style={{ backgroundColor: colors.input, borderColor: colors.border }}
+                                >
+                                    <Search size={18} color={colors.textMuted} />
                                     <TextInput
                                         placeholder="Buscar por tipo de projeto..."
-                                        placeholderTextColor="#94a3b8"
+                                        placeholderTextColor={colors.textMuted}
                                         value={search}
                                         onChangeText={setSearch}
-                                        className="flex-1 text-sm text-foreground dark:text-white"
-                                        style={{ outlineStyle: 'none' } as any}
+                                        className="flex-1 text-sm text-foreground"
+                                        style={{ outlineStyle: 'none', color: colors.foreground } as any}
                                     />
                                     {search.length > 0 && (
                                         <Pressable onPress={() => setSearch("")} hitSlop={8}>
-                                            <Text className="text-xs text-primary font-medium">Limpar</Text>
+                                            <Text className="text-xs font-medium" style={{ color: colors.primary }}>Limpar</Text>
                                         </Pressable>
                                     )}
                                 </View>
                             </View>
                         </View>
-                        
-                        <MotionFadeUp delay={300} className="py-12 items-center justify-center gap-3">
-                            <Sliders size={32} color="#94a3b8" />
-                            <Text className="text-base text-muted-foreground text-center font-medium">
-                                {search.length > 0 ? "Nenhum cálculo corresponde à busca." : "Nenhum cálculo salvo ainda."}
-                            </Text>
+
+                        <MotionFadeUp delay={300} className="flex-1 items-center justify-center gap-6 px-6">
+                            {search.length > 0 ? (
+                                <>
+                                    <Sliders size={48} color="#94a3b8" />
+                                    <View className="items-center gap-2">
+                                        <Text className="text-lg font-semibold text-foreground">
+                                            Nenhum resultado encontrado
+                                        </Text>
+                                        <Text className="text-sm text-muted-foreground text-center">
+                                            Tente ajustar sua busca ou navegue por ordem alfabética.
+                                        </Text>
+                                    </View>
+                                </>
+                            ) : (
+                                <>
+                                    <View className="items-center gap-2">
+                                        <Zap size={56} color="#6366f1" strokeWidth={1.5} />
+                                    </View>
+                                    <View className="items-center gap-3">
+                                        <View>
+                                            <Text className="text-xl font-bold text-foreground text-center">
+                                                Comece seu primeiro cálculo
+                                            </Text>
+                                            <Text className="text-sm text-muted-foreground text-center mt-2 leading-5">
+                                                Use o wizard de precificação para gerar estimativas precisas e gerenciar suas propostas.
+                                            </Text>
+                                        </View>
+                                        <Button
+                                            size="md"
+                                            label="Ir ao Wizard"
+                                            onPress={() => router.push("/(tabs)/wizard")}
+                                            className="mt-2 min-w-[200px]"
+                                        />
+                                    </View>
+                                </>
+                            )}
                         </MotionFadeUp>
                     </View>
                 ) : (
@@ -165,10 +212,10 @@ export default function HistoryScreen() {
                             <View className="gap-6 mb-6">
                                 {/* Header */}
                                 <View className="gap-1">
-                                    <Text className="text-2xl text-foreground dark:text-white" style={{ fontFamily: 'Inter_700Bold' }}>
+                                    <Text className="text-2xl text-foreground" style={{ fontFamily: 'Inter_700Bold', color: colors.foreground }}>
                                         Histórico de Precificações
                                     </Text>
-                                    <Text className="text-sm text-muted-foreground dark:text-slate-300" style={{ fontFamily: 'Inter_400Regular' }}>
+                                    <Text className="text-sm text-muted-foreground" style={{ fontFamily: 'Inter_400Regular', color: colors.textMuted }}>
                                         Acompanhe, busque e gerencie suas propostas salvas.
                                     </Text>
                                 </View>
@@ -176,18 +223,18 @@ export default function HistoryScreen() {
                                 {/* Dashboard Metrics Card */}
                                 <Card variant="glass" className="flex-row justify-between items-center">
                                     <View className="gap-1">
-                                        <Text className="text-xs uppercase tracking-[0.1em] text-muted-foreground" style={{ fontFamily: 'Inter_600SemiBold' }}>
+                                        <Text className="text-xs uppercase tracking-[0.1em] text-muted-foreground" style={{ fontFamily: 'Inter_600SemiBold', color: colors.textMuted }}>
                                             Total Estimado
                                         </Text>
-                                        <Text className="text-2xl text-primary" style={{ fontFamily: 'JetBrainsMono_700Bold' }}>
+                                        <Text className="text-2xl text-primary" style={{ fontFamily: 'JetBrainsMono_700Bold', color: colors.primary }}>
                                             {formatCurrency(totals.totalValue)}
                                         </Text>
                                     </View>
                                     <View className="gap-1 items-end">
-                                        <Text className="text-xs uppercase tracking-[0.1em] text-muted-foreground" style={{ fontFamily: 'Inter_600SemiBold' }}>
+                                        <Text className="text-xs uppercase tracking-[0.1em] text-muted-foreground" style={{ fontFamily: 'Inter_600SemiBold', color: colors.textMuted }}>
                                             Calculados
                                         </Text>
-                                        <Text className="text-2xl text-foreground dark:text-white" style={{ fontFamily: 'JetBrainsMono_700Bold' }}>
+                                        <Text className="text-2xl text-foreground" style={{ fontFamily: 'JetBrainsMono_700Bold', color: colors.foreground }}>
                                             {totals.count} {totals.count === 1 ? "item" : "itens"}
                                         </Text>
                                     </View>
@@ -204,29 +251,33 @@ export default function HistoryScreen() {
                                         onChange={(v) => setSortBy(v as any)}
                                     />
 
-                                    <View className="flex-row items-center border border-border dark:border-white/10 rounded-2xl bg-slate-50 dark:bg-slate-900/20 px-4 py-3 gap-3">
-                                        <Search size={18} color="#94a3b8" />
+                                    <View 
+                                        className="flex-row items-center border rounded-2xl px-4 py-3 gap-3"
+                                        style={{ backgroundColor: colors.input, borderColor: colors.border }}
+                                    >
+                                        <Search size={18} color={colors.textMuted} />
                                         <TextInput
                                             placeholder="Buscar por tipo de projeto..."
-                                            placeholderTextColor="#94a3b8"
+                                            placeholderTextColor={colors.textMuted}
                                             value={search}
                                             onChangeText={setSearch}
-                                            className="flex-1 text-sm text-foreground dark:text-white"
-                                            style={{ outlineStyle: 'none' } as any}
+                                            className="flex-1 text-sm text-foreground"
+                                            style={{ outlineStyle: 'none', color: colors.foreground } as any}
                                         />
                                         {search.length > 0 && (
-                                            <Pressable onPress={() => setSearch("")} hitSlop={8}>
-                                                <Text className="text-xs text-primary font-medium">Limpar</Text>
+                                            <Pressable
+                                                onPress={() => setSearch("")}
+                                                hitSlop={8}
+                                                accessibilityRole="button"
+                                                accessibilityLabel="Limpar busca"
+                                            >
+                                                <Text className="text-xs font-medium" style={{ color: colors.primary }}>Limpar</Text>
                                             </Pressable>
                                         )}
                                     </View>
                                 </View>
                             </View>
                         }
-                        data={filteredAndSortedItems}
-                        keyExtractor={(item) => item.id}
-                        showsVerticalScrollIndicator={false}
-
                         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
                         renderItem={({ item, index }) => {
                             const prob = item.probability || 'media';
@@ -237,27 +288,30 @@ export default function HistoryScreen() {
                                     <Card variant="glass" className="gap-3">
                                         <View className="flex-row justify-between items-start">
                                             <View className="flex-1 gap-1 pr-3">
-                                                <Text className="text-base text-foreground dark:text-white" style={{ fontFamily: 'Inter_700Bold' }}>
+                                                <Text className="text-base" style={{ fontFamily: 'Inter_700Bold', color: colors.foreground }}>
                                                     {item.name}
                                                 </Text>
                                                 <View className="flex-row items-center gap-1.5">
-                                                    <Calendar size={12} color="#94a3b8" />
-                                                    <Text className="text-xs text-muted-foreground dark:text-slate-300">
+                                                    <Calendar size={12} color={colors.textMuted} />
+                                                    <Text className="text-xs" style={{ color: colors.textMuted }}>
                                                         {item.date || new Date(item.createdAt).toLocaleDateString("pt-BR")}
                                                     </Text>
                                                 </View>
                                             </View>
                                             <Pressable
                                                 onPress={() => handleDelete(item.id, item.name)}
-                                                className="p-2 rounded-full active:scale-95 bg-red-50 dark:bg-red-900/20"
+                                                className="p-2 rounded-full active:scale-95"
+                                                style={{ backgroundColor: `${colors.danger}15` }}
                                                 hitSlop={8}
+                                                accessibilityRole="button"
+                                                accessibilityLabel={`Deletar ${item.name}`}
                                             >
-                                                <Trash2 size={16} color="#ef4444" />
+                                                <Trash2 size={16} color={colors.danger} />
                                             </Pressable>
                                         </View>
 
                                         <View className="flex-row justify-between items-end mt-1">
-                                            <Text className="text-lg text-primary" style={{ fontFamily: 'JetBrainsMono_700Bold' }}>
+                                            <Text className="text-lg" style={{ fontFamily: 'JetBrainsMono_700Bold', color: colors.primary }}>
                                                 {formatCurrency(item.value)}
                                             </Text>
 

@@ -15,6 +15,7 @@ export type {
     PricingBreakdownItem,
     PricingAlert,
     HistoryItem,
+    HistoryStatus,
     Probability,
 } from "./pricing.types";
 

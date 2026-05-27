@@ -1,7 +1,9 @@
-import React, { useState, useRef } from "react";
-import { View, Text, Pressable, TextInput } from "react-native";
+import React, { useState } from "react";
+import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { z } from "zod";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthStore } from "@/store/auth.store";
 import { AuthContainer } from "@/components/layout/AuthContainer";
 import { Input } from "@/components/ui/Input";
@@ -15,45 +17,43 @@ const registerSchema = z.object({
         .string()
         .min(1, "Senha é obrigatória")
         .min(6, "A senha deve ter pelo menos 6 caracteres"),
+    confirmPassword: z
+        .string()
+        .min(1, "Confirmar senha é obrigatório"),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não correspondem",
+    path: ["confirmPassword"],
 });
+
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterScreen() {
     const router = useRouter();
-    const register = useAuthStore((s) => s.register);
-
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [errors, setErrors] = useState<Record<string, string>>({});
+    const registerUser = useAuthStore((s) => s.register);
     const [isLoading, setIsLoading] = useState(false);
+    const [generalError, setGeneralError] = useState("");
 
-    const emailRef = useRef<TextInput>(null);
-    const passwordRef = useRef<TextInput>(null);
+    const { control, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
+        resolver: zodResolver(registerSchema),
+        defaultValues: {
+            name: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+        },
+    });
 
-    const handleRegister = async () => {
-        setErrors({});
-        const validation = registerSchema.safeParse({ name, email, password });
-
-        if (!validation.success) {
-            const fieldErrors: Record<string, string> = {};
-            for (const issue of validation.error.issues) {
-                if (issue.path[0]) {
-                    fieldErrors[issue.path[0] as string] = issue.message;
-                }
-            }
-            setErrors(fieldErrors);
-            return;
-        }
-
+    const handleRegister = async (data: RegisterFormData) => {
+        setGeneralError("");
         setIsLoading(true);
         try {
             // Mock delay
             await new Promise((resolve) => setTimeout(resolve, 800));
-            // Save session
-            await register(name, email);
+            // Save session with password hash
+            await registerUser(data.name, data.email, data.password);
             router.replace("/setup-profile");
         } catch (err) {
-            setErrors({ general: "Erro ao criar conta. Tente novamente." });
+            setGeneralError("Erro ao criar conta. Tente novamente.");
         } finally {
             setIsLoading(false);
         }
@@ -94,64 +94,89 @@ export default function RegisterScreen() {
                     </Text>
                 </View>
 
-                {errors.general && (
+                {generalError && (
                     <View className="p-3 bg-danger/10 border border-danger/25 rounded-xl">
                         <Text
                             className="text-xs text-destructive text-center"
                             style={{ fontFamily: "Inter_500Medium" }}
                         >
-                            {errors.general}
+                            {generalError}
                         </Text>
                     </View>
                 )}
 
                 <View className="gap-4">
-                    <Input
-                        label="Nome Completo"
-                        labelClassName="text-slate-300"
-                        placeholder="Seu nome"
-                        value={name}
-                        onChangeText={setName}
-                        autoCapitalize="words"
-                        error={errors.name}
-                        returnKeyType="next"
-                        onSubmitEditing={() => emailRef.current?.focus()}
-                        blurOnSubmit={false}
+                    <Controller
+                        control={control}
+                        name="name"
+                        render={({ field: { value, onChange } }) => (
+                            <Input
+                                label="Nome Completo"
+                                labelClassName="text-slate-300"
+                                placeholder="Seu nome"
+                                value={value}
+                                onChangeText={onChange}
+                                autoCapitalize="words"
+                                error={errors.name?.message}
+                            />
+                        )}
                     />
 
-                    <Input
-                        ref={emailRef}
-                        label="E-mail"
-                        labelClassName="text-slate-300"
-                        placeholder="seu-email@dominio.com"
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        error={errors.email}
-                        returnKeyType="next"
-                        onSubmitEditing={() => passwordRef.current?.focus()}
-                        blurOnSubmit={false}
+                    <Controller
+                        control={control}
+                        name="email"
+                        render={({ field: { value, onChange } }) => (
+                            <Input
+                                label="E-mail"
+                                labelClassName="text-slate-300"
+                                placeholder="seu-email@dominio.com"
+                                value={value}
+                                onChangeText={onChange}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                error={errors.email?.message}
+                            />
+                        )}
                     />
 
-                    <Input
-                        ref={passwordRef}
-                        label="Senha"
-                        labelClassName="text-slate-300"
-                        placeholder="••••••••"
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                        autoCapitalize="none"
-                        error={errors.password}
-                        returnKeyType="done"
-                        onSubmitEditing={handleRegister}
+                    <Controller
+                        control={control}
+                        name="password"
+                        render={({ field: { value, onChange } }) => (
+                            <Input
+                                label="Senha"
+                                labelClassName="text-slate-300"
+                                placeholder="••••••••"
+                                value={value}
+                                onChangeText={onChange}
+                                secureTextEntry
+                                autoCapitalize="none"
+                                error={errors.password?.message}
+                            />
+                        )}
+                    />
+
+                    <Controller
+                        control={control}
+                        name="confirmPassword"
+                        render={({ field: { value, onChange } }) => (
+                            <Input
+                                label="Confirmar Senha"
+                                labelClassName="text-slate-300"
+                                placeholder="••••••••"
+                                value={value}
+                                onChangeText={onChange}
+                                secureTextEntry
+                                autoCapitalize="none"
+                                error={errors.confirmPassword?.message}
+                            />
+                        )}
                     />
 
                     <Button
                         variant="primary"
                         size="lg"
-                        onPress={handleRegister}
+                        onPress={handleSubmit(handleRegister)}
                         isLoading={isLoading}
                         className="w-full mt-4"
                     >

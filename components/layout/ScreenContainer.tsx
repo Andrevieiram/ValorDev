@@ -1,34 +1,33 @@
-import { ScrollView, View, type ScrollViewProps, Platform } from 'react-native';
+import { Platform, ScrollView, View, type ScrollViewProps } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { SCREEN_CONTENT_GAP_ABOVE_TAB_BAR } from '@/constants/layout';
 import { useTabBarMetrics } from '@/hooks';
-import { spacing } from '@/theme';
-import { useTheme } from '@/theme/ThemeContext';
+import { spacing, useTheme } from '@/theme';
 import { AmbientBackground } from './AmbientBackground';
 import { cn } from '@/utils';
 
 interface ScreenContainerProps extends ScrollViewProps {
-  readonly scrollable?: boolean;
-  readonly withTabBar?: boolean;
-  readonly maxWidth?: 'wizard' | 'container' | 'simple' | 'none';
-  readonly className?: string;
-  readonly children: React.ReactNode;
+  scrollable?: boolean;
+  withTabBar?: boolean;
+  maxWidth?: 'wizard' | 'container' | 'simple' | 'none';
+  className?: string;
+  children: React.ReactNode;
 }
 
 export function ScreenContainer({
   scrollable = true,
   withTabBar = false,
-  maxWidth,
+  maxWidth = 'none',
   className,
   children,
   contentContainerStyle,
   ...props
 }: ScreenContainerProps) {
-  const insets = useSafeAreaInsets();
+  const safeInsets = useSafeAreaInsets();
+  const insets = safeInsets || { top: 0, bottom: 0, left: 0, right: 0 };
   const { occupiedHeight: tabBarOccupiedHeight } = useTabBarMetrics();
-  const themeContext = useTheme();
-  const theme = themeContext?.theme || 'light';
+  const { theme } = useTheme();
 
   const isDark = theme === 'dark';
   const isWeb = Platform.OS === 'web';
@@ -41,22 +40,17 @@ export function ScreenContainer({
     ? tabBarOccupiedHeight + SCREEN_CONTENT_GAP_ABOVE_TAB_BAR
     : insets.bottom + spacing.lg;
 
-  let maxWidthValue: number | undefined = undefined;
-  if (maxWidth === 'wizard') {
-    maxWidthValue = 600;
-  } else if (maxWidth === 'container') {
-    maxWidthValue = 1200;
-  }
+  // No Web, 'none' ainda aplica um limite amigável (1024px) para não esticar em monitores ultrawide
+  const maxWidthValue = maxWidth === 'wizard' ? 600 : maxWidth === 'container' ? 1200 : maxWidth === 'simple' ? 768 : isWeb ? 1024 : undefined;
 
   const content = (
     <View
-      className={cn('flex-1 bg-background px-6', className)}
+      className={cn('flex-1 px-6', className)}
       style={[
         {
           paddingTop: insets.top + spacing.lg,
           paddingBottom: bottomPadding,
-          // No nativo sobrescreve bg-background (que depende de CSS var) com hex direto
-          ...(isWeb ? {} : { backgroundColor: bgColor }),
+          backgroundColor: bgColor,
         },
         isWeb && maxWidthValue
           ? { maxWidth: maxWidthValue, width: '100%', alignSelf: 'center' as const }
@@ -68,11 +62,16 @@ export function ScreenContainer({
   );
 
   if (!scrollable) {
-    return content;
+    return (
+      <>
+        <AmbientBackground />
+        {content}
+      </>
+    );
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <>
       <AmbientBackground />
       <ScrollView
         className="flex-1 bg-transparent"
@@ -84,6 +83,6 @@ export function ScreenContainer({
       >
         {content}
       </ScrollView>
-    </View>
+    </>
   );
 }

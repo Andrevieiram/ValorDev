@@ -2,7 +2,7 @@ import { Slot, Tabs, usePathname, useRouter } from "expo-router";
 import { Clock, Home, User, PieChart } from "lucide-react-native";
 import { Platform, Pressable, Text, View } from "react-native";
 
-import { useTheme } from "@/theme/ThemeContext";
+import { useTheme } from "@/theme";
 
 const WEB_TABS = [
     { name: "index", title: "Home", href: "/", path: "/", icon: Home },
@@ -12,14 +12,12 @@ const WEB_TABS = [
 ] as const;
 
 export default function TabLayout() {
-    const themeContext = useTheme();
-    const { colors, theme } = themeContext || {};
+    const { colors, theme } = useTheme();
     const pathname = usePathname();
     const router = useRouter();
 
-    // Valores padrão se o contexto não estiver inicializado
     const isDark = theme === "dark";
-    const primaryColor = colors?.primary || "#2563eb";
+
     const tabBarBg = isDark ? "#0f172a" : "#ffffff";
     const tabBarBorder = isDark ? "#1e293b" : "#e5e7eb";
     const sceneBg = isDark ? "#04060a" : "#f8fafc";
@@ -46,7 +44,7 @@ export default function TabLayout() {
                     {WEB_TABS.map((item) => {
                         const Icon = item.icon;
                         const isActive = pathname === item.path || (item.path === "/" && pathname === "");
-                        const color = isActive ? primaryColor : (isDark ? "#64748b" : "#94a3b8");
+                        const color = isActive ? colors.primary : (isDark ? "#64748b" : "#94a3b8");
 
                         return (
                             <Pressable
@@ -82,7 +80,7 @@ export default function TabLayout() {
                     backgroundColor: sceneBg,
                 },
 
-                tabBarActiveTintColor: primaryColor,
+                tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: isDark ? "#64748b" : "#94a3b8",
 
                 tabBarStyle: {

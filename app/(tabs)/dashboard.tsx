@@ -345,7 +345,7 @@ export default function DashboardScreen() {
                                             {item.name}
                                         </Text>
                                         <Text className="text-xs text-muted-foreground dark:text-slate-400 mt-1">
-                                            {item.clientName || 'Cliente não informado'}
+                                            Proposta {item.id}
                                         </Text>
                                     </View>
                                     <Text className="text-sm font-bold text-foreground dark:text-white ml-2" style={{ fontFamily: 'JetBrainsMono_700Bold' }}>

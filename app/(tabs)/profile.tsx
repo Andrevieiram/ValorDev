@@ -14,7 +14,7 @@ import { Pressable, Text, View, Alert, Platform } from "react-native";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { Card, Divider } from "@/components/ui";
 import { useAuthStore, useWizardStore } from "@/store";
-import { useTheme } from "@/theme/ThemeContext";
+import { useTheme } from "@/theme";
 import { formatCurrency } from "@/utils";
 
 const taxRegimeLabels: Record<string, string> = {
@@ -28,8 +28,7 @@ export default function ProfileScreen() {
     const router = useRouter();
     const { user, logout } = useAuthStore();
     const profile = useWizardStore((s) => s.profile);
-    const themeContext = useTheme();
-    const colors = themeContext?.colors || { primary: '#2563eb', background: '#ffffff', foreground: '#18181b' };
+    const { colors } = useTheme();
 
     const handleLogout = async () => {
         if (Platform.OS === "web") {
@@ -165,6 +164,8 @@ export default function ProfileScreen() {
                             onPress={() => router.push("/setup-profile")}
                             className="flex-row items-center justify-between p-4"
                             style={({ pressed }) => pressed ? { opacity: 0.7 } : {}}
+                            accessibilityRole="menuitem"
+                            accessibilityLabel="Editar Perfil Financeiro"
                         >
                             <View className="flex-row items-center gap-3">
                                 <DollarSign size={20} color={colors.foreground} />
@@ -185,6 +186,8 @@ export default function ProfileScreen() {
                             onPress={() => router.push("/settings")}
                             className="flex-row items-center justify-between p-4"
                             style={({ pressed }) => pressed ? { opacity: 0.7 } : {}}
+                            accessibilityRole="menuitem"
+                            accessibilityLabel="Configurações do Aplicativo"
                         >
                             <View className="flex-row items-center gap-3">
                                 <Settings size={20} color={colors.foreground} />
@@ -205,6 +208,8 @@ export default function ProfileScreen() {
                             onPress={handleLogout}
                             className="flex-row items-center justify-between p-4"
                             style={({ pressed }) => pressed ? { opacity: 0.7 } : {}}
+                            accessibilityRole="menuitem"
+                            accessibilityLabel="Sair da Conta"
                         >
                             <View className="flex-row items-center gap-3">
                                 <LogOut size={20} color={colors.danger} />

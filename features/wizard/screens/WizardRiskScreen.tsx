@@ -2,13 +2,13 @@ import { useMemo } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
 import { Card, Button } from "@/components/ui";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { WizardProgress } from "@/components/wizard/WizardProgress";
 import { useWizardNavigation } from "@/hooks";
 import { useWizardStore } from "@/store";
-import { calculateWizardRisk } from "../risk";
+import { calculateRisk } from "../risk";
 
 export function WizardRiskScreen() {
     const { goToReview, goBack } = useWizardNavigation();
-    const profile = useWizardStore((state) => state.profile);
     const project = useWizardStore((state) => state.project);
     const client = useWizardStore((state) => state.client);
     const adjustments = useWizardStore((state) => state.adjustments);
@@ -16,8 +16,8 @@ export function WizardRiskScreen() {
     const persistDraft = useWizardStore((state) => state.persistDraft);
 
     const riskReport = useMemo(
-        () => calculateWizardRisk(profile, project, client, adjustments),
-        [profile, project, client, adjustments],
+        () => calculateRisk(project, client, adjustments),
+        [project, client, adjustments],
     );
 
     const handleContinue = async () => {
@@ -35,14 +35,15 @@ export function WizardRiskScreen() {
 
     return (
         <ScreenContainer maxWidth="wizard">
+            <WizardProgress current={4} />
             <KeyboardAvoidingView
                 behavior={Platform.select({ ios: "padding", android: "height" })}
                 className="flex-1"
                 keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 24}
             >
                 <ScrollView contentContainerStyle={{ paddingVertical: 24 }} className="px-4">
-                    <View className="space-y-5">
-                        <View className="space-y-2">
+                    <View className="gap-5">
+                        <View className="gap-2">
                             <Text className="text-2xl font-semibold text-foreground">
                                 Mapa de risco
                             </Text>
@@ -80,63 +81,39 @@ export function WizardRiskScreen() {
                                 </Text>
                             </View>
                             <Text className="text-sm text-muted-foreground">
-                                {riskReport.summary}
+                                {riskReport.recommendation}
                             </Text>
                         </Card>
 
-                        <View className="gap-4">
-                            <Card variant="outlined">
-                                <Text className="text-sm font-medium text-foreground mb-3">
-                                    Fatores de atenção
-                                </Text>
-                                <View className="space-y-2">
-                                    {riskReport.riskFactors.length > 0 ? (
-                                        riskReport.riskFactors.map((factor) => (
-                                            <Text key={factor} className="text-sm text-destructive">
-                                                • {factor}
-                                            </Text>
-                                        ))
-                                    ) : (
-                                        <Text className="text-sm text-muted-foreground">
-                                            Nenhum fator de risco significativo encontrado.
+                        <Card variant="outlined">
+                            <Text className="text-sm font-medium text-foreground mb-3">
+                                Fatores analisados
+                            </Text>
+                            <View className="gap-2">
+                                {riskReport.factors.map((factor) => (
+                                    <View key={factor.name} className="flex-row justify-between items-center">
+                                        <Text className="text-sm text-foreground flex-1">
+                                            {factor.name}
                                         </Text>
-                                    )}
-                                </View>
-                            </Card>
-
-                            <Card variant="outlined">
-                                <Text className="text-sm font-medium text-foreground mb-3">
-                                    Pontos positivos
-                                </Text>
-                                <View className="space-y-2">
-                                    {riskReport.positiveFactors.length > 0 ? (
-                                        riskReport.positiveFactors.map((factor) => (
-                                            <Text key={factor} className="text-sm text-foreground">
-                                                • {factor}
-                                            </Text>
-                                        ))
-                                    ) : (
-                                        <Text className="text-sm text-muted-foreground">
-                                            Nenhum ponto positivo destacado ainda.
+                                        <Text className={`text-sm font-medium ${factor.score > 0 ? 'text-destructive' : factor.score < 0 ? 'text-emerald-500' : 'text-muted-foreground'}`}>
+                                            {factor.score > 0 ? '+' : ''}{factor.score}
                                         </Text>
-                                    )}
-                                </View>
-                            </Card>
-                        </View>
+                                    </View>
+                                ))}
+                            </View>
+                        </Card>
 
-                        <View className="space-y-3 pt-1">
+                        <View className="gap-3 pt-1">
                             <Button
-                                size="lg"
+                                size="md"
                                 label="Continuar para revisão"
                                 onPress={handleContinue}
-                                className="rounded-3xl"
                             />
                             <Button
-                                size="lg"
+                                size="md"
                                 variant="ghost"
                                 label="Voltar"
                                 onPress={goBack}
-                                className="rounded-3xl"
                             />
                         </View>
                     </View>

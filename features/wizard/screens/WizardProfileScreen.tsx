@@ -1,15 +1,19 @@
-import { KeyboardAvoidingView, Platform, Text, View, Pressable, ScrollView } from "react-native";
+import React from "react";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Clock3, DollarSign, PiggyBank, Shield } from "lucide-react-native";
 
-import { Button, Input } from "@/components/ui";
+import { Button, Input, Select, SegmentedControl } from "@/components/ui";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { useWizardNavigation } from "@/hooks";
 import { useWizardStore } from "@/store";
 import { cn } from "@/utils";
 import {
     EXPERIENCE_LEVEL_OPTIONS,
+    TAX_REGIME_OPTIONS,
+    MAIN_STACK_OPTIONS,
+    WORKLOAD_OPTIONS,
     WIZARD_PROFILE_SCHEMA,
     type WizardProfileFormValues,
 } from "../schema";
@@ -34,11 +38,15 @@ export function WizardProfileScreen() {
             hoursPerWeek: profile.hoursPerWeek,
             monthlyCosts: profile.monthlyCosts,
             financialReserve: profile.financialReserve,
-            experienceLevel: profile.experienceLevel || "pleno",
+            experienceLevel: (profile.experienceLevel as any) || "pleno",
+            taxRegime: (profile.taxRegime as any) || "mei",
+            mainStack: (profile.mainStack as any) || "fullstack",
+            workload: (profile.workload as any) || "normal",
         },
     });
 
     const experienceLevel = watch("experienceLevel");
+    const workload = watch("workload");
 
     const handleSaveProfile = async (values: WizardProfileFormValues) => {
         setProfile(values);
@@ -47,7 +55,7 @@ export function WizardProfileScreen() {
     };
 
     return (
-        <ScreenContainer maxWidth="wizard">
+        <ScreenContainer>
             <KeyboardAvoidingView
                 behavior={Platform.select({ ios: "padding", android: "height" })}
                 className="flex-1"
@@ -147,6 +155,62 @@ export function WizardProfileScreen() {
                             />
                         </View>
 
+                        {/* Dropdown Selects for taxRegime and mainStack */}
+                        <View className="gap-4">
+                            <Controller
+                                control={control}
+                                name="taxRegime"
+                                render={({ field }) => (
+                                    <Select
+                                        label="Regime Tributário"
+                                        placeholder="Selecione o regime..."
+                                        value={field.value}
+                                        options={TAX_REGIME_OPTIONS}
+                                        onValueChange={field.onChange}
+                                        error={errors.taxRegime?.message}
+                                    />
+                                )}
+                            />
+
+                            <Controller
+                                control={control}
+                                name="mainStack"
+                                render={({ field }) => (
+                                    <Select
+                                        label="Especialidade / Stack principal"
+                                        placeholder="Selecione sua stack..."
+                                        value={field.value}
+                                        options={MAIN_STACK_OPTIONS}
+                                        onValueChange={field.onChange}
+                                        error={errors.mainStack?.message}
+                                    />
+                                )}
+                            />
+                        </View>
+
+                        {/* Segmented Controls for Workload */}
+                        <View className="gap-3 pt-1">
+                            <View className="gap-0.5">
+                                <Text className="text-sm font-semibold text-foreground dark:text-slate-200">
+                                    Carga de trabalho atual
+                                </Text>
+                                <Text className="text-xs text-muted-foreground">
+                                    Impacta o ajuste de urgência no cálculo
+                                </Text>
+                            </View>
+                            <Controller
+                                control={control}
+                                name="workload"
+                                render={({ field }) => (
+                                    <SegmentedControl
+                                        options={WORKLOAD_OPTIONS}
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                    />
+                                )}
+                            />
+                        </View>
+
                         {/* Experience Level Selection */}
                         <View className="gap-3 pt-1">
                             <View className="gap-0.5">
@@ -201,18 +265,16 @@ export function WizardProfileScreen() {
                         {/* Navigation Actions */}
                         <View className="gap-3 pt-2">
                             <Button
-                                size="lg"
+                                size="md"
                                 label="Próximo"
                                 onPress={handleSubmit(handleSaveProfile)}
                                 isLoading={isSubmitting}
-                                className="rounded-3xl"
                             />
                             <Button
-                                size="lg"
+                                size="md"
                                 variant="ghost"
                                 label="Voltar"
                                 onPress={goBack}
-                                className="rounded-3xl"
                             />
                         </View>
                     </View>

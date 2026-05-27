@@ -8,7 +8,7 @@ export type ClientLocation = "local" | "regional" | "national" | "international"
 export type BusinessImpact = "low" | "medium" | "high" | "strategic";
 export type ScopeClarity = "high" | "medium" | "low";
 export type RiskLevel = "low" | "medium" | "high";
-export type PaymentMethod = "upfront50" | "upfront30" | "delivery" | "installments";
+export type PaymentMethod = "pix" | "boleto" | "creditCard" | "international";
 export type BillingMethod = "fixed" | "hourly" | "subscription" | "milestone";
 export type InstallmentOption = "oneTime" | "two" | "three" | "fourPlus";
 export type PaymentTerm =
@@ -30,11 +30,11 @@ export interface ProfileData {
     desiredIncome: string;
     hoursPerWeek: string;
     experienceLevel: ExperienceLevel | "";
+    taxRegime: string;
     mainStack: string;
+    workload: string;
     monthlyCosts: string;
     financialReserve: string;
-    taxRegime?: string;
-    workload?: string;
 }
 
 export interface ProjectData {
@@ -42,9 +42,12 @@ export interface ProjectData {
     complexity: ComplexityLevel | "";
     deadline: string;
     scopeDocumented: boolean;
-    isUrgent: "yes" | "no" | "";
-    meetings: string;
-    maintenance: string;
+    maintenance: boolean;
+    meetingsFrequency: string;
+    externalDependencies: string;
+    reuseComponents: boolean;
+    toolsUsed: string;
+    estimatedHours: string;
 }
 
 export interface ClientData {
@@ -57,6 +60,7 @@ export interface ClientData {
 
 export interface AdjustmentsData {
     billingMethod: BillingMethod | "";
+    paymentMethod: PaymentMethod | "";
     installmentOption: InstallmentOption | "";
     paymentTerm: PaymentTerm | "";
     downPayment: DownPayment | "";
@@ -67,9 +71,8 @@ export interface AdjustmentsData {
 export interface RiskReport {
     score: number;
     level: RiskLevel;
-    summary: string;
-    riskFactors: string[];
-    positiveFactors: string[];
+    factors: Array<{ name: string; score: number }>;
+    recommendation: string;
 }
 
 export interface WizardFormData {
@@ -101,14 +104,14 @@ export interface PricingAlert {
 }
 
 export type Probability = 'alta' | 'media' | 'baixa' | 'fechada' | 'perdida';
+export type HistoryStatus = "draft" | "sent" | "won" | "lost";
 
 export interface HistoryItem {
     id: string;
     name: string;
-    clientName?: string;
     value: number;
     date: string;
-    status: "draft" | "sent" | "won" | "lost";
+    status: HistoryStatus;
     createdAt: string;
     probability?: Probability;
 }

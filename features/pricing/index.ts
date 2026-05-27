@@ -8,23 +8,17 @@ import type {
     ProjectData,
     RiskReport,
 } from "@/types";
-
-const clamp = (value: number) => Math.min(100, Math.max(0, value));
-
-const parseNumber = (value: string) => {
-    const normalized = value
-        .trim()
-        .replace(/[R$,.\s]/g, "")
-        .replace(/,/g, ".");
-    const parsed = Number(normalized);
-    return Number.isFinite(parsed) ? parsed : 0;
-};
-
-const parseDeadlineMonths = (deadline: string) => {
-    const match = deadline.match(/(\d+)\s*(m[eê]s|mes|month|months)/i);
-    if (!match) return null;
-    return Number(match[1]);
-};
+import {
+    HOURLY_RATE_CONFIG,
+    STACK_MULTIPLIERS,
+    WORKLOAD_MULTIPLIERS,
+    PROJECT_MULTIPLIERS,
+    CLIENT_MULTIPLIERS,
+    FINANCIAL_MULTIPLIERS,
+    PRICE_RANGE,
+    CONFIDENCE_CONFIG,
+} from "@/constants/pricing";
+import { clamp, parseNumber, parseDeadlineWeeks } from "./utils";
 
 export function calculatePricingResult(
     profile: ProfileData,
@@ -33,132 +27,155 @@ export function calculatePricingResult(
     adjustments: AdjustmentsData,
     risk: RiskReport,
 ): PricingResult {
-    const desiredIncome = Math.max(0, parseNumber(profile.desiredIncome));
-    const monthlyCosts = Math.max(0, parseNumber(profile.monthlyCosts));
-    const financialReserve = Math.max(0, parseNumber(profile.financialReserve));
-    const durationMonths = Math.max(
-        2,
-        Math.min(parseDeadlineMonths(project.deadline ?? "") ?? 3, 6),
+    // 1. Calcular Valor-Hora Base (RF-006)
+    // Valor/Hora = (Rendimento + Despesas de Trabalho + Gastos Pessoais) / Horas Produtivas Mensais
+    const desiredIncome = parseNumber(profile.desiredIncome);
+    const monthlyCosts = parseNumber(profile.monthlyCosts) || 0;
+    const financialReserve = parseNumber(profile.financialReserve) || 0;
+    const hoursPerWeek = parseNumber(profile.hoursPerWeek) || 40;
+    const monthlyHours = hoursPerWeek * HOURLY_RATE_CONFIG.WEEKS_PER_MONTH;
+
+    const totalMonthlyNeeds = desiredIncome + monthlyCosts + financialReserve;
+    const baseHourlyRate = totalMonthlyNeeds / monthlyHours;
+
+    // Ajuste Especialidade/Stack
+    const stackAdjustment =
+      (STACK_MULTIPLIERS[profile.mainStack as keyof typeof STACK_MULTIPLIERS] ??
+       STACK_MULTIPLIERS.default);
+
+    // Ajuste de Carga de Trabalho
+    const workloadAdjustment =
+      (WORKLOAD_MULTIPLIERS[profile.workload as keyof typeof WORKLOAD_MULTIPLIERS] ??
+       WORKLOAD_MULTIPLIERS.normal);
+
+    // Valor-hora com ajustes de especialidade e carga
+    const adjustedHourlyRate = baseHourlyRate * stackAdjustment * workloadAdjustment;
+
+    // 2. Preço de Base do Projeto (RF-003)
+    const estimatedHours = parseNumber(project.estimatedHours) || 80;
+    const projectBasePrice = Math.max(
+      HOURLY_RATE_CONFIG.MIN_PROJECT_PRICE,
+      Math.round(adjustedHourlyRate * estimatedHours),
     );
 
-    const baseMonthly = desiredIncome + monthlyCosts + financialReserve / 6;
-    const basePrice = Math.max(4500, Math.round(baseMonthly * durationMonths * 0.82));
+    // 3. Multiplicadores de Projeto (RF-003)
+    let projectMult = 0;
+    const weeks = parseDeadlineWeeks(project.deadline || "");
+    if (weeks !== null && weeks < 2) {
+        projectMult += PROJECT_MULTIPLIERS.urgency;
+    }
+    if (!project.scopeDocumented) {
+        projectMult += PROJECT_MULTIPLIERS.undocumentedScope;
+    }
+    if (project.meetingsFrequency === "diaria") {
+        projectMult += PROJECT_MULTIPLIERS.dailyMeetings;
+    }
+    if (project.maintenance) {
+        projectMult += PROJECT_MULTIPLIERS.maintenance;
+    }
+    if (project.reuseComponents) {
+        projectMult += PROJECT_MULTIPLIERS.componentReuse;
+    }
 
-    const complexityAdjustment =
-        project.complexity === "high" ? 0.18 : project.complexity === "medium" ? 0.09 : 0;
+    // 4. Multiplicadores do Cliente (RF-004)
+    let clientMult = 0;
+    if (client.digitalExperience === "none") {
+        clientMult += CLIENT_MULTIPLIERS.noDigitalExperience;
+    }
+    if (client.recurringClient === "yes") {
+        clientMult += CLIENT_MULTIPLIERS.recurringClientDiscount;
+    }
+    if (client.businessImpact === "high" || client.businessImpact === "strategic") {
+        clientMult += CLIENT_MULTIPLIERS.highBusinessImpact;
+    }
 
-    const impactAdjustment =
-        client.businessImpact === "high" || client.businessImpact === "strategic"
-            ? 0.1
-            : client.businessImpact === "medium"
-              ? 0.05
-              : 0;
+    // 5. Ajustes Financeiros (RF-006)
+    let financialMult = 0;
+    if (adjustments.paymentMethod === "creditCard") {
+        financialMult += FINANCIAL_MULTIPLIERS.creditCardFee;
+    } else if (adjustments.paymentMethod === "international") {
+        financialMult += FINANCIAL_MULTIPLIERS.internationalFee;
+    }
 
-    const riskAdjustment = (risk.score / 100) * 0.22;
-    const urgencyAdjustment = project.isUrgent === "yes" ? 0.08 : 0;
-    const paymentTermAdjustment =
-        adjustments.paymentTerm === "fortyFiveDays" || adjustments.paymentTerm === "sixtyDays"
-            ? 0.04
-            : adjustments.paymentTerm === "thirtyDays"
-              ? 0.02
-              : -0.01;
-    const downPaymentAdjustment =
-        adjustments.downPayment === "none"
-            ? 0.06
-            : adjustments.downPayment === "tenPercent"
-              ? 0.03
-              : 0;
-    const installmentAdjustment =
-        adjustments.installmentOption === "fourPlus"
-            ? 0.05
-            : adjustments.installmentOption === "three"
-              ? 0.03
-              : 0;
-    const contractAdjustment = adjustments.formalContract === "no" ? 0.05 : -0.03;
-    const recurringAdjustment = client.recurringClient === "yes" ? -0.03 : 0;
+    if (adjustments.paymentTerm === "fortyFiveDays" || adjustments.paymentTerm === "sixtyDays") {
+        financialMult += FINANCIAL_MULTIPLIERS.longPaymentTerm;
+    }
 
-    const totalAdjustment =
-        complexityAdjustment +
-        impactAdjustment +
-        riskAdjustment +
-        urgencyAdjustment +
-        paymentTermAdjustment +
-        downPaymentAdjustment +
-        installmentAdjustment +
-        contractAdjustment +
-        recurringAdjustment;
+    // Soma final de ajustes
+    const totalAdjustment = projectMult + clientMult + financialMult;
 
-    const recommended = Math.round(basePrice * (1 + totalAdjustment));
-    const minimum = Math.round(basePrice * 0.88);
-    const premium = Math.round(recommended * 1.15);
+    // Valor Recomendado, Mínimo e Premium
+    const recommended = Math.round(projectBasePrice * (1 + totalAdjustment));
+    const minimum = Math.round(recommended * PRICE_RANGE.minimum);
+    const premium = Math.round(recommended * PRICE_RANGE.premium);
 
+    // Confiança (RF-007)
+    const confidenceBonus =
+      adjustments.formalContract === "yes"
+        ? CONFIDENCE_CONFIG.formalContractBonus
+        : CONFIDENCE_CONFIG.noContractPenalty;
     const confidence = clamp(
-        Math.round(70 + (100 - risk.score) * 0.2 + (adjustments.formalContract === "yes" ? 6 : -5)),
+      Math.round(
+        CONFIDENCE_CONFIG.baseScore +
+          (100 - risk.score) * CONFIDENCE_CONFIG.riskFactor +
+          confidenceBonus,
+      ),
+      CONFIDENCE_CONFIG.min,
+      CONFIDENCE_CONFIG.max,
     );
 
-    const priceDelta = recommended - basePrice;
+    // Breakdown Items
     const breakdown: PricingBreakdownItem[] = [
         {
-            label: "Valor base estimado",
-            value: basePrice,
-            description: "Fundamentado na renda desejada, custos e prazo do projeto.",
+            label: "Valor Base Técnico",
+            value: projectBasePrice,
+            description: `Baseado em ${estimatedHours}h estimadas no valor-hora de R$ ${Math.round(adjustedHourlyRate)}/h (incluso stack, impostos e carga).`,
         },
         {
-            label: "Ajuste por risco e prazo",
-            value: Math.round(
-                basePrice * (complexityAdjustment + riskAdjustment + urgencyAdjustment),
-            ),
-            description: "Fatores que refletem risco, complexidade e escopo do cronograma.",
+            label: "Ajustes do Escopo & Cronograma",
+            value: Math.round(projectBasePrice * projectMult),
+            description: "Modificadores de urgência, documentação, reuniões diárias e manutenção pós-projeto.",
         },
         {
-            label: "Ajustes de proposta",
-            value: Math.round(
-                basePrice *
-                    (impactAdjustment +
-                        paymentTermAdjustment +
-                        downPaymentAdjustment +
-                        installmentAdjustment +
-                        contractAdjustment +
-                        recurringAdjustment),
-            ),
-            description:
-                "Recomendações adicionais para tornar a proposta mais confiável e competitiva.",
+            label: "Fatores de Perfil de Cliente",
+            value: Math.round(projectBasePrice * clientMult),
+            description: "Adequação ao nível digital do cliente, desconto por fidelidade e geração de receita.",
         },
         {
-            label: "Margem premium",
-            value: Math.round(premium - recommended),
-            description: "Espaço de negociação saudável para uma proposta de alto valor.",
+            label: "Ajustes Financeiros e Taxas",
+            value: Math.round(projectBasePrice * financialMult),
+            description: "Custos de processamento (cartão, internacional) e prazos longos de faturamento.",
         },
     ];
 
+    // Alertas (RF-007)
     const alerts: PricingAlert[] = [];
 
-    if (risk.score >= 75) {
+    if (risk.score >= 70) {
         alerts.push({
             type: "warning",
-            message: "Alto risco identificado — fortaleça o escopo e o contrato antes de avançar.",
+            message: "Perfil de Risco Alto: Certifique-se de cobrar sinal na assinatura do contrato.",
         });
     }
 
     if (adjustments.formalContract === "no") {
         alerts.push({
             type: "warning",
-            message: "Sem contrato formal. Reforce os termos para proteger o projeto.",
+            message: "Atenção: A falta de um contrato formal coloca o recebimento do projeto sob alto risco.",
+        });
+    }
+
+    if (weeks !== null && weeks < 2) {
+        alerts.push({
+            type: "warning",
+            message: "Prazo Crítico: Projetos em menos de 2 semanas sofrem alta probabilidade de atrasos.",
         });
     }
 
     if (client.recurringClient === "yes") {
         alerts.push({
             type: "info",
-            message: "Cliente recorrente melhora previsibilidade e autoridade da proposta.",
-        });
-    }
-
-    if (priceDelta <= 0) {
-        alerts.push({
-            type: "info",
-            message:
-                "A proposta está alinhada com o valor base calculado; a oferta é conservadora.",
+            message: "Cliente Recorrente: Aplicação de desconto de 10% de fidelidade ativa.",
         });
     }
 
