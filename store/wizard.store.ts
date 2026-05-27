@@ -15,7 +15,9 @@ const emptyProfile: ProfileData = {
     desiredIncome: "",
     hoursPerWeek: "",
     experienceLevel: "",
+    taxRegime: "",
     mainStack: "",
+    workload: "",
     monthlyCosts: "",
     financialReserve: "",
 };
@@ -25,9 +27,12 @@ const emptyProject: ProjectData = {
     complexity: "",
     deadline: "",
     scopeDocumented: false,
-    isUrgent: "",
-    meetings: "",
-    maintenance: "",
+    maintenance: false,
+    meetingsFrequency: "",
+    externalDependencies: "",
+    reuseComponents: false,
+    toolsUsed: "",
+    estimatedHours: "",
 };
 
 const emptyClient: ClientData = {
@@ -40,6 +45,7 @@ const emptyClient: ClientData = {
 
 const emptyAdjustments: AdjustmentsData = {
     billingMethod: "fixed",
+    paymentMethod: "pix",
     installmentOption: "oneTime",
     paymentTerm: "thirtyDays",
     downPayment: "none",

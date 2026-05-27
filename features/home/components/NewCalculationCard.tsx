@@ -4,7 +4,6 @@ import { Text, View, Pressable } from 'react-native';
 
 import { Button } from '@/components/ui';
 import { HOME_COPY } from '@/constants';
-import { colors } from '@/theme';
 
 interface NewCalculationCardProps {
   onPress: () => void;
@@ -12,23 +11,41 @@ interface NewCalculationCardProps {
 
 export function NewCalculationCard({ onPress }: NewCalculationCardProps) {
   return (
-    <View className="mb-8 overflow-hidden rounded-2xl">
+    <View
+      className="mb-8 overflow-hidden rounded-2xl"
+      style={{
+        shadowColor: '#2563eb',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.28,
+        shadowRadius: 20,
+        elevation: 10,
+      }}
+    >
+      {/* Gradiente blue → cyan (btn-glow do design system) */}
       <LinearGradient
-        colors={[colors.primary, '#1d4ed8']}
+        colors={['#2563eb', '#06b6d4']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ padding: 24, borderRadius: 16 }}
       >
-        <View className="flex-row items-start justify-between mb-4">
+        {/* Badge de destaque */}
+        <View className="flex-row items-center gap-1.5 mb-4 self-start">
+          <View className="w-1.5 h-1.5 rounded-full bg-cyan-300 opacity-80" />
+          <Text className="text-[10px] font-bold tracking-widest text-white/70 uppercase">
+            Nova Estimativa
+          </Text>
+        </View>
+
+        <View className="flex-row items-start justify-between mb-5">
           <View className="flex-1 pr-4">
-            <Text className="text-sm text-white/80 mb-2">
+            <Text className="text-white/75 text-sm font-light mb-1">
               {HOME_COPY.hero.subtitle}
             </Text>
-            <Text className="text-xl font-semibold text-white">
+            <Text className="text-xl font-bold text-white leading-snug">
               {HOME_COPY.hero.title}
             </Text>
           </View>
-          <TrendingUp color="rgba(255,255,255,0.6)" size={40} strokeWidth={1.5} />
+          <TrendingUp color="rgba(255,255,255,0.5)" size={42} strokeWidth={1.5} />
         </View>
 
         {/* Botão branco com texto primary */}

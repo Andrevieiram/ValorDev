@@ -1,6 +1,6 @@
 import { Platform, Pressable, View, type PressableProps, type ViewProps } from "react-native";
 import { cn } from "@/utils";
-import { useTheme } from "@/theme/ThemeContext";
+import { useTheme } from "@/theme";
 
 type CardVariant = "default" | "outlined" | "elevated" | "glass";
 
@@ -35,8 +35,7 @@ const nativeStyles = {
 };
 
 export function Card({ variant = "default", onPress, className, children, style, ...props }: CardProps) {
-    const themeContext = useTheme();
-    const theme = themeContext?.theme || "light";
+    const { theme } = useTheme();
     const isWeb = Platform.OS === "web";
 
     const base = cn(
@@ -45,8 +44,8 @@ export function Card({ variant = "default", onPress, className, children, style,
         className,
     );
 
-    // No mobile nativo, aplica cores via style prop (CSS variables não funcionam)
-    const nativeColorStyle = isWeb ? {} : nativeStyles[theme][variant];
+    // Aplica cores via style prop em todas as plataformas para garantir suporte ao dark mode
+    const nativeColorStyle = nativeStyles[theme][variant];
 
     const combinedStyle = [nativeColorStyle, style];
 

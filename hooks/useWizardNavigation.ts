@@ -10,7 +10,7 @@ export function useWizardNavigation() {
 
     const goToNextStep = (currentStepKey: WizardStepKey | "intro") => {
         if (currentStepKey === "intro") {
-            return router.push(ROUTES.wizard.profile);
+            return router.push(ROUTES.wizard.project);
         }
 
         const currentIndex = wizardStepKeys.indexOf(currentStepKey);
@@ -25,7 +25,7 @@ export function useWizardNavigation() {
 
     return {
         goToIntro: () => router.push(ROUTES.wizard.intro),
-        goToProfile: () => router.push(ROUTES.wizard.profile),
+        goToProfile: () => router.push(ROUTES.setupProfile),
         goToProject: () => router.push(ROUTES.wizard.project),
         goToClient: () => router.push(ROUTES.wizard.client),
         goToAdjustments: () => router.push(ROUTES.wizard.adjustments),

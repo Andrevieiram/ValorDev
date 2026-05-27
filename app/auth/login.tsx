@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { z } from "zod";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthStore } from "@/store/auth.store";
 import { AuthContainer } from "@/components/layout/AuthContainer";
 import { Input } from "@/components/ui/Input";
@@ -10,36 +12,31 @@ import { useWizardStore } from "@/store/wizard.store";
 import { ArrowLeft } from "lucide-react-native";
 
 const loginSchema = z.object({
-    email: z.string().nonempty("E-mail é obrigatório").email("Formato de e-mail inválido"),
+    email: z.string().min(1, "E-mail é obrigatório").email("Formato de e-mail inválido"),
     password: z
         .string()
-        .nonempty("Senha é obrigatória")
+        .min(1, "Senha é obrigatória")
         .min(6, "A senha deve ter pelo menos 6 caracteres"),
 });
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
     const router = useRouter();
     const login = useAuthStore((s) => s.login);
-
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
+    const [generalError, setGeneralError] = useState("");
 
-    const handleLogin = async () => {
-        setErrors({});
-        const validation = loginSchema.safeParse({ email, password });
+    const { control, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: {
+            email: "",
+            password: "",
+        },
+    });
 
-        if (!validation.success) {
-            const fieldErrors: Record<string, string> = {};
-            for (const issue of validation.error.issues) {
-                if (issue.path[0]) {
-                    fieldErrors[issue.path[0] as string] = issue.message;
-                }
-            }
-            setErrors(fieldErrors);
-            return;
-        }
+    const handleLogin = async (data: LoginFormData) => {
+        setGeneralError("");
 
         setIsLoading(true);
         try {
@@ -47,11 +44,11 @@ export default function LoginScreen() {
             await new Promise((resolve) => setTimeout(resolve, 800));
 
             // Extract name from email for mock purposes
-            const mockName = email.split("@")[0].replace(/[^a-zA-Z0-9]/g, " ");
+            const mockName = data.email.split("@")[0].replace(/[^a-zA-Z0-9]/g, " ");
             const formattedName = mockName.charAt(0).toUpperCase() + mockName.slice(1);
 
-            // Save session
-            await login(email, formattedName);
+            // Save session with password verification
+            await login(data.email, data.password, formattedName);
 
             // Verify if the user has completed their financial profile
             const hasProfile = useWizardStore.getState().profile.desiredIncome !== "";
@@ -62,7 +59,8 @@ export default function LoginScreen() {
                 router.replace("/setup-profile");
             }
         } catch (err) {
-            setErrors({ general: "Ocorreu um erro ao fazer login. Tente novamente." });
+            const errorMessage = err instanceof Error ? err.message : "Ocorreu um erro ao fazer login. Tente novamente.";
+            setGeneralError(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -103,44 +101,56 @@ export default function LoginScreen() {
                     </Text>
                 </View>
 
-                {errors.general && (
+                {generalError && (
                     <View className="p-3 bg-destructive/10 border border-destructive/25 rounded-xl">
                         <Text
                             className="text-xs text-destructive text-center"
                             style={{ fontFamily: "Inter_500Medium" }}
                         >
-                            {errors.general}
+                            {generalError}
                         </Text>
                     </View>
                 )}
 
                 <View className="gap-4">
-                    <Input
-                        label="E-mail"
-                        labelClassName="text-slate-300"
-                        placeholder="seu-email@dominio.com"
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        error={errors.email}
+                    <Controller
+                        control={control}
+                        name="email"
+                        render={({ field: { value, onChange } }) => (
+                            <Input
+                                label="E-mail"
+                                labelClassName="text-slate-300"
+                                placeholder="seu-email@dominio.com"
+                                value={value}
+                                onChangeText={onChange}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                error={errors.email?.message}
+                            />
+                        )}
                     />
 
-                    <Input
-                        label="Senha"
-                        labelClassName="text-slate-300"
-                        placeholder="••••••••"
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                        autoCapitalize="none"
-                        error={errors.password}
+                    <Controller
+                        control={control}
+                        name="password"
+                        render={({ field: { value, onChange } }) => (
+                            <Input
+                                label="Senha"
+                                labelClassName="text-slate-300"
+                                placeholder="••••••••"
+                                value={value}
+                                onChangeText={onChange}
+                                secureTextEntry
+                                autoCapitalize="none"
+                                error={errors.password?.message}
+                            />
+                        )}
                     />
 
                     <Button
                         variant="primary"
                         size="lg"
-                        onPress={handleLogin}
+                        onPress={handleSubmit(handleLogin)}
                         isLoading={isLoading}
                         className="w-full rounded-xl"
                     >

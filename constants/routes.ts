@@ -7,7 +7,6 @@ export const ROUTES = {
     settings: "/settings",
     wizard: {
         intro: "/wizard",
-        profile: "/wizard/profile",
         project: "/wizard/project",
         client: "/wizard/client",
         adjustments: "/wizard/adjustments",

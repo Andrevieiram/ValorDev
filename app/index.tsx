@@ -1,8 +1,8 @@
+import React from 'react';
 import { Redirect } from 'expo-router';
-import { ActivityIndicator, View } from 'react-native';
-
+import { useAuthStore } from '@/store/auth.store';
 import { ROUTES } from '@/constants';
-import { useAuthStore } from '@/store';
+import { View, ActivityIndicator } from 'react-native';
 
 export default function Index() {
   const { user, skipped, isHydrated } = useAuthStore();
