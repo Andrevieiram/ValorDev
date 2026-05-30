@@ -42,3 +42,24 @@ yarn-error.*
 
 # Documentação
 Documentação/
+
+# Maven
+target/
+
+# IntelliJ
+.idea/
+*.iml
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# Arquivos compilados
+*.class
+
+# Logs
+*.log

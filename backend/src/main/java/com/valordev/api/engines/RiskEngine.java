@@ -20,19 +20,19 @@ public class RiskEngine {
         }
 
         // Prazo muito curto
-        if ("< 1 mês".equals(input.getDeadline()) || "< 2 semanas".equals(input.getDeadline())) {
+        if (isUrgentDeadline(input.getDeadline())) {
             riskScore += 25;
-            riskFactors.add("Prazo muito curto");
+            riskFactors.add("Prazo muito curto (< 2 semanas)");
         }
 
         // Complexidade Alta
-        if ("Alta".equals(input.getComplexity())) {
+        if ("high".equalsIgnoreCase(input.getComplexity())) {
             riskScore += 20;
             riskFactors.add("Alta complexidade técnica");
         }
 
         // Dependências externas
-        if (input.getExternalDependencies() != null && !input.getExternalDependencies().isEmpty() && !"Nenhuma".equals(input.getExternalDependencies())) {
+        if (input.getExternalDependencies() != null && !input.getExternalDependencies().isEmpty()) {
             riskScore += 15;
             riskFactors.add("Dependências externas (" + input.getExternalDependencies() + ")");
         }
@@ -43,14 +43,14 @@ public class RiskEngine {
             riskFactors.add("Ausência de contrato formal");
         }
 
-        // Risco de Pagamento
-        if ("100% no final".equals(input.getDownPayment())) {
+        // Risco de Pagamento: 100% no final (down_payment = "none")
+        if ("none".equalsIgnoreCase(input.getDownPayment())) {
             riskScore += 20;
-            riskFactors.add("Pagamento apenas no final");
+            riskFactors.add("Pagamento apenas no final (sem entrada)");
         }
 
         // Cliente inexperiente
-        if ("Nenhuma".equals(input.getDigitalExperience()) || "Baixa".equals(input.getDigitalExperience())) {
+        if ("none".equalsIgnoreCase(input.getDigitalExperience()) || "beginner".equalsIgnoreCase(input.getDigitalExperience())) {
             riskScore += 15;
             riskFactors.add("Cliente com pouca/nenhuma experiência digital");
         }
@@ -63,11 +63,30 @@ public class RiskEngine {
         return new RiskResult((short) riskScore, level, riskFactors);
     }
 
+    private boolean isUrgentDeadline(String deadline) {
+        if (deadline == null || deadline.isEmpty()) {
+            return false;
+        }
+        
+        try {
+            // Tenta extrair número da string (ex: "3 semanas" -> 3)
+            String[] parts = deadline.toLowerCase().split("\\s+");
+            if (parts.length > 0) {
+                int weeks = Integer.parseInt(parts[0]);
+                return weeks < 2;
+            }
+        } catch (NumberFormatException e) {
+            // Se não conseguir fazer parse, retorna false
+        }
+        
+        return false;
+    }
+
     private String calculateRiskLevel(int score) {
-        if (score <= 25) return "Baixo";
-        if (score <= 50) return "Médio";
-        if (score <= 75) return "Alto";
-        return "Crítico";
+        if (score <= 25) return "low";
+        if (score <= 50) return "medium";
+        if (score <= 75) return "high";
+        return "critical";
     }
 
     public record RiskResult(short score, String level, List<String> factors) {}

@@ -73,6 +73,9 @@ public class Proposal {
     @Column(name = "estimated_hours", nullable = false)
     private int estimatedHours;
 
+    @Column(name = "tools_used", columnDefinition = "TEXT")
+    private String toolsUsed;
+
     // Inputs (Adjustments/Financial)
     @Column(name = "billing_method", nullable = false, length = 20)
     private String billingMethod;
@@ -80,11 +83,17 @@ public class Proposal {
     @Column(name = "payment_method", nullable = false, length = 20)
     private String paymentMethod;
 
+    @Column(name = "installment_option", nullable = false, length = 20)
+    private String installmentOption;
+
     @Column(name = "payment_term", nullable = false, length = 20)
     private String paymentTerm;
 
     @Column(name = "down_payment", nullable = false, length = 20)
     private String downPayment;
+
+    @Column(name = "recurring_billing", nullable = false, length = 20)
+    private String recurringBilling;
 
     @Column(name = "formal_contract", nullable = false)
     private boolean formalContract;

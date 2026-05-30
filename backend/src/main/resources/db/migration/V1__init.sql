@@ -1,4 +1,8 @@
--- V1__init.sql
+-- V1__init.sql - Script único com todas as tabelas e dados de teste
+
+-- ============================================================
+-- TABELAS
+-- ============================================================
 
 CREATE TABLE users (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -37,7 +41,7 @@ CREATE TABLE proposals (
     client_id            UUID REFERENCES clients(id),
     name                 VARCHAR(180) NOT NULL,
 
-    -- inputs (campos do wizard, sem JSONB por simplicidade)
+    -- inputs (campos do wizard)
     project_type         VARCHAR(20) NOT NULL,
     complexity           VARCHAR(20) NOT NULL,
     deadline             VARCHAR(60) NOT NULL,
@@ -52,6 +56,9 @@ CREATE TABLE proposals (
     payment_term         VARCHAR(20) NOT NULL,
     down_payment         VARCHAR(20) NOT NULL,
     formal_contract      BOOLEAN NOT NULL,
+    installment_option   VARCHAR(20) NOT NULL DEFAULT 'oneTime',
+    recurring_billing    VARCHAR(20) NOT NULL DEFAULT 'no',
+    tools_used           TEXT,
 
     -- resultado calculado
     minimum_price        NUMERIC(12,2) NOT NULL,

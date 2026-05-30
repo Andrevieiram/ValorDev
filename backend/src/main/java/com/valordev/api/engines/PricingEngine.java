@@ -14,7 +14,7 @@ public class PricingEngine {
 
     public PricingResult calculate(UserProfile profile, CreateProposalRequest input, RiskEngine.RiskResult riskResult) {
         // 1. Calcula o valor hora base
-        BigDecimal taxRate = PricingConstants.TAX_RATES.getOrDefault(profile.getTaxRegime(), BigDecimal.ZERO);
+        BigDecimal taxRate = PricingConstants.TAX_RATES.getOrDefault(profile.getTaxRegime().toLowerCase(), BigDecimal.ZERO);
         
         // Custo total = DesiredIncome + MonthlyCosts + FinancialReserve
         BigDecimal totalDesired = profile.getDesiredIncome()
@@ -40,41 +40,55 @@ public class PricingEngine {
 
         // 3. Aplica os modificadores do Projeto
         BigDecimal projectMultiplier = BigDecimal.ONE;
-        if ("< 2 semanas".equals(input.getDeadline())) {
+        
+        // Prazo muito curto (< 2 semanas)
+        if (isUrgentDeadline(input.getDeadline())) {
             projectMultiplier = projectMultiplier.add(PricingConstants.PROJECT_MULTIPLIERS.get("urgency"));
         }
+        
         if (!input.getScopeDocumented()) {
             projectMultiplier = projectMultiplier.add(PricingConstants.PROJECT_MULTIPLIERS.get("undocumentedScope"));
         }
-        if ("Diária".equals(input.getMeetingsFrequency())) {
+        
+        if ("diaria".equalsIgnoreCase(input.getMeetingsFrequency())) {
             projectMultiplier = projectMultiplier.add(PricingConstants.PROJECT_MULTIPLIERS.get("dailyMeetings"));
         }
+        
         if (input.getMaintenance()) {
             projectMultiplier = projectMultiplier.add(PricingConstants.PROJECT_MULTIPLIERS.get("maintenance"));
         }
+        
         if (input.getReuseComponents()) {
             projectMultiplier = projectMultiplier.add(PricingConstants.PROJECT_MULTIPLIERS.get("componentReuse"));
         }
 
         // Modificadores de Cliente
-        if ("Nenhuma".equals(input.getDigitalExperience())) {
+        if ("none".equalsIgnoreCase(input.getDigitalExperience()) || "leigo".equalsIgnoreCase(input.getDigitalExperience())) {
             projectMultiplier = projectMultiplier.add(PricingConstants.CLIENT_MULTIPLIERS.get("noDigitalExperience"));
         }
-        if ("Sim".equals(input.getRecurringClient())) {
+        
+        if ("yes".equalsIgnoreCase(input.getRecurringClient())) {
             projectMultiplier = projectMultiplier.add(PricingConstants.CLIENT_MULTIPLIERS.get("recurringClientDiscount"));
         }
-        if ("Alto".equals(input.getBusinessImpact())) {
+        
+        if ("high".equalsIgnoreCase(input.getBusinessImpact()) || "strategic".equalsIgnoreCase(input.getBusinessImpact())) {
             projectMultiplier = projectMultiplier.add(PricingConstants.CLIENT_MULTIPLIERS.get("highBusinessImpact"));
         }
 
         // Modificadores Financeiros
-        if ("Cartão de Crédito".equals(input.getPaymentMethod())) {
+        if ("creditCard".equalsIgnoreCase(input.getPaymentMethod())) {
             projectMultiplier = projectMultiplier.add(PricingConstants.FINANCIAL_MULTIPLIERS.get("creditCardFee"));
         }
-        if ("Internacional".equals(input.getLocation())) {
+        
+        if ("international".equalsIgnoreCase(input.getPaymentMethod())) {
             projectMultiplier = projectMultiplier.add(PricingConstants.FINANCIAL_MULTIPLIERS.get("internationalFee"));
         }
-        if ("30-60 dias".equals(input.getPaymentTerm()) || "60+ dias".equals(input.getPaymentTerm())) {
+        
+        if ("international".equalsIgnoreCase(input.getLocation())) {
+            projectMultiplier = projectMultiplier.add(PricingConstants.FINANCIAL_MULTIPLIERS.get("internationalFee"));
+        }
+        
+        if ("fortyFiveDays".equalsIgnoreCase(input.getPaymentTerm()) || "sixtyDays".equalsIgnoreCase(input.getPaymentTerm())) {
             projectMultiplier = projectMultiplier.add(PricingConstants.FINANCIAL_MULTIPLIERS.get("longPaymentTerm"));
         }
 
@@ -110,6 +124,28 @@ public class PricingEngine {
         }
 
         return new PricingResult(minValue, calculatedValue, premValue, (short) confidence, breakdown);
+    }
+
+    /**
+     * Verifica se o prazo é urgente (< 2 semanas)
+     */
+    private boolean isUrgentDeadline(String deadline) {
+        if (deadline == null || deadline.isEmpty()) {
+            return false;
+        }
+        
+        try {
+            // Tenta extrair número da string (ex: "3 semanas" -> 3)
+            String[] parts = deadline.toLowerCase().split("\\s+");
+            if (parts.length > 0) {
+                int weeks = Integer.parseInt(parts[0]);
+                return weeks < 2;
+            }
+        } catch (NumberFormatException e) {
+            // Se não conseguir fazer parse, retorna false
+        }
+        
+        return false;
     }
 
     public record PricingResult(

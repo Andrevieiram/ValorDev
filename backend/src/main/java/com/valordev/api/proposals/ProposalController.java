@@ -1,6 +1,8 @@
 package com.valordev.api.proposals;
 
 import com.valordev.api.auth.User;
+import com.valordev.api.proposals.dto.CalculatePricingRequest;
+import com.valordev.api.proposals.dto.CalculatePricingResponse;
 import com.valordev.api.proposals.dto.CreateProposalRequest;
 import com.valordev.api.proposals.dto.ProposalResponse;
 import jakarta.validation.Valid;
@@ -29,6 +31,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ProposalController {
 
     private final ProposalService proposalService;
+
+    @Operation(summary = "Calcular preço (simulação)", description = "Calcula o preço e risco sem salvar a proposta. Útil para simulações.")
+    @PostMapping("/calculate")
+    public ResponseEntity<CalculatePricingResponse> calculate(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody CalculatePricingRequest request) {
+        return ResponseEntity.ok(proposalService.calculatePricing(user, request));
+    }
 
     @Operation(summary = "Criar nova proposta", description = "Recebe os dados do Wizard, calcula o preço e risco e salva a proposta")
     @PostMapping

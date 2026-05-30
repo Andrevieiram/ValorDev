@@ -5,6 +5,8 @@ import com.valordev.api.engines.PricingEngine;
 import com.valordev.api.engines.RiskEngine;
 import com.valordev.api.profile.UserProfile;
 import com.valordev.api.profile.UserProfileRepository;
+import com.valordev.api.proposals.dto.CalculatePricingRequest;
+import com.valordev.api.proposals.dto.CalculatePricingResponse;
 import com.valordev.api.proposals.dto.CreateProposalRequest;
 import com.valordev.api.proposals.dto.ProposalResponse;
 import jakarta.persistence.EntityNotFoundException;
@@ -57,10 +59,13 @@ public class ProposalService {
                 .externalDependencies(request.getExternalDependencies())
                 .reuseComponents(request.getReuseComponents())
                 .estimatedHours(request.getEstimatedHours())
+                .toolsUsed(request.getToolsUsed())
                 .billingMethod(request.getBillingMethod())
                 .paymentMethod(request.getPaymentMethod())
+                .installmentOption(request.getInstallmentOption())
                 .paymentTerm(request.getPaymentTerm())
                 .downPayment(request.getDownPayment())
+                .recurringBilling(request.getRecurringBilling())
                 .formalContract(request.getFormalContract())
                 .minimumPrice(pricingResult.minimumPrice())
                 .recommendedPrice(pricingResult.recommendedPrice())
@@ -137,10 +142,13 @@ public class ProposalService {
                 .externalDependencies(p.getExternalDependencies())
                 .reuseComponents(p.isReuseComponents())
                 .estimatedHours(p.getEstimatedHours())
+                .toolsUsed(p.getToolsUsed())
                 .billingMethod(p.getBillingMethod())
                 .paymentMethod(p.getPaymentMethod())
+                .installmentOption(p.getInstallmentOption())
                 .paymentTerm(p.getPaymentTerm())
                 .downPayment(p.getDownPayment())
+                .recurringBilling(p.getRecurringBilling())
                 .formalContract(p.isFormalContract())
                 .minimumPrice(p.getMinimumPrice())
                 .recommendedPrice(p.getRecommendedPrice())
@@ -205,6 +213,58 @@ public class ProposalService {
                                 .perdida(com.valordev.api.dashboard.dto.DashboardSummaryDto.Category.builder().count(countPerdida).value(valPerdida).build())
                                 .build())
                         .build())
+                .build();
+    }
+
+    /**
+     * Calcula o preço da proposta sem salvar no banco de dados.
+     * Útil para simulações e pré-visualizações.
+     */
+    public CalculatePricingResponse calculatePricing(User user, CalculatePricingRequest request) {
+        UserProfile profile = userProfileRepository.findById(user.getId())
+                .orElseThrow(() -> new IllegalStateException("O perfil do usuário não foi configurado. Preencha o perfil primeiro."));
+
+        // Cria um CreateProposalRequest a partir do CalculatePricingRequest apenas para cálculo
+        CreateProposalRequest proposalRequest = new CreateProposalRequest();
+        proposalRequest.setProjectType(request.getProjectType());
+        proposalRequest.setComplexity(request.getComplexity());
+        proposalRequest.setDeadline(request.getDeadline());
+        proposalRequest.setScopeDocumented(request.getScopeDocumented());
+        proposalRequest.setMaintenance(request.getMaintenance());
+        proposalRequest.setMeetingsFrequency(request.getMeetingsFrequency());
+        proposalRequest.setExternalDependencies(request.getExternalDependencies());
+        proposalRequest.setReuseComponents(request.getReuseComponents());
+        proposalRequest.setEstimatedHours(request.getEstimatedHours());
+        proposalRequest.setClientType(request.getClientType());
+        proposalRequest.setDigitalExperience(request.getDigitalExperience());
+        proposalRequest.setRecurringClient(request.getRecurringClient());
+        proposalRequest.setLocation(request.getLocation());
+        proposalRequest.setBusinessImpact(request.getBusinessImpact());
+        proposalRequest.setBillingMethod(request.getBillingMethod());
+        proposalRequest.setPaymentMethod(request.getPaymentMethod());
+        proposalRequest.setPaymentTerm(request.getPaymentTerm());
+        proposalRequest.setDownPayment(request.getDownPayment());
+        proposalRequest.setFormalContract(request.getFormalContract());
+
+        RiskEngine.RiskResult riskResult = riskEngine.calculateRisk(proposalRequest);
+        PricingEngine.PricingResult pricingResult = pricingEngine.calculate(profile, proposalRequest, riskResult);
+
+        List<CalculatePricingResponse.BreakdownItemDto> breakdownItems = pricingResult.breakdown().stream()
+                .map(b -> CalculatePricingResponse.BreakdownItemDto.builder()
+                        .label(b.label())
+                        .value(b.value())
+                        .build())
+                .toList();
+
+        return CalculatePricingResponse.builder()
+                .minimumPrice(pricingResult.minimumPrice())
+                .recommendedPrice(pricingResult.recommendedPrice())
+                .premiumPrice(pricingResult.premiumPrice())
+                .confidence(pricingResult.confidence())
+                .riskScore(riskResult.score())
+                .riskLevel(riskResult.level())
+                .breakdown(breakdownItems)
+                .riskFactors(riskResult.factors())
                 .build();
     }
 }

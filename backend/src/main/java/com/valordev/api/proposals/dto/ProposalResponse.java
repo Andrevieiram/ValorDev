@@ -23,11 +23,14 @@ public class ProposalResponse {
     private String externalDependencies;
     private Boolean reuseComponents;
     private Integer estimatedHours;
+    private String toolsUsed;
 
     private String billingMethod;
     private String paymentMethod;
+    private String installmentOption;
     private String paymentTerm;
     private String downPayment;
+    private String recurringBilling;
     private Boolean formalContract;
 
     private BigDecimal minimumPrice;
