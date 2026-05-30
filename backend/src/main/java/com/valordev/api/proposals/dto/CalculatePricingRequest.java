@@ -1,15 +1,12 @@
-package main.java.com.valordev.api.proposals.dto;
+package com.valordev.api.proposals.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class CreateProposalRequest {
+public class CalculatePricingRequest {
     
-    @NotBlank
-    private String name;
-
     // Project Input
     @NotBlank
     private String projectType;
@@ -28,11 +25,8 @@ public class CreateProposalRequest {
     private Boolean reuseComponents;
     @NotNull
     private Integer estimatedHours;
-    private String toolsUsed;
 
     // Client Input
-    @NotBlank
-    private String clientName;
     @NotBlank
     private String clientType;
     @NotBlank
@@ -50,13 +44,9 @@ public class CreateProposalRequest {
     @NotBlank
     private String paymentMethod;
     @NotBlank
-    private String installmentOption;
-    @NotBlank
     private String paymentTerm;
     @NotBlank
     private String downPayment;
-    @NotBlank
-    private String recurringBilling;
     @NotNull
     private Boolean formalContract;
 }

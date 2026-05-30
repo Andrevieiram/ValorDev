@@ -35,4 +35,35 @@ export const proposalsApi = {
   getDashboardSummary: (): Promise<DashboardSummaryDto> => {
     return apiClient.get<DashboardSummaryDto>('/dashboard/summary');
   },
+
+  // Calcula pricing e risco a partir dos dados do wizard
+  calculate: (data: WizardFormData): Promise<any> => {
+    const payload = {
+      // Project
+      projectType: data.project.projectType,
+      complexity: data.project.complexity,
+      deadline: data.project.deadline,
+      scopeDocumented: data.project.scopeDocumented,
+      maintenance: data.project.maintenance || false,
+      meetingsFrequency: data.project.meetingsFrequency,
+      externalDependencies: data.project.externalDependencies,
+      reuseComponents: data.project.reuseComponents || false,
+      estimatedHours: parseInt(String(data.project.estimatedHours)) || 0,
+
+      // Client
+      clientType: data.client.clientType || 'individual',
+      digitalExperience: data.client.digitalExperience,
+      recurringClient: data.client.recurringClient,
+      location: data.client.location || 'national',
+      businessImpact: data.client.businessImpact,
+
+      // Adjustments
+      billingMethod: data.adjustments.billingMethod,
+      paymentMethod: data.adjustments.paymentMethod,
+      paymentTerm: data.adjustments.paymentTerm,
+      downPayment: data.adjustments.downPayment,
+      formalContract: data.adjustments.formalContract === 'yes' ? true : false,
+    };
+    return apiClient.post<any>('/proposals/calculate', payload);
+  },
 };
