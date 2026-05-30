@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Alert, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
@@ -7,6 +7,7 @@ import { Badge, Button, Card } from '@/components/ui';
 import { useWizardNavigation } from '@/hooks';
 import { useWizardStore, useHistoryStore } from '@/store';
 import { formatCurrency } from '@/utils';
+import { proposalsApi } from '@/api/proposals.api';
 
 const riskLabelMap = {
   low: { label: 'Baixo risco', variant: 'success' as const },
@@ -25,7 +26,10 @@ const projectTypeLabels: Record<string, string> = {
 export default function ResultScreen() {
   const { goBack, goHome } = useWizardNavigation();
   const router = useRouter();
+  const [isSaving, setIsSaving] = useState(false);
   const project = useWizardStore((s) => s.project);
+  const client = useWizardStore((s) => s.client);
+  const adjustments = useWizardStore((s) => s.adjustments);
   const result = useWizardStore((s) => s.result);
 
   // Se não houver resultado do backend, redirecionar de volta
@@ -51,18 +55,34 @@ export default function ResultScreen() {
 
   const handleSave = async () => {
     try {
+      setIsSaving(true);
+      const proposalName = projectTypeLabels[project.projectType] || 'Projeto Personalizado';
+
+      // Criar proposta no backend
+      await proposalsApi.create({
+        name: proposalName,
+        ...project,
+        ...client,
+        ...adjustments,
+      });
+
+      // Salvar no histórico local após sucesso no backend
       await useHistoryStore.getState().addItem({
-        name: projectTypeLabels[project.projectType] || 'Projeto Personalizado',
+        name: proposalName,
         value: result.recommended,
         date: new Date().toLocaleDateString('pt-BR'),
         status: 'sent',
       });
-      Alert.alert('Sucesso', 'O cálculo foi salvo com sucesso no seu histórico!', [
+
+      Alert.alert('Sucesso', 'Proposta salva com sucesso no seu histórico!', [
         { text: 'Ver Histórico', onPress: () => router.replace('/history') },
         { text: 'Ir para Início', onPress: () => goHome() },
       ]);
-    } catch {
-      Alert.alert('Erro', 'Não foi possível salvar o cálculo.');
+    } catch (error) {
+      console.error('Erro ao salvar proposta:', error);
+      Alert.alert('Erro', 'Não foi possível salvar a proposta. Tente novamente.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -182,8 +202,9 @@ export default function ResultScreen() {
           <View className="gap-3 pt-2">
             <Button
               size="lg"
-              label="Salvar no Histórico"
+              label={isSaving ? 'Salvando...' : 'Salvar no Histórico'}
               onPress={handleSave}
+              disabled={isSaving}
               className="rounded-3xl shadow-md py-4"
             />
             <Button
@@ -191,6 +212,7 @@ export default function ResultScreen() {
               variant="secondary"
               label="Exportar PDF"
               onPress={handleExport}
+              disabled={isSaving}
               className="rounded-3xl"
             />
             <Button
@@ -198,6 +220,7 @@ export default function ResultScreen() {
               variant="ghost"
               label="Refazer cálculo"
               onPress={goBack}
+              disabled={isSaving}
               className="rounded-3xl"
             />
           </View>
