@@ -98,7 +98,11 @@ describe('calculateRisk', () => {
 
   it('deve classificar como high quando score > 70', () => {
     const complexProject = { ...mockProject, complexity: 'high', scopeDocumented: false };
-    const problematicClient = { ...mockClient, digitalExperience: 'none', businessImpact: 'strategic' };
+    const problematicClient = {
+      ...mockClient,
+      digitalExperience: 'none',
+      businessImpact: 'strategic',
+    };
     const riskless = { ...mockAdjustments, formalContract: 'no' };
 
     const report = calculateRisk(complexProject, problematicClient, riskless);
