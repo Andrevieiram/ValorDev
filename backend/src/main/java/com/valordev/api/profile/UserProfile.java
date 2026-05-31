@@ -1,17 +1,14 @@
 package com.valordev.api.profile;
 
 import com.valordev.api.auth.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.valordev.api.common.enums.ExperienceLevel;
+import com.valordev.api.common.enums.TaxRegime;
+import com.valordev.api.common.enums.TechStack;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -32,25 +29,28 @@ public class UserProfile {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "desired_income", nullable = false)
+    @Column(name = "desired_income", nullable = false, precision = 10, scale = 2)
     private BigDecimal desiredIncome;
 
     @Column(name = "hours_per_week", nullable = false)
     private Integer hoursPerWeek;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "experience_level", nullable = false, length = 20)
-    private String experienceLevel;
+    private ExperienceLevel experienceLevel;
 
-    @Column(name = "tax_regime", nullable = false, length = 20)
-    private String taxRegime;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tax_regime", nullable = false, length = 30)
+    private TaxRegime taxRegime;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "main_stack", nullable = false, length = 20)
-    private String mainStack;
+    private TechStack mainStack;
 
     @Column(nullable = false, length = 20)
     private String workload;
 
-    @Column(name = "monthly_costs", nullable = false)
+    @Column(name = "monthly_costs", nullable = false, precision = 10, scale = 2)
     @Builder.Default
     private BigDecimal monthlyCosts = BigDecimal.ZERO;
 

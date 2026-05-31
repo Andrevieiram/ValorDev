@@ -1,4 +1,4 @@
-package com.valordev.api;
+package main.java.com.valordev;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

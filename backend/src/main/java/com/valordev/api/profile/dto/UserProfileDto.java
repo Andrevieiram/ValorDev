@@ -1,15 +1,15 @@
 package com.valordev.api.profile.dto;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import com.valordev.api.profile.dto.enums.*;
+import jakarta.validation.constraints.*;
+import com.valordev.api.common.enums.ExperienceLevel;
+import com.valordev.api.common.enums.TaxRegime;
+import com.valordev.api.common.enums.TechStack;
 
 import java.math.BigDecimal;
 
 public record UserProfileDto(
         @NotNull(message = "Renda desejada é obrigatória")
-        @DecimalMin(value = 0, message = "Renda desejada não pode ser negativa")
+        @DecimalMin(value = "0.00", message = "Renda desejada não pode ser negativa")
         BigDecimal desiredIncome,
 
         @NotNull(message = "Horas por semana é obrigatório")
@@ -34,7 +34,7 @@ public record UserProfileDto(
         BigDecimal monthlyCosts,
 
         @NotNull(message = "Reserva financeira é obrigatória")
-        @DecimalMin(value = 0, message = "Renda desejada não pode ser negativa")
+        @DecimalMin(value = "0.00", message = "Renda desejada não pode ser negativa")
         BigDecimal financialReserve
 ) {
 }
