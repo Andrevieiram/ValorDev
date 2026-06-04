@@ -179,7 +179,7 @@ export function WizardAdjustmentsScreen() {
             <View className="gap-3 pt-2">
               <Button
                 size="md"
-                label="Ver revisão"
+                label="Ver mapa de risco"
                 onPress={handleSubmit(handleSaveAdjustments)}
                 isLoading={isSubmitting}
               />

@@ -16,11 +16,11 @@ class ApiError extends Error {
 
 async function getAuthToken(): Promise<string | null> {
   try {
-    const session = await AsyncStorage.getItem('@pricing-pro/auth-session');
+    const session = await AsyncStorage.getItem('pricing-pro.auth-session');
     if (session) {
       const parsed = JSON.parse(session);
-      // Na Fase 2 teremos um token real, por enquanto simulamos ou lemos do objeto
-      return parsed?.user?.token || null;
+      // Retorna o token armazenado
+      return parsed?.token || null;
     }
   } catch (e) {
     console.error('Failed to read token', e);

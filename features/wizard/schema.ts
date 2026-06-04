@@ -168,6 +168,21 @@ export const COMPLEXITY_OPTIONS = [
   { value: 'high', label: 'Alta (0%)' },
 ] as const;
 
+export const EXTERNAL_DEPENDENCIES_OPTIONS = [
+  { value: 'none', label: 'Nenhuma (+0%)' },
+  { value: 'standard', label: 'APIs/Serviços Padrão (+8%)' },
+  { value: 'critical', label: 'Dependências Críticas (+15%)' },
+  { value: 'legacy', label: 'Integração com Sistemas Legados (+20%)' },
+  { value: 'ai', label: 'IA/ML/Apis Complexas (+25%)' },
+] as const;
+
+export const TOOLS_USED_OPTIONS = [
+  { value: 'standard', label: 'Tecnologias Padrão (+0%)' },
+  { value: 'specialized', label: 'Frameworks Especializados (+5%)' },
+  { value: 'emerging', label: 'Tecnologias Emergentes (+10%)' },
+  { value: 'custom', label: 'Soluções Customizadas (+15%)' },
+] as const;
+
 export const WIZARD_PROJECT_SCHEMA = z.object({
   projectType: z.enum(['landing', 'website', 'webapp', 'mobile', 'api']),
   complexity: z.enum(['low', 'medium', 'high']),
@@ -175,9 +190,9 @@ export const WIZARD_PROJECT_SCHEMA = z.object({
   scopeDocumented: z.boolean(),
   maintenance: z.boolean(),
   meetingsFrequency: z.enum(['diaria', 'semanal', 'quinzenal', 'mensal']),
-  externalDependencies: z.string().optional(),
+  externalDependencies: z.enum(['none', 'standard', 'critical', 'legacy', 'ai']),
   reuseComponents: z.boolean(),
-  toolsUsed: z.string().optional(),
+  toolsUsed: z.enum(['standard', 'specialized', 'emerging', 'custom']),
   estimatedHours: z
     .string()
     .nonempty('Horas estimadas são obrigatórias')

@@ -15,14 +15,22 @@ public class CalculatePricingResponse {
     private short confidence;
     private short riskScore;
     private String riskLevel;
+    private String riskRecommendation;
     
     private List<BreakdownItemDto> breakdown;
-    private List<String> riskFactors;
+    private List<RiskFactorDto> riskFactors;
 
     @Data
     @Builder
     public static class BreakdownItemDto {
         private String label;
         private BigDecimal value;
+    }
+
+    @Data
+    @Builder
+    public static class RiskFactorDto {
+        private String name;
+        private int score;
     }
 }

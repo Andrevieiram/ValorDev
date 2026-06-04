@@ -1,11 +1,11 @@
-spring:
+﻿spring:
   application:
     name: valordev-api
   
   datasource:
     url: jdbc:postgresql://localhost:5432/valordev
     username: ${DB_USER:postgres}
-    password: 123456
+    password: ${DB_PASS:root}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -23,7 +23,7 @@ spring:
     locations: classpath:db/migration
 
 server:
-  port: 8080
+  port: 8084
   error:
     include-message: always
     include-binding-errors: always
