@@ -26,7 +26,6 @@ export interface ButtonProps extends PressableProps {
   children?: ReactNode;
   className?: string;
   textClassName?: string;
-  /** Override de style para o texto (cor, fontFamily, etc.) */
   textStyle?: TextStyle;
 }
 
@@ -77,16 +76,22 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
   const resolveCustomStyle = (state: any) =>
     typeof customStyle === 'function' ? customStyle(state) : customStyle;
 
-  const textNode = (defaultColor: string, defaultFontFamily = 'Inter_600SemiBold') =>
-    isLoading ? (
-      <ActivityIndicator color={defaultColor} />
-    ) : typeof content === 'string' || typeof content === 'number' ? (
+  const textNode = (defaultColor: string, fontFamily = 'Inter_600SemiBold') => {
+    if (isLoading) {
+      return <ActivityIndicator color={defaultColor} />;
+    }
+
+    return typeof content === 'string' || typeof content === 'number' ? (
       <View className="flex-row items-center justify-center gap-2">
         {leftIcon}
         <Text
           className={cn('text-center tracking-wide', sizeTextStyles[size], textClassName)}
           style={[
-            { color: defaultColor, fontFamily: defaultFontFamily, fontSize: sizeTextSize[size] },
+            {
+              color: defaultColor,
+              fontFamily,
+              fontSize: sizeTextSize[size],
+            },
             textStyle,
           ]}
         >
@@ -96,6 +101,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
     ) : (
       content
     );
+  };
 
   if (variant === 'primary') {
     return (
@@ -120,15 +126,13 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
           colors={['#2563eb', '#06b6d4']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={[
-            {
-              alignItems: 'center',
-              justifyContent: 'center',
-              ...sizePadding[size],
-            },
-          ]}
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            ...sizePadding[size],
+          }}
         >
-          {textNode('#ffffff', 'Inter_600SemiBold')}
+          {textNode('#ffffff')}
         </LinearGradient>
       </Pressable>
     );
