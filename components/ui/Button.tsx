@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import type { ReactNode } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -21,21 +22,18 @@ export interface ButtonProps extends PressableProps {
   size?: ButtonSize;
   isLoading?: boolean;
   label?: string;
-  leftIcon?: React.ReactNode;
-  children?: React.ReactNode;
+  leftIcon?: ReactNode;
+  children?: ReactNode;
   className?: string;
   textClassName?: string;
   /** Override de style para o texto (cor, fontFamily, etc.) */
   textStyle?: TextStyle;
 }
 
-const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'px-4 py-2.5 min-h-[36px]',
-  md: 'px-6 py-3 min-h-[44px]',
-  lg: 'px-8 py-3.5 min-h-[50px]',
-};
-
-const sizePadding: Record<ButtonSize, { paddingHorizontal: number; paddingVertical: number; minHeight: number }> = {
+const sizePadding: Record<
+  ButtonSize,
+  { paddingHorizontal: number; paddingVertical: number; minHeight: number }
+> = {
   sm: { paddingHorizontal: 16, paddingVertical: 10, minHeight: 36 },
   md: { paddingHorizontal: 24, paddingVertical: 12, minHeight: 44 },
   lg: { paddingHorizontal: 32, paddingVertical: 14, minHeight: 50 },
@@ -68,7 +66,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
     style: customStyle,
     ...props
   },
-  ref,
+  ref
 ) {
   const isDisabled = disabled || isLoading;
   const content = children ?? label;
@@ -86,11 +84,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
       <View className="flex-row items-center justify-center gap-2">
         {leftIcon}
         <Text
-          className={cn(
-            'text-center tracking-wide',
-            sizeTextStyles[size],
-            textClassName,
-          )}
+          className={cn('text-center tracking-wide', sizeTextStyles[size], textClassName)}
           style={[
             { color: defaultColor, fontFamily: defaultFontFamily, fontSize: sizeTextSize[size] },
             textStyle,
@@ -108,11 +102,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
       <Pressable
         ref={ref}
         disabled={isDisabled}
-        className={cn(
-          'overflow-hidden rounded-xl',
-          isDisabled && 'opacity-50',
-          className
-        )}
+        className={cn('overflow-hidden rounded-xl', isDisabled && 'opacity-50', className)}
         style={(state) => [
           {
             shadowColor: '#2563eb',
@@ -152,7 +142,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
         className={cn(
           'flex-row items-center justify-center rounded-xl',
           isDisabled && 'opacity-50',
-          className,
+          className
         )}
         style={(state) => [
           {
@@ -183,7 +173,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
         className={cn(
           'flex-row items-center justify-center rounded-xl',
           isDisabled && 'opacity-50',
-          className,
+          className
         )}
         style={(state) => [
           {
@@ -211,7 +201,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
       className={cn(
         'flex-row items-center justify-center rounded-xl',
         isDisabled && 'opacity-50',
-        className,
+        className
       )}
       style={(state) => [
         {
