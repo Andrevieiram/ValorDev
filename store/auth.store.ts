@@ -1,130 +1,116 @@
-import { create } from "zustand";
-import { loadSensitiveJson, persistSensitiveJson, removeSensitivePersisted } from "./persistence";
-import { hashPassword, comparePassword } from "@/utils/password";
+import { create } from 'zustand';
+import { loadSensitiveJson, persistSensitiveJson, removeSensitivePersisted } from './persistence';
+import { authApi } from '@/api/auth.api';
 
 interface User {
   name: string;
   email: string;
 }
 
-interface StoredUser extends User {
-  passwordHash: string;
-}
-
-interface LoginAttempt {
-  email: string;
-  count: number;
-  lockedUntil: number | null;
-}
-
 interface AuthState {
   user: User | null;
+  token: string | null;
   skipped: boolean;
   isHydrated: boolean;
-  loginAttempts: Map<string, LoginAttempt>;
 
-  login: (email: string, password: string, name?: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   skipAuth: () => Promise<void>;
   hydrate: () => Promise<void>;
 }
 
-const MAX_LOGIN_ATTEMPTS = 5;
-const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutos
-
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
+  token: null,
   skipped: false,
   isHydrated: false,
-  loginAttempts: new Map(),
 
-  login: async (email, password, name = "Desenvolvedor") => {
-    const attempts = get().loginAttempts;
-    const attempt = attempts.get(email);
-
-    // Verificar se está bloqueado
-    if (attempt && attempt.lockedUntil && attempt.lockedUntil > Date.now()) {
-      const minutesLeft = Math.ceil((attempt.lockedUntil - Date.now()) / 60000);
-      throw new Error(`Conta bloqueada. Tente novamente em ${minutesLeft} minutos.`);
+  login: async (email, password) => {
+    try {
+      const response = await authApi.login(email, password);
+      set({
+        user: { name: response.name, email: response.email },
+        token: response.token,
+        skipped: false,
+      });
+      // Armazenar token e usuário
+      await persistSensitiveJson('pricing-pro.auth-session', {
+        user: { name: response.name, email: response.email },
+        token: response.token,
+        skipped: false,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'E-mail ou senha inválidos';
+      throw new Error(message);
     }
-
-    // Resetar se o lockout expirou
-    if (attempt && attempt.lockedUntil && attempt.lockedUntil <= Date.now()) {
-      attempts.delete(email);
-    }
-
-    const stored = await loadSensitiveJson<{ user: StoredUser | null; skipped: boolean }>(
-      "pricing-pro-auth-session"
-    );
-
-    if (!stored || !stored.user || stored.user.email !== email || !stored.user.passwordHash) {
-      // Incrementar tentativas falhas
-      const newAttempt = attempt ? { ...attempt, count: attempt.count + 1 } : { email, count: 1, lockedUntil: null };
-
-      if (newAttempt.count >= MAX_LOGIN_ATTEMPTS) {
-        newAttempt.lockedUntil = Date.now() + LOCKOUT_DURATION_MS;
-      }
-
-      attempts.set(email, newAttempt);
-      set({ loginAttempts: new Map(attempts) });
-
-      throw new Error("E-mail ou senha inválidos");
-    }
-
-    const isPasswordValid = await comparePassword(password, stored.user.passwordHash);
-    if (!isPasswordValid) {
-      // Incrementar tentativas falhas
-      const newAttempt = attempt ? { ...attempt, count: attempt.count + 1 } : { email, count: 1, lockedUntil: null };
-
-      if (newAttempt.count >= MAX_LOGIN_ATTEMPTS) {
-        newAttempt.lockedUntil = Date.now() + LOCKOUT_DURATION_MS;
-      }
-
-      attempts.set(email, newAttempt);
-      set({ loginAttempts: new Map(attempts) });
-
-      throw new Error("E-mail ou senha inválidos");
-    }
-
-    // Login bem-sucedido: limpar tentativas e defazer lockout
-    attempts.delete(email);
-    const user: User = { name: stored.user.name, email: stored.user.email };
-    set({ user, skipped: false, loginAttempts: new Map(attempts) });
   },
 
   register: async (name, email, password) => {
-    const passwordHash = await hashPassword(password);
-    const storedUser: StoredUser = { name, email, passwordHash };
-    set({ user: { name, email }, skipped: false });
-    await persistSensitiveJson("pricing-pro-auth-session", { user: storedUser, skipped: false });
+    try {
+      const response = await authApi.register(name, email, password);
+      set({
+        user: { name: response.name, email: response.email },
+        token: response.token,
+        skipped: false,
+      });
+      // Armazenar token e usuário
+      await persistSensitiveJson('pricing-pro.auth-session', {
+        user: { name: response.name, email: response.email },
+        token: response.token,
+        skipped: false,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao registrar';
+      throw new Error(message);
+    }
   },
 
   logout: async () => {
-    // Limpar estado de autenticação
-    set({ user: null, skipped: false });
-    // Remover sessão criptografada
-    await removeSensitivePersisted("pricing-pro-auth-session");
-    // Nota: wizard e histórico são mantidos para referência futura
+    set({ user: null, token: null, skipped: false });
+    await removeSensitivePersisted('pricing-pro.auth-session');
   },
 
   skipAuth: async () => {
-    set({ user: null, skipped: true });
-    await persistSensitiveJson("pricing-pro-auth-session", { user: null, skipped: true });
+    set({ user: null, token: null, skipped: true });
+    await persistSensitiveJson('pricing-pro.auth-session', {
+      user: null,
+      token: null,
+      skipped: true,
+    });
   },
 
   hydrate: async () => {
-    const stored = await loadSensitiveJson<{ user: StoredUser | null; skipped: boolean }>(
-      "pricing-pro-auth-session"
-    );
-    if (stored && stored.user) {
-      const user: User = { name: stored.user.name, email: stored.user.email };
-      set({
-        user,
-        skipped: stored.skipped,
-        isHydrated: true,
-      });
-    } else {
+    try {
+      const stored = await loadSensitiveJson<{
+        user: User | null;
+        token: string | null;
+        skipped: boolean;
+      }>('pricing-pro.auth-session');
+
+      if (stored) {
+        if (stored.user && stored.token) {
+          set({
+            user: stored.user,
+            token: stored.token,
+            skipped: stored.skipped,
+            isHydrated: true,
+          });
+        } else if (stored.skipped) {
+          set({
+            user: null,
+            token: null,
+            skipped: true,
+            isHydrated: true,
+          });
+        } else {
+          set({ isHydrated: true });
+        }
+      } else {
+        set({ isHydrated: true });
+      }
+    } catch (error) {
+      console.error('Error hydrating auth store:', error);
       set({ isHydrated: true });
     }
   },

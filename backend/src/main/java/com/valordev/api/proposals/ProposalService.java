@@ -256,6 +256,13 @@ public class ProposalService {
                         .build())
                 .toList();
 
+        List<CalculatePricingResponse.RiskFactorDto> riskFactors = riskResult.factors().stream()
+                .map(f -> CalculatePricingResponse.RiskFactorDto.builder()
+                        .name(f.getName())
+                        .score(f.getScore())
+                        .build())
+                .toList();
+
         return CalculatePricingResponse.builder()
                 .minimumPrice(pricingResult.minimumPrice())
                 .recommendedPrice(pricingResult.recommendedPrice())
@@ -263,8 +270,9 @@ public class ProposalService {
                 .confidence(pricingResult.confidence())
                 .riskScore(riskResult.score())
                 .riskLevel(riskResult.level())
+                .riskRecommendation(riskResult.recommendation())
                 .breakdown(breakdownItems)
-                .riskFactors(riskResult.factors())
+                .riskFactors(riskFactors)
                 .build();
     }
 }

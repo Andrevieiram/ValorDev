@@ -2,7 +2,7 @@ import React from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Calendar, Clock3, Link, Wrench } from 'lucide-react-native';
+import { Calendar, Clock3 } from 'lucide-react-native';
 
 import { Button, Input, Select, Switch } from '@/components/ui';
 import { ScreenContainer } from '@/components/layout/ScreenContainer';
@@ -12,6 +12,8 @@ import { useWizardStore } from '@/store';
 import {
   PROJECT_TYPE_OPTIONS,
   COMPLEXITY_OPTIONS,
+  EXTERNAL_DEPENDENCIES_OPTIONS,
+  TOOLS_USED_OPTIONS,
   WIZARD_PROJECT_SCHEMA,
   type WizardProjectFormValues,
 } from '../schema';
@@ -43,9 +45,9 @@ export function WizardProjectScreen() {
       scopeDocumented: project.scopeDocumented ?? false,
       maintenance: project.maintenance ?? false,
       meetingsFrequency: (project.meetingsFrequency as any) || 'semanal',
-      externalDependencies: project.externalDependencies || '',
+      externalDependencies: (project.externalDependencies as any) || 'none',
       reuseComponents: project.reuseComponents ?? false,
-      toolsUsed: project.toolsUsed || '',
+      toolsUsed: (project.toolsUsed as any) || 'standard',
       estimatedHours: project.estimatedHours || '',
     },
   });
@@ -210,17 +212,13 @@ export function WizardProjectScreen() {
                 control={control}
                 name="externalDependencies"
                 render={({ field }) => (
-                  <Input
+                  <Select
                     label="Dependências externas criticas"
-                    placeholder="Ex: API de pagamentos, IA, legado"
+                    placeholder="Selecione o tipo..."
                     value={field.value}
-                    onChangeText={field.onChange}
-                    onBlur={field.onBlur}
+                    options={EXTERNAL_DEPENDENCIES_OPTIONS}
+                    onValueChange={field.onChange}
                     error={errors.externalDependencies?.message}
-                    helper="APIs, sistemas de terceiros ou legados."
-                    leftIcon={<Link size={18} className="text-primary" />}
-                    className="rounded-2xl"
-                    inputClassName="py-3 text-sm"
                   />
                 )}
               />
@@ -229,17 +227,13 @@ export function WizardProjectScreen() {
                 control={control}
                 name="toolsUsed"
                 render={({ field }) => (
-                  <Input
+                  <Select
                     label="Ferramentas e bibliotecas"
-                    placeholder="Ex: React, Node, PostgreSQL"
+                    placeholder="Selecione a categoria..."
                     value={field.value}
-                    onChangeText={field.onChange}
-                    onBlur={field.onBlur}
+                    options={TOOLS_USED_OPTIONS}
+                    onValueChange={field.onChange}
                     error={errors.toolsUsed?.message}
-                    helper="Tecnologias principais de desenvolvimento."
-                    leftIcon={<Wrench size={18} className="text-primary" />}
-                    className="rounded-2xl"
-                    inputClassName="py-3 text-sm"
                   />
                 )}
               />
