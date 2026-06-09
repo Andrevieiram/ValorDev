@@ -44,6 +44,14 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     const response = await fetch(url, { ...options, headers });
 
     if (!response.ok) {
+      // Se receber 401 (Unauthorized), o JWT expirou ou é inválido
+      if (response.status === 401) {
+        // Remove o token do AsyncStorage
+        await AsyncStorage.removeItem('pricing-pro.auth-session');
+        // Redirecionamento e limpeza de estado costumam ser feitos observando a store,
+        // mas garantir que limpamos a sessão aqui é crucial para não ficar preso.
+      }
+
       let errorData;
       try {
         errorData = await response.json();
