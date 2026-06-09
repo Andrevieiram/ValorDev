@@ -14,15 +14,45 @@ export const proposalsApi = {
   },
 
   // Cria uma nova proposta (O backend executa os cálculos)
-  create: (data: WizardFormData): Promise<ProposalDto> => {
-    // Transforma o formato de WizardFormData do frontend para um payload flat
-    // ou o backend recebe como DTO aninhado. Assumindo DTO mais flat:
+  create: (data: any): Promise<ProposalDto> => {
+    // Pode receber tanto WizardFormData (aninhado) quanto o formato plano de ResultScreen
+    const project = data.project || data;
+    const client = data.client || data;
+    const adjustments = data.adjustments || data;
+
     const payload = {
-      name: 'Projeto sem nome', // Pode ser adicionado no wizard depois
-      ...data.project,
-      ...data.client,
-      ...data.adjustments,
+      name: data.name || 'Projeto sem nome',
+      
+      // Project
+      projectType: project.projectType,
+      complexity: project.complexity,
+      deadline: project.deadline,
+      scopeDocumented: !!project.scopeDocumented,
+      maintenance: !!project.maintenance,
+      meetingsFrequency: project.meetingsFrequency,
+      externalDependencies: project.externalDependencies || 'none',
+      reuseComponents: !!project.reuseComponents,
+      estimatedHours: parseInt(String(project.estimatedHours), 10) || 0,
+      toolsUsed: project.toolsUsed || 'standard',
+
+      // Client
+      clientName: client.clientName || 'Cliente Padrão',
+      clientType: client.clientType || 'business',
+      digitalExperience: client.digitalExperience,
+      recurringClient: client.recurringClient,
+      location: client.location || 'national',
+      businessImpact: client.businessImpact,
+
+      // Adjustments
+      billingMethod: adjustments.billingMethod,
+      paymentMethod: adjustments.paymentMethod,
+      installmentOption: adjustments.installmentOption || 'oneTime',
+      paymentTerm: adjustments.paymentTerm,
+      downPayment: adjustments.downPayment,
+      recurringBilling: adjustments.recurringBilling || 'no',
+      formalContract: adjustments.formalContract === 'yes' || adjustments.formalContract === true,
     };
+
     return apiClient.post<ProposalDto>('/proposals', payload);
   },
 

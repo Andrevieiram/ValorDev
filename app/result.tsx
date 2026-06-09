@@ -47,8 +47,18 @@ export default function ResultScreen() {
     );
   }
 
-  const positiveHighlights = (result.riskFactors ?? []).slice(0, 3);
-  const riskHighlights = (result.riskFactors ?? []).slice(0, 3);
+  const positiveHighlights = (result.riskFactors ?? [])
+    .filter((factor): factor is { name: string; score: number } => 
+      typeof factor === 'object' && factor !== null && 'score' in factor && factor.score < 0
+    )
+    .slice(0, 3);
+
+  const riskHighlights = (result.riskFactors ?? [])
+    .filter((factor) => 
+      typeof factor === 'string' || 
+      (typeof factor === 'object' && factor !== null && 'score' in factor && factor.score >= 0)
+    )
+    .slice(0, 3);
 
   const handleExport = () =>
     Alert.alert('Exportar PDF', 'Essa função de exportação em PDF será disponibilizada em breve.');
@@ -66,13 +76,8 @@ export default function ResultScreen() {
         ...adjustments,
       });
 
-      // Salvar no histórico local após sucesso no backend
-      await useHistoryStore.getState().addItem({
-        name: proposalName,
-        value: result.recommended,
-        date: new Date().toLocaleDateString('pt-BR'),
-        status: 'sent',
-      });
+      // Recarrega o histórico a partir do backend para obter a proposta com o ID correto (UUID)
+      await useHistoryStore.getState().fetchFromApi();
 
       Alert.alert('Sucesso', 'Proposta salva com sucesso no seu histórico!', [
         { text: 'Ver Histórico', onPress: () => router.replace('/history') },
@@ -174,10 +179,10 @@ export default function ResultScreen() {
                   </Text>
                   {positiveHighlights.map((item) => (
                     <Text
-                      key={item}
+                      key={typeof item === 'string' ? item : item.name}
                       className="text-sm text-foreground dark:text-slate-200 leading-5"
                     >
-                      • {item}
+                      • {typeof item === 'string' ? item : `${item.name} (${item.score}%)`}
                     </Text>
                   ))}
                 </View>
@@ -189,8 +194,11 @@ export default function ResultScreen() {
                     Fatores de atenção
                   </Text>
                   {riskHighlights.map((item) => (
-                    <Text key={item} className="text-sm text-destructive leading-5">
-                      • {item}
+                    <Text 
+                      key={typeof item === 'string' ? item : item.name} 
+                      className="text-sm text-destructive leading-5"
+                    >
+                      • {typeof item === 'string' ? item : `${item.name} (+${item.score}%)`}
                     </Text>
                   ))}
                 </View>

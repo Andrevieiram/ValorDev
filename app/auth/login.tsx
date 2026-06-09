@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useWizardStore } from '@/store/wizard.store';
 import { ArrowLeft } from 'lucide-react-native';
+import { profileApi } from '@/api/profile.api';
 
 const loginSchema = z.object({
   email: z.string().min(1, 'E-mail é obrigatório').email('Formato de e-mail inválido'),
@@ -47,8 +48,29 @@ export default function LoginScreen() {
       // Chamar a API do backend
       await login(data.email, data.password);
 
+      // Tenta obter o perfil do usuário do backend para hidratar a store local
+      let backendHasProfile = false;
+      try {
+        const profileData = await profileApi.getProfile();
+        if (profileData && profileData.desiredIncome) {
+          useWizardStore.getState().setProfile({
+            desiredIncome: Math.round(Number(profileData.desiredIncome) * 100).toString(),
+            hoursPerWeek: String(profileData.hoursPerWeek),
+            monthlyCosts: Math.round(Number(profileData.monthlyCosts) * 100).toString(),
+            financialReserve: Math.round(Number(profileData.financialReserve) * 100).toString(),
+            experienceLevel: profileData.experienceLevel || 'pleno',
+            taxRegime: profileData.taxRegime || 'mei',
+            mainStack: profileData.mainStack || 'fullstack',
+            workload: profileData.workload || 'normal',
+          });
+          backendHasProfile = true;
+        }
+      } catch (profileErr) {
+        console.warn('Erro ao carregar perfil pós-login:', profileErr);
+      }
+
       // Verify if the user has completed their financial profile
-      const hasProfile = useWizardStore.getState().profile.desiredIncome !== '';
+      const hasProfile = backendHasProfile || useWizardStore.getState().profile.desiredIncome !== '';
 
       if (hasProfile) {
         router.replace('/(tabs)');

@@ -91,7 +91,7 @@ export interface PricingResult {
   breakdown: PricingBreakdownItem[];
   alerts?: PricingAlert[];
   riskScore?: number;
-  riskFactors?: string[];
+  riskFactors?: Array<string | { name: string; score: number }>;
 }
 
 export interface PricingBreakdownItem {
