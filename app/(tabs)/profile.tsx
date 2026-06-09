@@ -1,5 +1,5 @@
-import React from "react";
-import { useRouter } from "expo-router";
+import React, { useState, useCallback } from "react";
+import { useRouter, useFocusEffect } from "expo-router";
 import {
     ChevronRight,
     Settings,
@@ -8,14 +8,17 @@ import {
     DollarSign,
     Clock,
     Shield,
+    Edit2,
 } from "lucide-react-native";
-import { Pressable, Text, View, Alert, Platform } from "react-native";
+import { Pressable, Text, View, Alert, Platform, ActivityIndicator } from "react-native";
 
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { Card, Divider } from "@/components/ui";
-import { useAuthStore, useWizardStore } from "@/store";
+import { useAuthStore } from "@/store";
 import { useTheme } from "@/theme";
 import { formatCurrency } from "@/utils";
+import { profileApi } from "@/api/profile.api";
+import type { UserProfileDto } from "@/api/types";
 
 const taxRegimeLabels: Record<string, string> = {
     mei: "MEI",
@@ -27,8 +30,27 @@ const taxRegimeLabels: Record<string, string> = {
 export default function ProfileScreen() {
     const router = useRouter();
     const { user, logout } = useAuthStore();
-    const profile = useWizardStore((s) => s.profile);
     const { colors } = useTheme();
+
+    const [profile, setProfile] = useState<UserProfileDto | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useFocusEffect(
+        useCallback(() => {
+            const loadProfile = async () => {
+                try {
+                    setIsLoading(true);
+                    const data = await profileApi.getProfile();
+                    setProfile(data);
+                } catch (err) {
+                    console.warn("[ProfileScreen] Falha ao carregar perfil:", err);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            loadProfile();
+        }, [])
+    );
 
     const handleLogout = async () => {
         if (Platform.OS === "web") {
@@ -102,50 +124,87 @@ export default function ProfileScreen() {
                         Resumo Financeiro Padrão
                     </Text>
                     <Card variant="outlined" className="gap-3">
-                        <View className="flex-row items-center justify-between">
-                            <View className="flex-row items-center gap-2">
-                                <DollarSign size={16} color={colors.primary} />
-                                <Text className="text-sm" style={{ color: colors.textMuted }}>
-                                    Renda Desejada
-                                </Text>
+                        {isLoading ? (
+                            <View className="py-4 items-center">
+                                <ActivityIndicator size="small" color={colors.primary} />
                             </View>
-                            <Text
-                                className="text-sm"
-                                style={{ fontFamily: "Inter_600SemiBold", color: colors.foreground }}
-                            >
-                                {profile.desiredIncome ? formatCurrency(Number(profile.desiredIncome)) : "—"}
-                            </Text>
-                        </View>
-                        <Divider />
-                        <View className="flex-row items-center justify-between">
-                            <View className="flex-row items-center gap-2">
-                                <Clock size={16} color={colors.primary} />
-                                <Text className="text-sm" style={{ color: colors.textMuted }}>
-                                    Horas Disponíveis
-                                </Text>
-                            </View>
-                            <Text
-                                className="text-sm"
-                                style={{ fontFamily: "Inter_600SemiBold", color: colors.foreground }}
-                            >
-                                {profile.hoursPerWeek ? `${profile.hoursPerWeek}h / sem` : "—"}
-                            </Text>
-                        </View>
-                        <Divider />
-                        <View className="flex-row items-center justify-between">
-                            <View className="flex-row items-center gap-2">
-                                <Shield size={16} color={colors.primary} />
-                                <Text className="text-sm" style={{ color: colors.textMuted }}>
-                                    Regime Fiscal
-                                </Text>
-                            </View>
-                            <Text
-                                className="text-sm"
-                                style={{ fontFamily: "Inter_600SemiBold", color: colors.foreground }}
-                            >
-                                {taxRegimeLabels[profile.taxRegime] ?? "MEI"}
-                            </Text>
-                        </View>
+                        ) : (
+                            <>
+                                <Pressable
+                                    onPress={() => router.push("/setup-profile")}
+                                    className="flex-row items-center justify-between active:opacity-75"
+                                    hitSlop={8}
+                                    accessibilityRole="button"
+                                    accessibilityLabel="Editar Renda Desejada"
+                                >
+                                    <View className="flex-row items-center gap-2">
+                                        <DollarSign size={16} color={colors.primary} />
+                                        <Text className="text-sm" style={{ color: colors.textMuted }}>
+                                            Renda Desejada
+                                        </Text>
+                                    </View>
+                                    <View className="flex-row items-center gap-1.5">
+                                        <Text
+                                            className="text-sm"
+                                            style={{ fontFamily: "Inter_600SemiBold", color: colors.foreground }}
+                                        >
+                                            {profile?.desiredIncome
+                                                ? formatCurrency(Number(profile.desiredIncome))
+                                                : "—"}
+                                        </Text>
+                                        <Edit2 size={13} color={colors.textMuted} />
+                                    </View>
+                                </Pressable>
+                                <Divider />
+                                <Pressable
+                                    onPress={() => router.push("/setup-profile")}
+                                    className="flex-row items-center justify-between active:opacity-75"
+                                    hitSlop={8}
+                                    accessibilityRole="button"
+                                    accessibilityLabel="Editar Horas Disponíveis"
+                                >
+                                    <View className="flex-row items-center gap-2">
+                                        <Clock size={16} color={colors.primary} />
+                                        <Text className="text-sm" style={{ color: colors.textMuted }}>
+                                            Horas Disponíveis
+                                        </Text>
+                                    </View>
+                                    <View className="flex-row items-center gap-1.5">
+                                        <Text
+                                            className="text-sm"
+                                            style={{ fontFamily: "Inter_600SemiBold", color: colors.foreground }}
+                                        >
+                                            {profile?.hoursPerWeek ? `${profile.hoursPerWeek}h / sem` : "—"}
+                                        </Text>
+                                        <Edit2 size={13} color={colors.textMuted} />
+                                    </View>
+                                </Pressable>
+                                <Divider />
+                                <Pressable
+                                    onPress={() => router.push("/setup-profile")}
+                                    className="flex-row items-center justify-between active:opacity-75"
+                                    hitSlop={8}
+                                    accessibilityRole="button"
+                                    accessibilityLabel="Editar Regime Fiscal"
+                                >
+                                    <View className="flex-row items-center gap-2">
+                                        <Shield size={16} color={colors.primary} />
+                                        <Text className="text-sm" style={{ color: colors.textMuted }}>
+                                            Regime Fiscal
+                                        </Text>
+                                    </View>
+                                    <View className="flex-row items-center gap-1.5">
+                                        <Text
+                                            className="text-sm"
+                                            style={{ fontFamily: "Inter_600SemiBold", color: colors.foreground }}
+                                        >
+                                            {taxRegimeLabels[profile?.taxRegime ?? ""] ?? "—"}
+                                        </Text>
+                                        <Edit2 size={13} color={colors.textMuted} />
+                                    </View>
+                                </Pressable>
+                            </>
+                        )}
                     </Card>
                 </View>
 

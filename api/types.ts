@@ -54,16 +54,42 @@ export interface ProposalDto {
   createdAt: string;
 }
 
+export interface ProposalItemDto {
+  id: string;
+  name: string;
+  value: number;
+  status: HistoryStatus;
+  probability: Probability;
+}
+
+export interface DashboardCategoryDto {
+  count: number;
+  value: number;
+  items: ProposalItemDto[];
+}
+
 export interface DashboardSummaryDto {
   monthlyGoal: number;
   pipeline: {
     totalValue: number;
     breakdown: {
-      fechada: { count: number; value: number };
-      alta: { count: number; value: number };
-      media: { count: number; value: number };
-      baixa: { count: number; value: number };
-      perdida: { count: number; value: number };
+      fechada: DashboardCategoryDto;
+      alta: DashboardCategoryDto;
+      media: DashboardCategoryDto;
+      baixa: DashboardCategoryDto;
+      perdida: DashboardCategoryDto;
     };
   };
+}
+
+export interface CalculatePricingResponse {
+  minimumPrice: number;
+  recommendedPrice: number;
+  premiumPrice: number;
+  confidence: number;
+  riskScore: number;
+  riskLevel: string;
+  riskRecommendation: string;
+  breakdown: { label: string; value: number }[];
+  riskFactors: { name: string; score: number }[];
 }

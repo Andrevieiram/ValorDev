@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { FlatList, Text, View, Pressable, TextInput, Alert } from "react-native";
 import { Trash2, Search, Calendar, Sliders, ChevronDown, Zap } from "lucide-react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { Card, MotionFadeUp, SegmentedControl, Modal, Button } from "@/components/ui";
@@ -29,9 +29,15 @@ const PROBABILITY_WEIGHTS: Record<Probability, number> = {
 
 export default function HistoryScreen() {
     const router = useRouter();
-    const { items, isLoading, removeItem, updateItemProbability } = useHistoryStore();
+    const { items, isLoading, removeItem, updateItemProbability, fetchFromApi } = useHistoryStore();
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState<"date" | "probability">("date");
+    
+    useFocusEffect(
+        useCallback(() => {
+            fetchFromApi();
+        }, [fetchFromApi])
+    );
     
     // Modal State
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);

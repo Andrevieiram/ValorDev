@@ -4,64 +4,21 @@ import { nanoid } from 'nanoid';
 import { STORAGE_KEYS, STORAGE_VERSION } from '@/constants';
 import type { HistoryItem } from '@/types';
 import { loadJson, persistJson } from './persistence';
+import { proposalsApi } from '@/api/proposals.api';
+import type { ProposalDto } from '@/api/types';
 
-/** Dados mock — apenas carregados em __DEV__ ou quando storage está vazio */
-const MOCK_HISTORY: HistoryItem[] = __DEV__ ? [
-  {
-    id: '1',
-    name: 'E-commerce App',
-    value: 15000,
-    date: '',
-    status: 'sent',
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    probability: 'alta',
-  },
-  {
-    id: '2',
-    name: 'Site Institucional',
-    value: 4500,
-    date: '',
-    status: 'sent',
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    probability: 'fechada',
-  },
-  {
-    id: '3',
-    name: 'Automação de Processos',
-    value: 8000,
-    date: '',
-    status: 'sent',
-    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    probability: 'media',
-  },
-  {
-    id: '4',
-    name: 'MVP SaaS',
-    value: 22000,
-    date: '',
-    status: 'sent',
-    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    probability: 'alta',
-  },
-  {
-    id: '5',
-    name: 'Consultoria UI/UX',
-    value: 2000,
-    date: '',
-    status: 'sent',
-    createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-    probability: 'baixa',
-  },
-  {
-    id: '6',
-    name: 'Aplicativo de Delivery',
-    value: 12500,
-    date: '',
-    status: 'sent',
-    createdAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
-    probability: 'fechada',
-  },
-] : [];
+/** Converte um ProposalDto da API para o formato HistoryItem usado na UI */
+function proposalDtoToHistoryItem(dto: ProposalDto): HistoryItem {
+  return {
+    id: dto.id,
+    name: dto.name,
+    value: dto.recommendedPrice,
+    date: dto.createdAt,
+    status: dto.status as HistoryItem['status'],
+    createdAt: dto.createdAt,
+    probability: dto.probability as HistoryItem['probability'],
+  };
+}
 
 interface HistoryState {
   items: HistoryItem[];
@@ -73,19 +30,21 @@ interface HistoryState {
   addItem: (item: Omit<HistoryItem, 'id' | 'createdAt'>) => Promise<void>;
   removeItem: (id: string) => Promise<void>;
   updateItemProbability: (id: string, probability: import('@/types').Probability) => Promise<void>;
-  /** Ponto de integração futuro com backend */
+  /** Busca o histórico de propostas da API do backend */
+  fetchFromApi: () => Promise<void>;
+  /** @deprecated Use fetchFromApi para dados reais */
   fetchHistory: () => Promise<void>;
 }
 
 export const useHistoryStore = create<HistoryState>((set, get) => ({
-  items: MOCK_HISTORY,
+  items: [],
   isLoading: false,
   isHydrated: false,
 
   hydrate: async () => {
+    // Hidratação inicial: carrega do localStorage enquanto busca da API
     const stored = await loadJson<HistoryItem[] | HistoryPayload>(STORAGE_KEYS.history);
 
-    // Suportar ambos formatos: array antigo e novo com versionamento
     let items: HistoryItem[] = [];
     if (stored) {
       if (Array.isArray(stored)) {
@@ -95,20 +54,30 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
       }
     }
 
-    if (items.length > 0) {
-      set({ items, isHydrated: true });
-      return;
-    }
-    // Pre-populate with mock data only if in development and storage is empty
-    if (MOCK_HISTORY.length > 0) {
-      await persistHistory(MOCK_HISTORY);
-      set({ items: MOCK_HISTORY, isHydrated: true });
-    } else {
-      set({ items: [], isHydrated: true });
-    }
+    // Seta o que tiver no cache local primeiro (evita tela vazia)
+    set({ items, isHydrated: true });
+
+    // Então busca da API para ter dados frescos
+    await get().fetchFromApi();
   },
 
   setItems: (items) => set({ items }),
+
+  fetchFromApi: async () => {
+    set({ isLoading: true });
+    try {
+      const dtos = await proposalsApi.list();
+      const items = dtos.map(proposalDtoToHistoryItem);
+      set({ items });
+      // Atualiza cache local com dados reais
+      await persistHistory(items);
+    } catch (err) {
+      // Silencia erro de rede — mantém o cache local exibido
+      console.warn('[HistoryStore] Falha ao buscar propostas da API:', err);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
   addItem: async (item) => {
     const newItem: HistoryItem = {
@@ -123,6 +92,12 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
   },
 
   removeItem: async (id) => {
+    // Remove na API primeiro, depois atualiza o estado local
+    try {
+      await proposalsApi.delete(id);
+    } catch (err) {
+      console.warn('[HistoryStore] Falha ao deletar proposta na API:', err);
+    }
     const updated = get().items.filter((item) => item.id !== id);
     set({ items: updated });
     await persistHistory(updated);
@@ -137,23 +112,7 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
   },
 
   fetchHistory: async () => {
-    set({ isLoading: true });
-    try {
-      const stored = await loadJson<HistoryItem[] | HistoryPayload>(STORAGE_KEYS.history);
-
-      let items: HistoryItem[] = [];
-      if (stored) {
-        if (Array.isArray(stored)) {
-          items = stored;
-        } else if ('items' in stored && Array.isArray(stored.items)) {
-          items = stored.items;
-        }
-      }
-
-      set({ items });
-    } finally {
-      set({ isLoading: false });
-    }
+    return get().fetchFromApi();
   },
 }));
 

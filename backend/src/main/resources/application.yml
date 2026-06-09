@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/valordev
     username: ${DB_USER:postgres}
-    password: ${DB_PASS:root}
+    password: ${DB_PASS:maioral747@A}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -23,7 +23,7 @@ spring:
     locations: classpath:db/migration
 
 server:
-  port: 8080
+  port: 8084
   error:
     include-message: always
     include-binding-errors: always

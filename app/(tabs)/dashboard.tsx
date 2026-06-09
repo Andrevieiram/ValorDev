@@ -1,58 +1,66 @@
-import React, { useMemo, useState } from "react";
-import { View, Text, ScrollView, Dimensions, Pressable } from "react-native";
+import React, { useMemo, useState, useCallback } from "react";
+import { View, Text, ScrollView, Dimensions, Pressable, ActivityIndicator } from "react-native";
 import { TrendingUp, Target, Briefcase, Activity, CheckCircle, AlertCircle, Clock, Calendar } from "lucide-react-native";
+import { useFocusEffect, useRouter } from "expo-router";
 
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { Card, MotionFadeUp, Modal } from "@/components/ui";
-import { useHistoryStore, useWizardStore } from "@/store";
 import { formatCurrency } from "@/utils";
 import { Probability } from "@/types";
+import { proposalsApi } from "@/api/proposals.api";
+import { DashboardSummaryDto } from "@/api/types";
 
 export default function DashboardScreen() {
-    const { items } = useHistoryStore();
-    const { profile } = useWizardStore();
-    const [selectedProbability, setSelectedProbability] = useState<Probability | null>(null);
+    const router = useRouter();
+    const [selectedProbability, setSelectedProbability] = useState<Probability | 'fechada' | 'perdida' | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
+    
+    const [summary, setSummary] = useState<DashboardSummaryDto | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Extrair meta mensal. Se estiver vazio, assume 0.
+    // Recarrega toda vez que a aba ganha foco (ao navegar de volta do setup-profile, etc.)
+    useFocusEffect(
+        useCallback(() => {
+            const loadDashboard = async () => {
+                try {
+                    setIsLoading(true);
+                    const data = await proposalsApi.getDashboardSummary();
+                    setSummary(data);
+                } catch (err) {
+                    console.error("Erro ao carregar dashboard", err);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            loadDashboard();
+        }, [])
+    );
+
+    // Meta mensal vem diretamente da API (desiredIncome do perfil do usuário)
     const monthlyGoal = useMemo(() => {
-        const incomeStr = profile?.desiredIncome?.replace(/\D/g, "") || "";
-        const num = parseFloat(incomeStr) / 100;
-        return (isNaN(num) || num === 0) ? 40000 : num; // Fallback mock 40k
-    }, [profile?.desiredIncome]);
+        if (summary?.monthlyGoal && Number(summary.monthlyGoal) > 0) return Number(summary.monthlyGoal);
+        return 0;
+    }, [summary?.monthlyGoal]);
 
-    // Calcular pipeline (funil de vendas)
+    // Calcular pipeline (funil de vendas) baseado na API
     const pipeline = useMemo(() => {
-        const result = {
-            fechada: { count: 0, value: 0, color: '#22c55e', bg: 'rgba(34,197,94,0.15)', label: 'Negócios Fechados' },
-            alta: { count: 0, value: 0, color: '#3b82f6', bg: 'rgba(59,130,246,0.15)', label: 'Alta Probabilidade' },
-            media: { count: 0, value: 0, color: '#eab308', bg: 'rgba(234,179,8,0.15)', label: 'Média Probabilidade' },
-            baixa: { count: 0, value: 0, color: '#f97316', bg: 'rgba(249,115,22,0.15)', label: 'Baixa Probabilidade' },
-            perdida: { count: 0, value: 0, color: '#ef4444', bg: 'rgba(239,68,68,0.15)', label: 'Negócios Perdidos' },
+        const bd = summary?.pipeline.breakdown;
+        
+        return {
+            breakdown: {
+                fechada: { count: bd?.fechada.count || 0, value: bd?.fechada.value || 0, items: bd?.fechada.items || [], color: '#22c55e', bg: 'rgba(34,197,94,0.15)', label: 'Negócios Fechados' },
+                alta: { count: bd?.alta.count || 0, value: bd?.alta.value || 0, items: bd?.alta.items || [], color: '#3b82f6', bg: 'rgba(59,130,246,0.15)', label: 'Alta Probabilidade' },
+                media: { count: bd?.media.count || 0, value: bd?.media.value || 0, items: bd?.media.items || [], color: '#eab308', bg: 'rgba(234,179,8,0.15)', label: 'Média Probabilidade' },
+                baixa: { count: bd?.baixa.count || 0, value: bd?.baixa.value || 0, items: bd?.baixa.items || [], color: '#f97316', bg: 'rgba(249,115,22,0.15)', label: 'Baixa Probabilidade' },
+                perdida: { count: bd?.perdida.count || 0, value: bd?.perdida.value || 0, items: bd?.perdida.items || [], color: '#ef4444', bg: 'rgba(239,68,68,0.15)', label: 'Negócios Perdidos' },
+            },
+            totalPotential: summary?.pipeline.totalValue || 0
         };
-
-        let totalPotential = 0;
-
-        items.forEach(item => {
-            let prob = item.probability || 'media';
-            if (item.status === 'won') prob = 'fechada';
-            if (item.status === 'lost') prob = 'perdida';
-
-            result[prob].count += 1;
-            result[prob].value += item.value;
-
-            if (prob !== 'perdida') {
-                totalPotential += item.value;
-            }
-        });
-
-        return { breakdown: result, totalPotential };
-    }, [items]);
+    }, [summary]);
 
     // Progresso da Meta
     const goalProgress = useMemo(() => {
         if (monthlyGoal === 0) return 0;
-        // Calculamos o progresso apenas com negócios "Fechados"
         const progress = (pipeline.breakdown.fechada.value / monthlyGoal) * 100;
         return Math.min(progress, 100);
     }, [monthlyGoal, pipeline.breakdown.fechada.value]);
@@ -74,20 +82,27 @@ export default function DashboardScreen() {
 
     const selectedItems = useMemo(() => {
         if (!selectedProbability) return [];
-        return items.filter(i => {
-            let prob = i.probability || 'media';
-            if (i.status === 'won') prob = 'fechada';
-            if (i.status === 'lost') prob = 'perdida';
-            
-            return prob === selectedProbability;
-        });
-    }, [items, selectedProbability]);
+        // @ts-ignore
+        return pipeline.breakdown[selectedProbability]?.items || [];
+    }, [pipeline, selectedProbability]);
 
     const getModalTitle = () => {
         if (!selectedProbability) return '';
-        // @ts-ignore (Ignorando pois as chaves batem com o breakdown)
+        // @ts-ignore
         return pipeline.breakdown[selectedProbability]?.label || 'Projetos';
     };
+
+    if (isLoading) {
+        return (
+            <ScreenContainer maxWidth="container">
+                <View className="flex-1 justify-center items-center">
+                    <ActivityIndicator size="large" color="#3b82f6" />
+                    <Text className="mt-4 text-muted-foreground">Carregando dashboard...</Text>
+                </View>
+            </ScreenContainer>
+        );
+    }
+
 
     return (
         <ScreenContainer maxWidth="container" scrollable>
@@ -104,12 +119,17 @@ export default function DashboardScreen() {
 
                 {/* Meta Mensal Card */}
                 <MotionFadeUp delay={150}>
-                    <Card variant="glass" className="gap-4 border-primary/20">
+                    <Card variant="glass" className="gap-4 border-primary/20" onPress={() => router.push("/setup-profile")}>
                         <View className="flex-row justify-between items-start">
                             <View className="gap-1">
-                                <Text className="text-xs uppercase tracking-[0.1em] text-muted-foreground" style={{ fontFamily: 'Inter_600SemiBold' }}>
-                                    Meta Mensal
-                                </Text>
+                                <View className="flex-row items-center gap-1.5">
+                                    <Text className="text-xs uppercase tracking-[0.1em] text-muted-foreground" style={{ fontFamily: 'Inter_600SemiBold' }}>
+                                        Meta Mensal
+                                    </Text>
+                                    <Text className="text-[10px] text-primary" style={{ fontFamily: 'Inter_500Medium' }}>
+                                        • Editar
+                                    </Text>
+                                </View>
                                 <Text className="text-3xl text-primary" style={{ fontFamily: 'JetBrainsMono_700Bold' }}>
                                     {formatCurrency(monthlyGoal)}
                                 </Text>

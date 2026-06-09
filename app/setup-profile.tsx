@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -7,6 +7,7 @@ import {
   Text,
   View,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,6 +35,8 @@ export default function SetupProfileScreen() {
   const setProfile = useWizardStore((state) => state.setProfile);
   const persistDraft = useWizardStore((state) => state.persistDraft);
 
+  const [isInitializing, setIsInitializing] = useState(true);
+
   const {
     control,
     handleSubmit,
@@ -55,7 +58,57 @@ export default function SetupProfileScreen() {
     },
   });
 
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const data = await profileApi.getProfile();
+        if (data) {
+          // Converte valores do backend (decimais) para o formato centavos esperado pela UI
+          const backendValues = {
+            desiredIncome: Math.round(Number(data.desiredIncome) * 100).toString(),
+            hoursPerWeek: String(data.hoursPerWeek),
+            monthlyCosts: Math.round(Number(data.monthlyCosts) * 100).toString(),
+            financialReserve: Math.round(Number(data.financialReserve) * 100).toString(),
+            experienceLevel: data.experienceLevel || 'pleno',
+            taxRegime: data.taxRegime || 'mei',
+            mainStack: data.mainStack || 'fullstack',
+            workload: data.workload || 'normal',
+          };
+          
+          // Sincroniza store local com o backend
+          setProfile(backendValues);
+          
+          // Atualiza formulário com valores do backend
+          setValue('desiredIncome', backendValues.desiredIncome);
+          setValue('hoursPerWeek', backendValues.hoursPerWeek);
+          setValue('monthlyCosts', backendValues.monthlyCosts);
+          setValue('financialReserve', backendValues.financialReserve);
+          setValue('experienceLevel', backendValues.experienceLevel as any);
+          setValue('taxRegime', backendValues.taxRegime as any);
+          setValue('mainStack', backendValues.mainStack as any);
+          setValue('workload', backendValues.workload as any);
+        }
+      } catch (err) {
+        console.warn('[SetupProfile] Não foi possível obter perfil do backend, usando valores locais:', err);
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+    fetchProfileData();
+  }, [setValue, setProfile]);
+
   const experienceLevel = watch('experienceLevel');
+
+  if (isInitializing) {
+    return (
+      <ScreenContainer maxWidth="wizard">
+        <View className="flex-1 justify-center items-center py-20">
+          <ActivityIndicator size="large" color="#3b82f6" />
+          <Text className="mt-4 text-muted-foreground text-center">Carregando seu perfil...</Text>
+        </View>
+      </ScreenContainer>
+    );
+  }
 
   const handleSaveProfile = async (values: WizardProfileFormValues) => {
     try {
@@ -65,10 +118,10 @@ export default function SetupProfileScreen() {
 
       // Sincronizar com backend
       await profileApi.updateProfile({
-        desiredIncome: parseFloat(String(values.desiredIncome).replace(/\D/g, '') || '0'),
+        desiredIncome: parseFloat(String(values.desiredIncome).replace(/\D/g, '') || '0') / 100,
         hoursPerWeek: parseInt(String(values.hoursPerWeek), 10) || 0,
-        monthlyCosts: parseFloat(String(values.monthlyCosts).replace(/\D/g, '') || '0'),
-        financialReserve: parseFloat(String(values.financialReserve).replace(/\D/g, '') || '0'),
+        monthlyCosts: parseFloat(String(values.monthlyCosts).replace(/\D/g, '') || '0') / 100,
+        financialReserve: parseFloat(String(values.financialReserve).replace(/\D/g, '') || '0') / 100,
         experienceLevel: values.experienceLevel,
         taxRegime: values.taxRegime,
         mainStack: values.mainStack,
