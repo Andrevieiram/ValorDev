@@ -168,50 +168,75 @@ public class ProposalService {
         List<Proposal> proposals = proposalRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
 
         java.math.BigDecimal totalValue = java.math.BigDecimal.ZERO;
+        
         int countFechada = 0; java.math.BigDecimal valFechada = java.math.BigDecimal.ZERO;
+        List<com.valordev.api.dashboard.dto.DashboardSummaryDto.ProposalItemDto> itemsFechada = new java.util.ArrayList<>();
+        
         int countAlta = 0; java.math.BigDecimal valAlta = java.math.BigDecimal.ZERO;
+        List<com.valordev.api.dashboard.dto.DashboardSummaryDto.ProposalItemDto> itemsAlta = new java.util.ArrayList<>();
+        
         int countMedia = 0; java.math.BigDecimal valMedia = java.math.BigDecimal.ZERO;
+        List<com.valordev.api.dashboard.dto.DashboardSummaryDto.ProposalItemDto> itemsMedia = new java.util.ArrayList<>();
+        
         int countBaixa = 0; java.math.BigDecimal valBaixa = java.math.BigDecimal.ZERO;
+        List<com.valordev.api.dashboard.dto.DashboardSummaryDto.ProposalItemDto> itemsBaixa = new java.util.ArrayList<>();
+        
         int countPerdida = 0; java.math.BigDecimal valPerdida = java.math.BigDecimal.ZERO;
+        List<com.valordev.api.dashboard.dto.DashboardSummaryDto.ProposalItemDto> itemsPerdida = new java.util.ArrayList<>();
 
         for (Proposal p : proposals) {
             java.math.BigDecimal recPrice = p.getRecommendedPrice();
+            
+            com.valordev.api.dashboard.dto.DashboardSummaryDto.ProposalItemDto itemDto = 
+                com.valordev.api.dashboard.dto.DashboardSummaryDto.ProposalItemDto.builder()
+                    .id(p.getId())
+                    .name(p.getName())
+                    .value(recPrice)
+                    .status(p.getStatus())
+                    .probability(p.getProbability())
+                    .build();
+
             if ("won".equalsIgnoreCase(p.getStatus())) {
                 countFechada++;
                 valFechada = valFechada.add(recPrice);
                 totalValue = totalValue.add(recPrice);
+                itemsFechada.add(itemDto);
             } else if ("lost".equalsIgnoreCase(p.getStatus())) {
                 countPerdida++;
                 valPerdida = valPerdida.add(recPrice);
+                itemsPerdida.add(itemDto);
             } else {
                 // Draft or Sent
                 totalValue = totalValue.add(recPrice);
                 if ("alta".equalsIgnoreCase(p.getProbability())) {
                     countAlta++;
                     valAlta = valAlta.add(recPrice);
+                    itemsAlta.add(itemDto);
                 } else if ("baixa".equalsIgnoreCase(p.getProbability())) {
                     countBaixa++;
                     valBaixa = valBaixa.add(recPrice);
+                    itemsBaixa.add(itemDto);
                 } else {
                     countMedia++;
                     valMedia = valMedia.add(recPrice);
+                    itemsMedia.add(itemDto);
                 }
             }
         }
 
         UserProfile profile = userProfileRepository.findById(user.getId()).orElse(null);
-        java.math.BigDecimal monthlyGoal = profile != null ? profile.getDesiredIncome() : java.math.BigDecimal.ZERO;
+        java.math.BigDecimal monthlyGoal = profile != null && profile.getDesiredIncome() != null ? profile.getDesiredIncome() : java.math.BigDecimal.ZERO;
 
         return com.valordev.api.dashboard.dto.DashboardSummaryDto.builder()
                 .monthlyGoal(monthlyGoal)
                 .pipeline(com.valordev.api.dashboard.dto.DashboardSummaryDto.Pipeline.builder()
                         .totalValue(totalValue)
                         .breakdown(com.valordev.api.dashboard.dto.DashboardSummaryDto.Breakdown.builder()
-                                .fechada(com.valordev.api.dashboard.dto.DashboardSummaryDto.Category.builder().count(countFechada).value(valFechada).build())
-                                .alta(com.valordev.api.dashboard.dto.DashboardSummaryDto.Category.builder().count(countAlta).value(valAlta).build())
-                                .media(com.valordev.api.dashboard.dto.DashboardSummaryDto.Category.builder().count(countMedia).value(valMedia).build())
-                                .baixa(com.valordev.api.dashboard.dto.DashboardSummaryDto.Category.builder().count(countBaixa).value(valBaixa).build())
-                                .perdida(com.valordev.api.dashboard.dto.DashboardSummaryDto.Category.builder().count(countPerdida).value(valPerdida).build())
+                                .fechada(com.valordev.api.dashboard.dto.DashboardSummaryDto.Category.builder().count(countFechada).value(valFechada).items(itemsFechada).build())
+                                .alta(com.valordev.api.dashboard.dto.DashboardSummaryDto.Category.builder().count(countAlta).value(valAlta).items(itemsAlta).build())
+                                .media(com.valordev.api.dashboard.dto.DashboardSummaryDto.Category.builder().count(countMedia).value(valMedia).items(itemsMedia).build())
+                                .baixa(com.valordev.api.dashboard.dto.DashboardSummaryDto.Category.builder().count(countBaixa).value(valBaixa).items(itemsBaixa).build())
+                                .perdida(com.valordev.api.dashboard.dto.DashboardSummaryDto.Category.builder().count(countPerdida).value(valPerdida).items(itemsPerdida).build())
                                 .build())
                         .build())
                 .build();
