@@ -30,10 +30,10 @@ public class ProfileController {
     }
 
     @Operation(summary = "Atualizar perfil", description = "Atualiza configurações de custo, pretensão e horas")
-    @PutMapping
+    @PutMapping("/update")
     public ResponseEntity<UserProfileDto> updateProfile(
             @AuthenticationPrincipal User user,
             @Valid @RequestBody UserProfileDto request) {
-        return ResponseEntity.ok(profileService.updateProfile(user.getId(), request));
+        return ResponseEntity.ok(profileService.saveProfile(user.getId(), request));
     }
 }

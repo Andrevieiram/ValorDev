@@ -30,7 +30,7 @@ public class PricingEngine {
         BigDecimal baseHourlyRate = grossIncome.divide(hoursPerMonth, 2, RoundingMode.HALF_UP);
 
         // Aplica os multiplicadores do perfil
-        BigDecimal stackMult = PricingConstants.STACK_MULTIPLIERS.getOrDefault(profile.getMainStack().toLowerCase(), BigDecimal.ONE);
+        BigDecimal stackMult = PricingConstants.STACK_MULTIPLIERS.getOrDefault(profile.getMainStack(), BigDecimal.ONE);
         BigDecimal workloadMult = PricingConstants.WORKLOAD_MULTIPLIERS.getOrDefault(profile.getWorkload().toLowerCase(), BigDecimal.ONE);
         
         BigDecimal finalHourlyRate = baseHourlyRate.multiply(stackMult).multiply(workloadMult);
