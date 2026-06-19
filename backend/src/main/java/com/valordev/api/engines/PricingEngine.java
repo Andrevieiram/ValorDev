@@ -38,6 +38,20 @@ public class PricingEngine {
         // 2. Calcula o valor base do projeto (Horas x Valor Hora)
         BigDecimal baseProjectValue = finalHourlyRate.multiply(BigDecimal.valueOf(input.getEstimatedHours()));
 
+        // 2b. Aplica multiplicador de complexidade
+        BigDecimal complexityMult = PricingConstants.COMPLEXITY_MULTIPLIERS.getOrDefault(
+                input.getComplexity() != null ? input.getComplexity().toLowerCase() : "medium",
+                BigDecimal.ONE
+        );
+        baseProjectValue = baseProjectValue.multiply(complexityMult);
+
+        // 2c. Aplica multiplicador de tipo de produto
+        BigDecimal projectTypeMult = PricingConstants.PROJECT_TYPE_MULTIPLIERS.getOrDefault(
+                input.getProjectType() != null ? input.getProjectType().toLowerCase() : "webapp",
+                BigDecimal.ONE
+        );
+        baseProjectValue = baseProjectValue.multiply(projectTypeMult);
+
         // 3. Aplica os modificadores do Projeto
         BigDecimal projectMultiplier = BigDecimal.ONE;
         
@@ -73,6 +87,21 @@ public class PricingEngine {
         
         if ("high".equalsIgnoreCase(input.getBusinessImpact()) || "strategic".equalsIgnoreCase(input.getBusinessImpact())) {
             projectMultiplier = projectMultiplier.add(PricingConstants.CLIENT_MULTIPLIERS.get("highBusinessImpact"));
+        }
+
+        // Modificadores de Forma de Cobrança
+        if ("hourly".equalsIgnoreCase(input.getBillingMethod())) {
+            projectMultiplier = projectMultiplier.add(PricingConstants.BILLING_MULTIPLIERS.get("hourly").subtract(BigDecimal.ONE));
+        }
+
+        // Modificadores de Parcelamento
+        if ("yes".equalsIgnoreCase(input.getInstallmentOption())) {
+            projectMultiplier = projectMultiplier.add(PricingConstants.INSTALLMENT_MULTIPLIERS.get("yes"));
+        }
+
+        // Modificadores de Faturamento Recorrente
+        if ("yes".equalsIgnoreCase(input.getRecurringBilling())) {
+            projectMultiplier = projectMultiplier.add(BigDecimal.valueOf(-0.1)); // Desconto de 10% para recorrente
         }
 
         // Modificadores Financeiros
@@ -116,11 +145,22 @@ public class PricingEngine {
 
         // 7. Monta o Breakdown
         List<BreakdownItemDto> breakdown = new ArrayList<>();
-        breakdown.add(new BreakdownItemDto("Desenvolvimento (Horas x Taxa)", baseProjectValue));
+        BigDecimal hourlyComponent = finalHourlyRate.multiply(BigDecimal.valueOf(input.getEstimatedHours()));
+        breakdown.add(new BreakdownItemDto("Desenvolvimento (Horas x Taxa)", hourlyComponent));
+        
+        BigDecimal complexityAdjustment = hourlyComponent.multiply(complexityMult.subtract(BigDecimal.ONE));
+        if (complexityAdjustment.compareTo(BigDecimal.ZERO) != 0) {
+            breakdown.add(new BreakdownItemDto("Ajuste de Complexidade", complexityAdjustment));
+        }
+        
+        BigDecimal projectTypeAdjustment = hourlyComponent.multiply(projectTypeMult.subtract(BigDecimal.ONE));
+        if (projectTypeAdjustment.compareTo(BigDecimal.ZERO) != 0) {
+            breakdown.add(new BreakdownItemDto("Ajuste de Tipo de Produto", projectTypeAdjustment));
+        }
         
         BigDecimal adjustmentValue = calculatedValue.subtract(baseProjectValue);
         if (adjustmentValue.compareTo(BigDecimal.ZERO) != 0) {
-            breakdown.add(new BreakdownItemDto("Ajustes (Risco, Prazo, Complexidade)", adjustmentValue));
+            breakdown.add(new BreakdownItemDto("Ajustes (Risco, Prazo, Cobrança, Parcelamento, Cliente)", adjustmentValue));
         }
 
         return new PricingResult(minValue, calculatedValue, premValue, (short) confidence, breakdown);

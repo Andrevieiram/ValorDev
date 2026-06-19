@@ -47,17 +47,21 @@ export default function ResultScreen() {
     );
   }
 
-  const positiveHighlights = (result.riskFactors ?? [])
-    .filter((factor): factor is { name: string; score: number } => 
-      typeof factor === 'object' && factor !== null && 'score' in factor && factor.score < 0
-    )
+  const normalizeFactor = (factor: any) =>
+    typeof factor === 'string' ? { name: factor, score: 0 } : factor;
+
+  const source = result;
+
+  const positiveHighlights = (source.riskFactors ?? [])
+    .map(normalizeFactor)
+    .filter((factor: { name: string; score: number }) => factor.score < 0)
+    .sort((a: { score: number }, b: { score: number }) => a.score - b.score)
     .slice(0, 3);
 
-  const riskHighlights = (result.riskFactors ?? [])
-    .filter((factor) => 
-      typeof factor === 'string' || 
-      (typeof factor === 'object' && factor !== null && 'score' in factor && factor.score >= 0)
-    )
+  const riskHighlights = (source.riskFactors ?? [])
+    .map(normalizeFactor)
+    .filter((factor: { name: string; score: number }) => factor.score >= 0)
+    .sort((a: { score: number }, b: { score: number }) => b.score - a.score)
     .slice(0, 3);
 
   const handleExport = () =>
@@ -116,7 +120,7 @@ export default function ResultScreen() {
               className="text-5xl text-primary my-2"
               style={{ fontFamily: 'JetBrainsMono_700Bold' }}
             >
-              {formatCurrency(result.recommended)}
+              {source.recommended ? formatCurrency(source.recommended) : '—'}
             </Text>
             <Text className="text-center text-sm text-muted-foreground leading-5 px-2">
               Preço otimizado para cobertura de impostos, riscos e margem líquida pretendida.
@@ -125,10 +129,10 @@ export default function ResultScreen() {
             <View className="flex-row flex-wrap justify-center gap-2 pt-2">
               <Badge
                 size="sm"
-                variant={riskLabelMap[result.riskLevel].variant}
-                label={riskLabelMap[result.riskLevel].label}
+                variant={riskLabelMap[source.riskLevel].variant}
+                label={riskLabelMap[source.riskLevel].label}
               />
-              <Badge size="sm" variant="success" label={`Confiança ${result.confidence}%`} />
+              <Badge size="sm" variant="success" label={`Confiança ${source.confidence}%`} />
             </View>
           </Card>
 
@@ -138,7 +142,7 @@ export default function ResultScreen() {
               Composição da proposta
             </Text>
             <View className="gap-3">
-              {result.breakdown.map((item) => (
+              {source.breakdown.map((item) => (
                 <View key={item.label} className="flex-row justify-between items-start">
                   <View className="flex-1 pr-3">
                     <Text className="text-sm font-semibold text-foreground dark:text-slate-200">
@@ -160,7 +164,9 @@ export default function ResultScreen() {
                   Faixa recomendada de negociação
                 </Text>
                 <Text className="text-sm font-semibold text-primary">
-                  {formatCurrency(result.minimum)} — {formatCurrency(result.premium)}
+                  {source.minimum && source.premium
+                    ? `${formatCurrency(source.minimum)} — ${formatCurrency(source.premium)}`
+                    : '—'}
                 </Text>
               </View>
             </View>
@@ -194,8 +200,8 @@ export default function ResultScreen() {
                     Fatores de atenção
                   </Text>
                   {riskHighlights.map((item) => (
-                    <Text 
-                      key={typeof item === 'string' ? item : item.name} 
+                    <Text
+                      key={typeof item === 'string' ? item : item.name}
                       className="text-sm text-destructive leading-5"
                     >
                       • {typeof item === 'string' ? item : `${item.name} (+${item.score}%)`}

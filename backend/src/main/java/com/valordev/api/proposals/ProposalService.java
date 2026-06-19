@@ -283,6 +283,7 @@ public class ProposalService {
                 .toList();
 
         List<CalculatePricingResponse.RiskFactorDto> riskFactors = riskResult.factors().stream()
+                .sorted((a, b) -> Integer.compare(b.getScore(), a.getScore()))
                 .map(f -> CalculatePricingResponse.RiskFactorDto.builder()
                         .name(f.getName())
                         .score(f.getScore())

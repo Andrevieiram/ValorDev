@@ -164,8 +164,8 @@ export const PROJECT_TYPE_OPTIONS = [
 
 export const COMPLEXITY_OPTIONS = [
   { value: 'low', label: 'Baixa (0%)' },
-  { value: 'medium', label: 'Média (0%)' },
-  { value: 'high', label: 'Alta (0%)' },
+  { value: 'medium', label: 'Média (+15%)' },
+  { value: 'high', label: 'Alta (+30%)' },
 ] as const;
 
 export const EXTERNAL_DEPENDENCIES_OPTIONS = [
