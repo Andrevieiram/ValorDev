@@ -15,6 +15,16 @@ public class RiskEngine {
         int score = 50;
         List<RiskFactor> factors = new ArrayList<>();
 
+        // 0. Tipo de Produto
+        int projectTypeScore = 0;
+        if ("mobile".equalsIgnoreCase(input.getProjectType())) {
+            projectTypeScore = 8; // Mobile tem mais complexidade em testes/distribuição
+        } else if ("api".equalsIgnoreCase(input.getProjectType())) {
+            projectTypeScore = 5; // API tem risco moderado de integrações
+        }
+        score += projectTypeScore;
+        factors.add(new RiskFactor("Tipo de Produto", projectTypeScore));
+
         // 1. Complexidade do Projeto
         int complexityScore = 0;
         if ("high".equalsIgnoreCase(input.getComplexity())) {
@@ -142,6 +152,14 @@ public class RiskEngine {
         int downPaymentScore = ("none".equalsIgnoreCase(input.getDownPayment())) ? 15 : 0;
         score += downPaymentScore;
         factors.add(new RiskFactor("Pagamento de Sinal", downPaymentScore));
+
+        // 11. Faturamento Recorrente
+        int recurringBillingScore = 0;
+        if ("yes".equalsIgnoreCase(input.getRecurringBilling())) {
+            recurringBillingScore = -5; // Reduz risco por ter receita contínua
+        }
+        score += recurringBillingScore;
+        factors.add(new RiskFactor("Faturamento Recorrente", recurringBillingScore));
 
         // Clamp score between 0 and 100
         int finalScore = Math.min(100, Math.max(0, score));

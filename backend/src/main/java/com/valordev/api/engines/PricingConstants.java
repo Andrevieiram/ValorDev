@@ -22,12 +22,34 @@ public class PricingConstants {
             "overloaded", BigDecimal.valueOf(1.3)
     );
 
+    public static final Map<String, BigDecimal> COMPLEXITY_MULTIPLIERS = Map.of(
+            "low", BigDecimal.valueOf(1.0),
+            "medium", BigDecimal.valueOf(1.15),
+            "high", BigDecimal.valueOf(1.3)
+    );
+
+    public static final Map<String, BigDecimal> PROJECT_TYPE_MULTIPLIERS = Map.of(
+            "webapp", BigDecimal.valueOf(1.0),
+            "mobile", BigDecimal.valueOf(1.25),
+            "api", BigDecimal.valueOf(1.15)
+    );
+
     public static final Map<String, BigDecimal> PROJECT_MULTIPLIERS = Map.of(
             "urgency", BigDecimal.valueOf(0.3), // Prazo < 2 semanas
             "undocumentedScope", BigDecimal.valueOf(0.25), // Escopo não documentado
             "dailyMeetings", BigDecimal.valueOf(0.2), // Reuniões diárias
             "maintenance", BigDecimal.valueOf(0.1), // Manutenção pós-projeto
             "componentReuse", BigDecimal.valueOf(-0.15) // Reaproveitamento de componentes
+    );
+
+    public static final Map<String, BigDecimal> BILLING_MULTIPLIERS = Map.of(
+            "fixed", BigDecimal.valueOf(1.0),
+            "hourly", BigDecimal.valueOf(1.1)
+    );
+
+    public static final Map<String, BigDecimal> INSTALLMENT_MULTIPLIERS = Map.of(
+            "yes", BigDecimal.valueOf(0.05),
+            "no", BigDecimal.valueOf(0.0)
     );
 
     public static final Map<String, BigDecimal> CLIENT_MULTIPLIERS = Map.of(
