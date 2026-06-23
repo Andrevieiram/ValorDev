@@ -1,13 +1,13 @@
-package com.valordev.api.profile.dto;
+package main.java.com.valordev.api.profile.dto;
 
 import jakarta.validation.constraints.*;
 import com.valordev.api.common.enums.ExperienceLevel;
 import com.valordev.api.common.enums.TaxRegime;
 import com.valordev.api.common.enums.TechStack;
-
 import java.math.BigDecimal;
 
-public record UserProfileDto(
+
+public record UserProfileRequest(
         @NotNull(message = "Renda desejada é obrigatória")
         @DecimalMin(value = "0.00", message = "Renda desejada não pode ser negativa")
         BigDecimal desiredIncome,
@@ -30,11 +30,10 @@ public record UserProfileDto(
         String workload,
 
         @NotNull(message = "Custos mensais são obrigatórios")
-        @Min(value = 0, message = "Custos mensais não podem ser negativos")
+        @DecimalMin(value = "0.00", message = "Custos mensais não podem ser negativos")
         BigDecimal monthlyCosts,
 
         @NotNull(message = "Reserva financeira é obrigatória")
-        @DecimalMin(value = "0.00", message = "Renda desejada não pode ser negativa")
+        @DecimalMin(value = "0.00", message = "Reserva financeira não pode ser negativa")
         BigDecimal financialReserve
-) {
-}
+) {}

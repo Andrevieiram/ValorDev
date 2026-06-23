@@ -1,4 +1,4 @@
-package com.valordev.api.proposals.dto;
+package main.java.com.valordev.api.proposals.dto;
 
 import lombok.Builder;
 import lombok.Data;

@@ -17,7 +17,8 @@ CREATE TABLE user_profiles (
     main_stack           VARCHAR(20) NOT NULL,
     workload             VARCHAR(20) NOT NULL,
     monthly_costs        NUMERIC(12,2) NOT NULL DEFAULT 0,
-    financial_reserve    NUMERIC(12,2) NOT NULL DEFAULT 0
+    financial_reserve    NUMERIC(12,2) NOT NULL DEFAULT 0,
+    hourly_rate          NUMERIC(12,2) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE clients (

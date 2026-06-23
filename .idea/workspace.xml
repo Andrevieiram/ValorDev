@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="8a430837-d07e-488b-9c8e-120af51b95a8" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/ValorDevApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/ValorDevApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/auth/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/auth/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/auth/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/auth/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/auth/JwtService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/auth/JwtService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/auth/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/auth/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/auth/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/auth/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/common/config/ApplicationConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/common/config/ApplicationConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/common/config/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/common/config/JwtAuthenticationFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/common/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/common/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/common/enums/ExperienceLevel.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/common/enums/ExperienceLevel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/common/enums/TaxRegime.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/common/enums/TaxRegime.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/common/enums/TechStack.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/common/enums/TechStack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/common/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/common/exception/GlobalExceptionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/dashboard/DashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/dashboard/DashboardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/dashboard/dto/DashboardSummaryDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/dashboard/dto/DashboardSummaryDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/engines/PricingConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/engines/PricingConstants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/engines/PricingEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/engines/PricingEngine.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/engines/RiskEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/engines/RiskEngine.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/profile/ProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/profile/ProfileController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/profile/ProfileService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/profile/ProfileService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/profile/UserProfile.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/profile/UserProfile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/profile/UserProfileRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/profile/UserProfileRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/profile/dto/UserProfileDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/profile/dto/UserProfileRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/Client.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/ClientRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/ClientRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/Proposal.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/Proposal.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/ProposalBreakdownItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/ProposalBreakdownItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/ProposalController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/ProposalController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/ProposalRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/ProposalRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/ProposalService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/ProposalService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/dto/CreateProposalRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/dto/CreateProposalRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/dto/ProposalResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/valordev/api/proposals/dto/ProposalResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/valordev/api/auth/AuthServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/valordev/api/auth/AuthServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/common/exception/GlobalExceptionHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/common/exception/GlobalExceptionHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/profile/ProfileController.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/profile/ProfileController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/profile/ProfileService$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/profile/ProfileService$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/profile/ProfileService.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/profile/ProfileService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/profile/UserProfile$UserProfileBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/profile/UserProfile$UserProfileBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/profile/UserProfile.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/profile/UserProfile.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/profile/UserProfileRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/profile/UserProfileRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/profile/dto/UserProfileDto.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/proposals/ProposalService.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/valordev/api/proposals/ProposalService.class" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="3Dv4lxRTaE5o4dTOqslmDy8BIsk" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.ValorDevApplication.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "jdk.selected.JAVA_MODULE": "openjdk-21",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Programacao/Java/calculator-api",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "fileTemplates"
+  }
+}]]></component>
+  <component name="QodanaReportsService">
+    <option name="descriptions">
+      <ReportDescription localRun="true" path="C:\Users\andre\AppData\Local\Temp\qodana_output\qodana.sarif.json" reportGuid="e751dea8-8efb-4c01-b005-291b43076c46" reportId="calculator-api/qodana/2026-05-30" />
+    </option>
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Programação\Java\calculator-api\backend\src\main\java\com\valordev" />
+      <recent name="D:\Programação\Java\calculator-api\backend\src\main\java\com\valordev\api\common\domains" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8a430837-d07e-488b-9c8e-120af51b95a8" name="Changes" comment="" />
+      <created>1779149364082</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1779149364082</updated>
+    </task>
+    <servers />
+  </component>
+</project>

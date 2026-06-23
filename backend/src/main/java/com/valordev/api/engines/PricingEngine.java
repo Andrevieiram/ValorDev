@@ -1,4 +1,4 @@
-package com.valordev.api.engines;
+package main.java.com.valordev.api.engines;
 
 import com.valordev.api.profile.UserProfile;
 import com.valordev.api.proposals.dto.CreateProposalRequest;

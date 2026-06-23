@@ -1,12 +1,12 @@
-package com.valordev.api.profile;
+package main.java.com.valordev.api.profile;
 
 import com.valordev.api.auth.User;
 import com.valordev.api.auth.UserRepository;
-import com.valordev.api.profile.dto.UserProfileDto;
+import com.valordev.api.profile.dto.UserProfileRequest;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.valordev.api.profile.dto.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -21,18 +21,17 @@ public class ProfileService {
 
     // ─── GET ─────────────────────────────────────────────────────────────────────
 
-    @Transactional(readOnly = true)
-    public UserProfileDto getProfile(UUID userId) {
+    public UserProfileResponse getProfile(UUID userId) {
         UserProfile profile = userProfileRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Perfil não encontrado"));
-
-        return mapToDto(profile);
+        return mapToResponse(profile);
     }
+
 
     // ─── SAVE / UPDATE ────────────────────────────────────────────────────────────
 
-    @Transactional
-    public UserProfileDto saveProfile(UUID userId, UserProfileDto dto) {
+
+    public UserProfileResponse saveProfile(UUID userId, UserProfileRequest dto) {
 
         // Garante que o User existe antes de criar o perfil
         User user = userRepository.findById(userId)
@@ -54,30 +53,34 @@ public class ProfileService {
         profile.setMonthlyCosts(dto.monthlyCosts());
         profile.setFinancialReserve(dto.financialReserve());
 
-        // Calcula o valor/hora após preencher todos os campos
-        profile.setWorkload(calculateHourlyRate(profile));
+        profile.setHourlyRate(calculateHourlyRate(profile));
 
         UserProfile saved = userProfileRepository.save(profile);
-        return mapToDto(saved);
+        return mapToResponse(saved);
+    }
+
+    // ─── DELETE ─────────────────────────────────────────────
+    public void deleteProfile(UUID userId) {
+        if (!userProfileRepository.existsById(userId)) {
+            throw new EntityNotFoundException("Perfil não encontrado");
+        }
+        userProfileRepository.deleteById(userId);
     }
 
     // ─── CÁLCULO DO VALOR/HORA ────────────────────────────────────────────────────
 
-    private String calculateHourlyRate(UserProfile profile) {
+    private BigDecimal calculateHourlyRate(UserProfile profile) {
 
-        // 1. Necessidade financeira total
         BigDecimal totalNeed = profile.getDesiredIncome()
                 .add(profile.getMonthlyCosts())
                 .add(profile.getFinancialReserve());
 
-        // 2. Fator do regime tributário
         BigDecimal taxMultiplier = switch (profile.getTaxRegime()) {
             case MEI              -> new BigDecimal("1.04");
             case SIMPLES_NACIONAL -> new BigDecimal("1.08");
-            case CPF  -> new BigDecimal("1.08");
+            case CPF              -> new BigDecimal("1.08");
         };
 
-        // 3. Semanas por mês baseado no workload (String)
         int weeksPerMonth = switch (profile.getWorkload()) {
             case "INTEGRAL"     -> 4;
             case "MEIO_PERIODO" -> 4;
@@ -85,32 +88,30 @@ public class ProfileService {
             default             -> 4;
         };
 
-        // 4. Total de horas disponíveis no mês
         BigDecimal monthlyHours = BigDecimal.valueOf(
                 (long) profile.getHoursPerWeek() * weeksPerMonth
         );
 
-        // 5. Valor/hora base antes do fator de experiência
         BigDecimal baseRate = totalNeed
                 .multiply(taxMultiplier)
                 .divide(monthlyHours, 2, RoundingMode.HALF_UP);
 
-        // 6. Fator do nível de experiência
         BigDecimal experienceMultiplier = switch (profile.getExperienceLevel()) {
             case JUNIOR -> new BigDecimal("1.00");
             case PLENO  -> new BigDecimal("1.20");
             case SENIOR -> new BigDecimal("1.50");
         };
 
-        return String.valueOf(baseRate
+        // ✅ Retorna BigDecimal direto, sem String.valueOf()
+        return baseRate
                 .multiply(experienceMultiplier)
-                .setScale(2, RoundingMode.HALF_UP));
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
     // ─── MAPEAMENTO ───────────────────────────────────────────────────────────────
 
-    private UserProfileDto mapToDto(UserProfile profile) {
-        return new UserProfileDto(
+    private UserProfileResponse mapToResponse(UserProfile profile) {
+        return new UserProfileResponse(
                 profile.getDesiredIncome(),
                 profile.getHoursPerWeek(),
                 profile.getExperienceLevel(),
@@ -118,7 +119,14 @@ public class ProfileService {
                 profile.getMainStack(),
                 profile.getWorkload(),
                 profile.getMonthlyCosts(),
-                profile.getFinancialReserve()
+                profile.getFinancialReserve(),
+                profile.getHourlyRate()
         );
+    }
+
+    // ─── BUSCA PERFIL ───────────────────────────────────────────────────────────────
+
+    public boolean profileExists(UUID userId) {
+        return userProfileRepository.existsById(userId);
     }
 }

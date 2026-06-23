@@ -1,4 +1,4 @@
-package com.valordev.api.auth;
+package main.java.com.valordev.api.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

@@ -1,4 +1,4 @@
-package com.valordev.api.common.enums;
+package main.java.com.valordev.api.common.enums;
 
 public enum TechStack {
     FRONTEND,

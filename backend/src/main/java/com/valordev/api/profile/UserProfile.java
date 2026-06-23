@@ -1,4 +1,4 @@
-package com.valordev.api.profile;
+package main.java.com.valordev.api.profile;
 
 import com.valordev.api.auth.User;
 import jakarta.persistence.*;
@@ -49,6 +49,10 @@ public class UserProfile {
 
     @Column(nullable = false, length = 20)
     private String workload;
+
+    @Column(name = "hourly_rate", nullable = false, precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal hourlyRate = BigDecimal.ZERO;
 
     @Column(name = "monthly_costs", nullable = false, precision = 10, scale = 2)
     @Builder.Default
