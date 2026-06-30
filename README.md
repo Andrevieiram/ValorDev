@@ -53,7 +53,9 @@ Para abrir o aplicativo e ver o Dashboard:
 
 ## 🧪 Usuário de Testes
 
-Para visualizar o Dashboard populado em todo o seu potencial, entre no App com a seguinte conta:
+O projeto utiliza o **Flyway** para rodar migrações no banco de dados. Ao iniciar o backend pela primeira vez, o script `V3__insert_mock_data.sql` será executado automaticamente para popular a base de dados com o usuário de testes e todos os dados fictícios (clientes, propostas e itens de escopo).
+
+Para visualizar o Dashboard populado em todo o seu potencial, entre no App com a seguinte conta (criada automaticamente):
 
 - **E-mail:** `kevinkennedy.dev@gmail.com`
-- _(A senha original de testes é injetada via banco. Caso enfrente problemas de login, você pode registrar uma nova conta através da tela inicial do app ou forçar um hash BCrypt conhecido diretamente na tabela `users`)._
+- **Senha:** `password123`
