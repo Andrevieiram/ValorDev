@@ -1,4 +1,4 @@
-package com.valordev.api.proposals;
+package main.java.com.valordev.api.proposals;
 
 import com.valordev.api.auth.User;
 import com.valordev.api.proposals.dto.CalculatePricingRequest;
@@ -30,7 +30,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequiredArgsConstructor
 public class ProposalController {
 
-    private final ProposalService proposalService;
+    private final com.valordev.api.proposals.ProposalService proposalService;
 
     @Operation(summary = "Calcular preço (simulação)", description = "Calcula o preço e risco sem salvar a proposta. Útil para simulações.")
     @PostMapping("/calculate")

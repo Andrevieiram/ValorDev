@@ -17,11 +17,12 @@ CREATE TABLE user_profiles (
     desired_income       NUMERIC(12,2) NOT NULL,
     hours_per_week       INT NOT NULL,
     experience_level     VARCHAR(20) NOT NULL,
-    tax_regime           VARCHAR(20) NOT NULL,
+    tax_regime           VARCHAR(30) NOT NULL,
     main_stack           VARCHAR(20) NOT NULL,
     workload             VARCHAR(20) NOT NULL,
     monthly_costs        NUMERIC(12,2) NOT NULL DEFAULT 0,
-    financial_reserve    NUMERIC(12,2) NOT NULL DEFAULT 0
+    financial_reserve    NUMERIC(12,2) NOT NULL DEFAULT 0,
+    hourly_rate          NUMERIC(12,2) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE clients (

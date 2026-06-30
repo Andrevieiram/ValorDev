@@ -1,4 +1,4 @@
-package com.valordev.api.proposals;
+package main.java.com.valordev.api.proposals;
 
 import com.valordev.api.auth.User;
 import com.valordev.api.engines.PricingEngine;
@@ -11,6 +11,7 @@ import com.valordev.api.proposals.dto.CreateProposalRequest;
 import com.valordev.api.proposals.dto.ProposalResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import main.java.com.valordev.api.proposals.ClientRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

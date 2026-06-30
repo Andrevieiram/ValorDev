@@ -1,4 +1,4 @@
-package com.valordev.api.auth;
+package main.java.com.valordev.api.auth;
 
 import com.valordev.api.auth.dto.AuthResponse;
 import com.valordev.api.auth.dto.LoginRequest;

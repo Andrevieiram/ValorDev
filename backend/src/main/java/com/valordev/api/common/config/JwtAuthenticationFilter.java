@@ -1,4 +1,4 @@
-package com.valordev.api.common.config;
+package main.java.com.valordev.api.common.config;
 
 import com.valordev.api.auth.JwtService;
 import jakarta.servlet.FilterChain;

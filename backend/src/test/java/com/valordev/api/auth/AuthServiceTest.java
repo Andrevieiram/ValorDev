@@ -1,8 +1,12 @@
-package com.valordev.api.auth;
+package test.java.com.valordev.api.auth;
 
 import com.valordev.api.auth.dto.AuthResponse;
 import com.valordev.api.auth.dto.LoginRequest;
 import com.valordev.api.auth.dto.RegisterRequest;
+import main.java.com.valordev.api.auth.AuthService;
+import main.java.com.valordev.api.auth.JwtService;
+import main.java.com.valordev.api.auth.User;
+import main.java.com.valordev.api.auth.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
