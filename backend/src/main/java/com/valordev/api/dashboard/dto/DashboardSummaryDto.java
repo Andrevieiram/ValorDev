@@ -1,4 +1,4 @@
-package main.java.com.valordev.api.dashboard.dto;
+package com.valordev.api.dashboard.dto;
 
 import lombok.Builder;
 import lombok.Data;

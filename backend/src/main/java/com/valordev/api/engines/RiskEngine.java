@@ -1,4 +1,4 @@
-package main.java.com.valordev.api.engines;
+package com.valordev.api.engines;
 
 import com.valordev.api.proposals.dto.CreateProposalRequest;
 import org.springframework.stereotype.Component;

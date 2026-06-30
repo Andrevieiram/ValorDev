@@ -1,4 +1,4 @@
-package main.java.com.valordev.api.proposals;
+package com.valordev.api.proposals;
 
 import com.valordev.api.auth.User;
 import com.valordev.api.proposals.dto.CalculatePricingRequest;

@@ -1,4 +1,4 @@
-package main.java.com.valordev.api.auth;
+package com.valordev.api.auth;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

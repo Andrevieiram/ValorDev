@@ -1,4 +1,4 @@
-package main.java.com.valordev.api.engines;
+package com.valordev.api.engines;
 
 import java.math.BigDecimal;
 import java.util.Map;

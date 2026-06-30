@@ -1,4 +1,4 @@
-package main.java.com.valordev.api.profile;
+package com.valordev.api.profile;
 
 import com.valordev.api.auth.User;
 import com.valordev.api.profile.dto.UserProfileRequest;

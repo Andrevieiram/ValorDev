@@ -1,4 +1,4 @@
-package main.java.com.valordev.api.proposals;
+package com.valordev.api.proposals;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

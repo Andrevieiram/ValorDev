@@ -1,4 +1,4 @@
-package main.java.com.valordev.api.profile;
+package com.valordev.api.profile;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

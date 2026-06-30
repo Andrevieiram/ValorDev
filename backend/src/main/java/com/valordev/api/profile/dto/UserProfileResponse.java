@@ -1,4 +1,4 @@
-package main.java.com.valordev.api.profile.dto;
+package com.valordev.api.profile.dto;
 
 import com.valordev.api.common.enums.ExperienceLevel;
 import com.valordev.api.common.enums.TaxRegime;

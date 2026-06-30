@@ -1,4 +1,4 @@
-package main.java.com.valordev.api.proposals;
+package com.valordev.api.proposals;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

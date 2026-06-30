@@ -1,4 +1,4 @@
-package main.java.com.valordev.api.dashboard;
+package com.valordev.api.dashboard;
 
 import com.valordev.api.auth.User;
 import com.valordev.api.dashboard.dto.DashboardSummaryDto;

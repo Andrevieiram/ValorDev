@@ -1,4 +1,4 @@
-package main.java.com.valordev.api.common.exception;
+package com.valordev.api.common.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;

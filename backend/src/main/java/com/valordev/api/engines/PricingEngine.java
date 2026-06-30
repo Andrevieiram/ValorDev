@@ -1,4 +1,4 @@
-package main.java.com.valordev.api.engines;
+package com.valordev.api.engines;
 
 import com.valordev.api.profile.UserProfile;
 import com.valordev.api.proposals.dto.CreateProposalRequest;
@@ -14,7 +14,8 @@ public class PricingEngine {
 
     public PricingResult calculate(UserProfile profile, CreateProposalRequest input, RiskEngine.RiskResult riskResult) {
         // 1. Calcula o valor hora base
-        BigDecimal taxRate = PricingConstants.TAX_RATES.getOrDefault(profile.getTaxRegime().toLowerCase(), BigDecimal.ZERO);
+        String taxRegimeKey = profile.getTaxRegime() != null ? profile.getTaxRegime().name().toLowerCase() : "cpf";
+        BigDecimal taxRate = PricingConstants.TAX_RATES.getOrDefault(taxRegimeKey, BigDecimal.ZERO);
         
         // Custo total = DesiredIncome + MonthlyCosts + FinancialReserve
         BigDecimal totalDesired = profile.getDesiredIncome()
@@ -31,7 +32,8 @@ public class PricingEngine {
 
         // Aplica os multiplicadores do perfil
         BigDecimal stackMult = PricingConstants.STACK_MULTIPLIERS.getOrDefault(profile.getMainStack(), BigDecimal.ONE);
-        BigDecimal workloadMult = PricingConstants.WORKLOAD_MULTIPLIERS.getOrDefault(profile.getWorkload().toLowerCase(), BigDecimal.ONE);
+        String workloadKey = profile.getWorkload() != null ? profile.getWorkload().toLowerCase() : "full";
+        BigDecimal workloadMult = PricingConstants.WORKLOAD_MULTIPLIERS.getOrDefault(workloadKey, BigDecimal.ONE);
         
         BigDecimal finalHourlyRate = baseHourlyRate.multiply(stackMult).multiply(workloadMult);
 

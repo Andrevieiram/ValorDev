@@ -1,4 +1,4 @@
-package main.java.com.valordev.api.proposals.dto;
+package com.valordev.api.proposals.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
