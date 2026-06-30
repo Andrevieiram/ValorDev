@@ -5,7 +5,7 @@
   datasource:
     url: jdbc:postgresql://localhost:5432/valordev
     username: ${DB_USER:postgres}
-    password: ${DB_PASS:root}
+    password: ${DB_PASS:123}
     driver-class-name: org.postgresql.Driver
 
   jpa:
