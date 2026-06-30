@@ -18,8 +18,8 @@ Bem-vindo à branch `develop_test` do **ValorDev**. Esta branch foi criada espec
 
 ### 1. Banco de Dados (PostgreSQL)
 
-Certifique-se de que o seu PostgreSQL está rodando na porta padrão (5432) com o usuário `postgres`.
-A senha definida no `application.yml` do Spring Boot nesta branch é `vsmaioral747@A`.
+Certifique-se de que o seu PostgreSQL está rodando na porta padrão (5432).
+O projeto utiliza as variáveis de ambiente `DB_USER` (padrão: `postgres`) e `DB_PASS` para conectar ao banco. Configure-as de acordo com a sua instalação local.
 
 > **Dica:** Se tiver problemas de bloqueio de conexão local, edite seu arquivo `pg_hba.conf` alterando os métodos IPv4 e IPv6 locais para `trust` durante os testes.
 
@@ -28,9 +28,9 @@ A senha definida no `application.yml` do Spring Boot nesta branch é `vsmaioral7
 O backend foi ajustado para subir perfeitamente ignorando problemas prévios de testes de integração na pipeline.
 
 1. Abra um terminal na pasta onde fica o backend (ex: `novo_valorDev/backend`).
-2. Suba o servidor com Maven, pulando os testes para uma execução ágil:
+2. Suba o servidor com Maven, injetando sua senha local e pulando os testes para uma execução ágil (exemplo em PowerShell):
    ```bash
-   mvn clean spring-boot:run "-Dmaven.test.skip=true"
+   $env:DB_PASS='sua_senha_aqui'; $env:DB_USER='postgres'; mvn clean spring-boot:run "-Dmaven.test.skip=true"
    ```
    O servidor estará ativo na porta `http://localhost:8084`.
 
