@@ -1,77 +1,59 @@
-# ValorDev 🚀
+# ValorDev - Guia da Branch `develop_test`
 
-O **ValorDev** é a ferramenta definitiva de precificação e análise de risco para freelancers. Ele ajuda desenvolvedores e designers independentes a calcularem seu custo operacional, descobrirem seu valor/hora ideal e realizarem orçamentos de projetos de forma justa, segura e lucrativa.
+Bem-vindo à branch `develop_test` do **ValorDev**. Esta branch foi criada especificamente para validar e testar a integração completa entre o backend (Spring Boot) e o frontend (React Native/Expo) em ambiente local. Ela já conta com configurações de ambiente resolvidas e um banco de dados robusto com dados fictícios para testes de UI/UX.
+
+## 🚀 O que há de novo nesta branch?
+
+- **Ambiente e Banco de Dados Corrigidos:** O banco de dados PostgreSQL foi reconfigurado e os problemas de conflitos de migração do Flyway foram resolvidos recriando o schema `public`.
+- **Dados Massivos (Mock de UI):** O banco de dados foi extensivamente populado para a conta `kevinkennedy.dev@gmail.com`. Foram inseridos:
+  - Um **Perfil Financeiro** de usuário completo (horas, gastos, renda desejada).
+  - **3 Clientes** fictícios de diferentes portes.
+  - **Mais de 10 Propostas** em diferentes estágios do funil (draft, sent, won, lost).
+  - Múltiplos **Itens de Escopo (Breakdown Items)** para popular as listagens internas das propostas.
+- **Correções de Serialização (Enums):** Foram realizados os devidos ajustes direto na base de dados para garantir que os valores textuais combinem de forma exata com os Enums do Java (ex: `SENIOR`, `SIMPLES_NACIONAL`, `BACKEND`), sanando um erro 500 silencioso que impedia a renderização do Dashboard.
 
 ---
 
-## ⚡ Quick Start: Como rodar sem erros (Branch Develop)
+## 🛠️ Como rodar o projeto localmente
 
-Se você acabou de clonar este repositório na branch `develop`, siga exatamente os passos abaixo para rodar o app no seu celular (Expo Go) de primeira e sem erros de cache ou de rede:
+### 1. Banco de Dados (PostgreSQL)
 
-1. **Instale as dependências:**
-   \`\`\`bash
+Certifique-se de que o seu PostgreSQL está rodando na porta padrão (5432) com o usuário `postgres`.
+A senha definida no `application.yml` do Spring Boot nesta branch é `vsmaioral747@A`.
+
+> **Dica:** Se tiver problemas de bloqueio de conexão local, edite seu arquivo `pg_hba.conf` alterando os métodos IPv4 e IPv6 locais para `trust` durante os testes.
+
+### 2. Backend (Spring Boot)
+
+O backend foi ajustado para subir perfeitamente ignorando problemas prévios de testes de integração na pipeline.
+
+1. Abra um terminal na pasta onde fica o backend (ex: `novo_valorDev/backend`).
+2. Suba o servidor com Maven, pulando os testes para uma execução ágil:
+   ```bash
+   mvn clean spring-boot:run "-Dmaven.test.skip=true"
+   ```
+   O servidor estará ativo na porta `http://localhost:8084`.
+
+### 3. Frontend (React Native / Expo)
+
+Para abrir o aplicativo e ver o Dashboard:
+
+1. Abra o terminal na raiz do frontend (ex: `novo_valorDev`).
+2. Instale as dependências (caso ainda não tenha feito):
+   ```bash
    npm install
-   \`\`\`
-   *(Certifique-se de usar Node 18+)*
-
-2. **Inicie o servidor limpando o cache e em modo Tunnel:**
-   \`\`\`bash
+   ```
+3. Inicie o Metro Bundler limpando o cache e abrindo um túnel seguro (isso evita problemas de bloqueio de firewall pelo Windows no Expo Go):
+   ```bash
    npx expo start --clear --tunnel
-   \`\`\`
-   * **Por que `--clear`?** Garante que o Metro Bundler não use um cache quebrado (comum ao trocar de branch).
-   * **Por que `--tunnel`?** Garante que o seu celular (Expo Go) consiga acessar o app de qualquer rede Wi-Fi ou 4G, burlando os bloqueios comuns do Firewall do Windows na porta 8081 que causam o erro *"The Internet connection appears to be offline"*.
-
-3. **Abra o app no seu celular:**
-   * Abra o aplicativo **Expo Go** no seu celular (iOS/Android).
-   * Escaneie o **QR Code** gerado no terminal.
-   * Pronto! O App vai abrir automaticamente.
+   ```
+4. Escaneie o QR code com o Expo Go no seu celular.
 
 ---
 
-## 📱 Funcionalidades Principais
+## 🧪 Usuário de Testes
 
-* **Perfil Financeiro Completo**: Permite configurar rendimento desejado, despesas de trabalho, gastos pessoais, dias de férias e carga horária para calcular automaticamente seu **valor/hora ideal**.
-* **Assistente de Precificação (Wizard)**: Passos interativos para precificar projetos:
-  * **Cliente**: Cadastro básico e contexto.
-  * **Escopo e Horas**: Levantamento detalhado das horas de desenvolvimento.
-  * **Análise de Risco**: Cálculo automático de riscos (complexidade, nível de definição do escopo, estabilidade do cliente).
-  * **Variáveis de Ajuste**: Margem de lucro, impostos adicionais e gordura para imprevistos.
-* **Resultado Consolidado**: Tela final rica com breakdown de custos, preço sugerido para o cliente e insights de risco.
-* **Histórico de Estimativas**: Histórico local de cálculos antigos para consulta rápida.
-* **Design Premium Dark/Light**: Interface moderna com suporte a modo escuro inteligente, efeitos de glassmorphism e animações fluidas.
+Para visualizar o Dashboard populado em todo o seu potencial, entre no App com a seguinte conta:
 
----
-
-## 🛠️ Tecnologias Utilizadas
-
-Este projeto foi construído utilizando as melhores práticas do ecossistema moderno do **React Native**:
-
-* **Expo (SDK 51+)**: Framework e plataforma para desenvolvimento ágil de aplicativos universais (iOS, Android e Web).
-* **Expo Router (v3+)**: Navegação baseada em arquivos (File-based Routing) intuitiva e performática.
-* **TypeScript**: Tipagem estática para robustez do código.
-* **NativeWind (v4)**: Utilização do Tailwind CSS v4 para estilização rápida, responsiva e consistente em múltiplos ambientes (web e mobile).
-* **Zustand**: Gerenciamento de estado global leve e otimizado com persistência local de dados.
-* **React Hook Form + Zod**: Gerenciamento e validação de formulários complexos de maneira segura.
-* **Lucide React Native**: Conjunto de ícones vetoriais modernos.
-
-
-
----
-
-## 🧪 Estrutura de Pastas
-
-```
-├── app/                  # Rotas da navegação baseada em arquivos (Expo Router)
-│   ├── (tabs)/           # Abas principais (Home, Histórico, Perfil)
-│   ├── auth/             # Fluxo de login e registro
-│   ├── wizard/           # Wizard de precificação de projetos
-│   └── setup-profile.tsx # Configuração do perfil financeiro autônomo
-├── assets/               # Imagens, fontes e recursos gráficos
-├── components/           # Componentes de UI genéricos (Button, Input, Card, etc.)
-├── constants/            # Constantes de rotas, layouts e passos
-├── features/             # Lógica específica por feature (Home, Wizard, Pricing)
-├── hooks/                # Custom React Hooks genéricos
-├── store/                # Estados globais (Zustand) com persistência
-├── theme/                # Definição da paleta de cores e contexto do tema
-└── types/                # Tipagens TypeScript globais
-```
+- **E-mail:** `kevinkennedy.dev@gmail.com`
+- _(A senha original de testes é injetada via banco. Caso enfrente problemas de login, você pode registrar uma nova conta através da tela inicial do app ou forçar um hash BCrypt conhecido diretamente na tabela `users`)._
