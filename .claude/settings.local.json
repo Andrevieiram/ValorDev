@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm list *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(npm test *)",
+      "Bash(npm start *)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(Start-Sleep -Seconds 5)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git commit -m 'feat: enhance empty state in history with CTA to wizard *)",
+      "Bash(git commit -m 'feat: add skeleton loaders during store hydration *)",
+      "Bash(npx husky *)",
+      "Bash(git commit -m 'chore: setup ESLint, Prettier, and Husky for code quality *)",
+      "Bash(git commit -m 'feat: implement i18n-js with Portuguese/English translations *)",
+      "Bash(git checkout *)",
+      "Bash(git commit -m 'feat: implement remaining improvements \\(i18n, CI/CD, accessibility, EAS\\) *)"
+    ]
+  }
+}
